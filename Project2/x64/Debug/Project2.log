@@ -1,0 +1,13 @@
+﻿  소스.cpp
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(94,12): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(95,11): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(99,11): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(100,11): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(59,8): warning C4101: 'hFont' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(61,8): warning C4101: 'pt' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(128,8): warning C4101: 'msg' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(125,14): warning C4101: 'ps' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(126,8): warning C4101: 'pt' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(127,6): warning C4101: 't' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project2\소스.cpp(123,7): warning C4101: 'rt' :참조되지 않은 지역 변수입니다.
+  Project2.vcxproj -> C:\Users\jinwoo\Desktop\registryControl\x64\Debug\Project2.exe

@@ -1,0 +1,19 @@
+﻿  RegistryControl.cpp
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x13c9 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(59,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(72,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(79,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(303,23): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(190,8): warning C4101: 'byte' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(191,6): warning C4101: 'j' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(191,9): warning C4101: 't' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(308,14): warning C4101: 'temp' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(400,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(401,45): warning C4244: '인수': 'LPARAM'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(382,13): warning C4101: 'lvi' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(447,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(461,31): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(499,9): warning C4101: 'li' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(495,7): warning C4101: 'hkey' :참조되지 않은 지역 변수입니다.
+  Project1.vcxproj -> C:\Users\jinwoo\Desktop\registryControl\x64\Debug\Project1.exe
