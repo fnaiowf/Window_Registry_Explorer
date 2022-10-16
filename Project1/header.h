@@ -1,5 +1,5 @@
 /*
-MULTI_SZ 검색, 수정
+MULTI_SZ 바꾸기, 수정
 바이너리 수정
 */
 
@@ -100,7 +100,7 @@ void loadValue(TCHAR* path, HKEY basickey); //listview에 값 로드
 void deleteAllSubkey(TCHAR* path, HTREEITEM item); //서브키 모두 삭제
 void deleteAllSubkey(HKEY hkey, HTREEITEM item); //서브키 모두 삭제
 void createValue(int type, HTREEITEM hitem); //값 추가
-int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int base);
+int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int base); //SetVlaue 래퍼
 
 //Proc.cpp
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); //메인 윈도우 프로시저
@@ -109,6 +109,7 @@ BOOL CALLBACK FindDlgProc(HWND, UINT, WPARAM, LPARAM); //찾기&바꾸기 다이얼로그 
 LRESULT CALLBACK DlgEditSubProc(HWND, UINT, WPARAM, LPARAM); //다이얼로그 EDIT 서브클래싱
 BOOL CALLBACK ModifySzNumDlgProc(HWND, UINT, WPARAM, LPARAM); //값 수정 다이얼로그 프로시저
 BOOL CALLBACK ModifyBinaryDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK ModifyMultiSzDlgProc(HWND, UINT, WPARAM, LPARAM);
 int CALLBACK CompareFunc(LPARAM, LPARAM, LPARAM); //검색 결과 리스트뷰 정렬 함수
 DWORD WINAPI ThreadFunc(LPVOID); // 쓰레드 함수
 
@@ -120,12 +121,11 @@ const TCHAR* getTypeName(int type); //레지스트리 타입 문자열 리턴
 void openPopupMenu(HMENU menu, int x, int y); //오른쪽 마우스 버튼 누를 때 팝업 메뉴 열기
 void processPopup(int id, int index, void* item); //팝업 메뉴 프로시저
 int getType(TCHAR* type); //레지스트리 타입 문자열 -> 정의된 값
-void byteToString(BYTE* bytes, int size, TCHAR* dest);
-void stringToByte(TCHAR* source, BYTE_DATA* bytes);
-int is_number(TCHAR* string, int base);
-int splitMulSz(TCHAR* data, int size, TCHAR*** strings);
-void concatMulSz(TCHAR* strings, int size, TCHAR* ret);
-void freeMemory();
+void byteToString(BYTE* bytes, int size, TCHAR* dest); //Byte -> String
+int is_number(TCHAR* string, int base); //문자열이 숫자인지 체크
+int splitMulSz(TCHAR* data, int size, TCHAR*** strings); //MULTI_SZ 값 처리
+void concatMulSz(TCHAR* strings, int size, TCHAR* ret); //MULTI_SZ 값 NULL문자 공백으로 바꿈
+void freeMemory(); //모든 할당 메모리 해제
 
 void initWindow(); //컨트롤 생성
 SPLIT getSplitter(POINT pt); //창 분할 정보

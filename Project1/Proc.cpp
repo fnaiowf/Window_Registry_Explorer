@@ -278,11 +278,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					ListView_GetItemText(hLV, ((LPNMITEMACTIVATE)lParam)->iItem, 1, temp, sizeof(temp));
 					t = getType(temp);
 
-					if (t != 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
-					else
-					{
-						hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
-					}
+					if (t == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
+					else if (t == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
+					else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
 
 					ShowWindow(hDlgModify, SW_SHOW);
 				}
@@ -510,8 +508,6 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 						}
 
 						MessageBox(hWndMain, temp, L"¾Ë¸²", MB_OK);
-						
-
 					}
 				}
 			}
@@ -735,7 +731,6 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 							t++;
 						}
-
 					}
 				}
 
@@ -762,8 +757,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 			break;
 		case IDC_D2_MODIFY_NO:
-			hDlgModify = NULL;
-			EndDialog(hDlg, 0);
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
 			return 0;
 		}
 		break;
@@ -787,13 +781,14 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA), WM_SETFONT, (WPARAM)hf, TRUE);
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), WM_SETFONT, (WPARAM)hf, TRUE);
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), WM_SETFONT, (WPARAM)hf, TRUE);
+
+		SetFocus(GetDlgItem(hDlg, IDC_D3_VDATA));
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
 		case IDC_D3_MODIFY_NO:
-			hDlgModify = NULL;
-			EndDialog(hDlg, 0);
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
 			return 0;
 		}
 		break;
@@ -808,6 +803,47 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 		break;
 	case WM_CLOSE:
 		DeleteObject(hf);
+		hDlgModify = NULL;
+		EndDialog(hDlg, 0);
+		return 0;
+	}
+
+	return 0;
+}
+
+BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+	static HWND nh;
+	static int tindex;
+	TCHAR text[MAX_VALUE_LENGTH], path[2][MAX_PATH_LENGTH], name[2][MAX_KEY_LENGTH];
+
+	switch (iMessage)
+	{
+	case WM_INITDIALOG:
+		if (GetFocus() == hresultLV)
+		{
+			nh = hresultLV;
+			tindex = 1;
+		}
+		else
+		{
+			nh = hLV;
+			tindex = 0;
+		}
+
+		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 0, name[0], sizeof(name[0]));
+
+		SetFocus(GetDlgItem(hDlg, IDC_D4_VDATA));
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDC_D3_MODIFY_NO:
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			return 0;
+		}
+		break;
+	case WM_CLOSE:
 		hDlgModify = NULL;
 		EndDialog(hDlg, 0);
 		return 0;

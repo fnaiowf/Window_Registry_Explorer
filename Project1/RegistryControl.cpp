@@ -29,7 +29,7 @@ int enumRegistry(DATA* data)
 	TCHAR* key = (TCHAR*)malloc(sizeof(TCHAR) * MAX_KEY_LENGTH);
 	if (key == NULL)
 	{
-		fwprintf(fp, TEXT("In main : variable \"key1\" memory alloction failed.\n"));
+		//fwprintf(fp, TEXT("In main : variable \"key1\" memory alloction failed.\n"));
 		fclose(fp);
 		return -1;
 	}
@@ -85,7 +85,7 @@ int enumRegistry(DATA* data)
 			else //접근 권한 X
 			{
 				wsprintf(msg, TEXT("%ws open failed\n"), path);
-				fwprintf(fp, msg);
+				//fwprintf(fp, msg);
 
 				for (int j = lstrlen(path) - 1;; j--)
 				{
@@ -122,7 +122,7 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 	TCHAR* key = (TCHAR*)malloc(sizeof(TCHAR) * MAX_KEY_LENGTH);
 	if (key == NULL)
 	{
-		fwprintf(fp, TEXT("In func : variable \"key1\" memory alloction failed.\n"));
+		//fwprintf(fp, TEXT("In func : variable \"key1\" memory alloction failed.\n"));
 		return;
 	}
 
@@ -152,7 +152,7 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 		else
 		{
 			wsprintf(msg, TEXT("%ws open failed\n"), path);
-			fwprintf(fp, msg);
+			//fwprintf(fp, msg);
 
 			for (int j = lstrlen(path) - 1;; j--)
 			{
@@ -188,7 +188,7 @@ void enumValue(HKEY hkey, DATA* data)
 	long long dvalue64;
 	TCHAR name[MAX_VALUE_LENGTH], * value = NULL, * adr, stype[30];
 	BYTE* byte;
-	int j, t, targetLen = wcslen(data->targetValue);
+	int j, t, targetLen;
 	LVITEM li;
 
 	while (RegEnumValue(hkey, i, name, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
@@ -232,7 +232,7 @@ void enumValue(HKEY hkey, DATA* data)
 				}
 				break;
 			case REG_MULTI_SZ:
-				value = (TCHAR*)malloc(len2);
+				value = (TCHAR*)calloc(len2, 1);
 				if (len2 <= 2)
 				{
 					if (data == NULL)
@@ -291,12 +291,15 @@ void enumValue(HKEY hkey, DATA* data)
 			{
 				if ((type == REG_EXPAND_SZ || type == REG_MULTI_SZ || type == REG_SZ) && data->type == REG_SZ) //FIND
 				{
+					targetLen = wcslen(data->targetValue);
+
 					if (type == REG_MULTI_SZ && len2 > 2)
 					{
-						TCHAR* temp = (TCHAR*)calloc(len2, 1);
+						TCHAR* temp = (TCHAR*)malloc(len2);
+
 						concatMulSz(value, len2, temp);
 						wsprintf(value, temp);
-						
+
 						free(temp);
 					}
 
@@ -354,7 +357,7 @@ void enumValue(HKEY hkey, DATA* data)
 void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 {
 	TCHAR temp[MAX_VALUE_LENGTH];
-	fwprintf(fp, L"%ws   %ws:%ws", path, name, value);
+	//fwprintf(fp, L"%ws   %ws:%ws", path, name, value);
 
 	if (data->type == REG_DWORD || data->type == REG_QWORD)
 		wsprintf(temp, data->newValue);
@@ -364,7 +367,7 @@ void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 		wsprintf(temp, L"%ws%ws%ws", value, data->newValue, value + (pos + wcslen(data->targetValue)));
 	}
 
-	fwprintf(fp, L" -> %ws\n", temp);
+	//fwprintf(fp, L" -> %ws\n", temp);
 
 	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->base))
 	{

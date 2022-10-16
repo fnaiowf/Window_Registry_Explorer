@@ -244,7 +244,7 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 
 			if (wcslen(b) >= 200)
 			{
-				b[191] = 0; //레지스트리 탐색기에서 보여주는 길이
+				b[191] = 0; //레지스트리 탐색기에서 보여주는 최대 길이
 				wsprintf(b, L"%ws...", b);
 			}
 
@@ -582,7 +582,7 @@ void processPopup(int id, int index, void* item)
 		case ID_MENU2_MULSTR:
 			createValue(id - ID_MENU2_DWORD, hitem);
 			break;
-		case ID_MENU2_DELETE: //stack overflow error
+		case ID_MENU2_DELETE:
 			if (MessageBox(hWndMain, L"정말 삭제하시겠습니까?(하위키까지 전부 삭제됩니다)", L"알림", MB_YESNO) == IDNO)
 				break;
 
@@ -629,8 +629,9 @@ void processPopup(int id, int index, void* item)
 				ListView_GetItemText(hLV, litem, 1, temp, sizeof(temp));
 				t = getType(temp);
 
-				if (t != 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
-				else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
+				if (t == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
+				else if(t == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
+				else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
 
 				ShowWindow(hDlgModify, SW_SHOW);
 			}
@@ -661,8 +662,10 @@ void processPopup(int id, int index, void* item)
 			{
 				ListView_GetItemText(hLV, litem, 2, temp, sizeof(temp));
 				t = getType(temp);
-				if (t != 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
-				else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
+				if (t == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
+				else if (t == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
+				else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
+
 
 				ShowWindow(hDlgModify, SW_SHOW);
 			}
@@ -686,7 +689,7 @@ void processPopup(int id, int index, void* item)
 			break;
 		}
 		break;
-	case 3:
+	case 3: //리스트뷰에서 항목 아닌 곳
 		hitem = *(HTREEITEM*)item;
 		switch (id)
 		{
@@ -755,6 +758,7 @@ int splitMulSz(TCHAR* data, int size, TCHAR*** strings)
 	while (1)
 	{
 		len = wcslen(adr);
+
 		(*strings)[count] = (TCHAR*)malloc(sizeof(TCHAR) * (len + 1));
 		wsprintf((*strings)[count], adr);
 
@@ -782,15 +786,15 @@ void concatMulSz(TCHAR* strings, int size, TCHAR* ret)
 
 	while (1)
 	{
+		if (t >= size / sizeof(TCHAR) - 1)
+			break;
+
 		len = wcslen(adr);
+
 		wsprintf(ret, L"%ws %ws", ret, adr);
 		t += len + 1;
 		adr += len + 1;
-
-		if (t >= size / sizeof(TCHAR) - 1)
-			break;
 	}
-
 }
 
 void freeMemory()
