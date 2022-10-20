@@ -534,7 +534,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 					li.mask = LVIF_PARAM | LVIF_GROUPID;
 					li.iItem = index;
 					li.iGroupId = 2;
-					li.lParam = getListViewItem(hresultLV, LVIF_PARAM, index).lParam | CHECKBIT; //32768 : 1000 0000 0000 0000
+					li.lParam = getListViewItem(hresultLV, LVIF_PARAM, index).lParam | CHECKBIT; //8388608 : 1000 0000 0000 0000 0000 0000
 					ListView_SetItem(hresultLV, &li);
 
 					nchanged++;
@@ -563,7 +563,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 					index = -1;
 					ListView_DeleteAllItems(hresultLV);
 					EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE), FALSE);
-					MessageBox(hDlgFind, L"더이상 바꿀 항목이 없습니다.", L"ERROR", MB_OK);
+					MessageBox(hDlgFind, L"더이상 바꿀 항목이 없습니다.", L"알림", MB_OK);
 				}
 			}
 			break;

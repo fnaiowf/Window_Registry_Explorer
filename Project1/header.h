@@ -1,5 +1,5 @@
 /*
-MULTI_SZ 바꾸기, 수정
+MULTI_SZ 수정
 바이너리 수정
 */
 
@@ -42,7 +42,7 @@ MULTI_SZ 바꾸기, 수정
 #define ID_EDIT 2
 #define ID_resLV 3
 
-#define CHECKBIT 32768
+#define CHECKBIT 8388608
 #define ListView_DeSelectAll(handle) {LVITEM li; li.mask = LVIF_STATE; li.stateMask = LVIS_SELECTED; SendMessage(handle, LVM_SETITEMSTATE, (WPARAM)-1, (LPARAM)&li); }
 enum SPLIT { SP_NONE, SP_VERT, SP_HORZ}; //창 분할 정보
 enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD};

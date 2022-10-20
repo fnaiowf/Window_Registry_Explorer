@@ -203,7 +203,7 @@ HTREEITEM addTVitem(const TCHAR* text, HTREEITEM parent, int bkey)
 void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHAR* opt, LPARAM lParam)
 {
 	LVITEM item;
-	TCHAR k[200], *b = NULL;
+	TCHAR *b = NULL;
 	int t = 0, it;
 
 	item.mask = LVIF_TEXT | LVIF_PARAM;
@@ -257,28 +257,40 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 	}
 	else if (it == 4)
 	{
-		lvData.mulstrData[lvData.nMul].index = index;
-
-		if (lvData.mulstrData[lvData.nMul].size > 2)
+		if (hlv == hLV)
 		{
-			b = (TCHAR*)calloc(lvData.mulstrData[lvData.nMul].size, sizeof(TCHAR));
-			wsprintf(b, L"%ws",lvData.mulstrData[lvData.nMul].strings[0]);
+			lvData.mulstrData[lvData.nMul].index = index;
 
-			for (int i = 1; i < lvData.mulstrData[lvData.nMul].nString; i++)
-				wsprintf(b, L"%ws %ws", b, (lvData.mulstrData[lvData.nMul].strings)[i]);
-
-			if (wcslen(b) >= 200)
+			if (lvData.mulstrData[lvData.nMul].size > 2)
 			{
-				b[191] = 0;
-				wsprintf(b, L"%ws...", b);
+				b = (TCHAR*)calloc(lvData.mulstrData[lvData.nMul].size, sizeof(TCHAR));
+				wsprintf(b, L"%ws", lvData.mulstrData[lvData.nMul].strings[0]);
+
+				for (int i = 1; i < lvData.mulstrData[lvData.nMul].nString; i++)
+					wsprintf(b, L"%ws %ws", b, (lvData.mulstrData[lvData.nMul].strings)[i]);
+
+				if (wcslen(b) >= 200)
+				{
+					b[191] = 0;
+					wsprintf(b, L"%ws...", b);
+				}
+
+				lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
+
+				item.pszText = b;
 			}
-
-			lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
-
-			item.pszText = b;
+			else
+				item.pszText = value;
 		}
 		else
+		{
+			if (wcslen(value) >= 200)
+			{
+				value[191] = 0;
+				wsprintf(value, L"%ws...", value);
+			}
 			item.pszText = value;
+		}
 	}
 	else
 		item.pszText = value;

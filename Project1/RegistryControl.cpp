@@ -295,20 +295,40 @@ void enumValue(HKEY hkey, DATA* data)
 
 					if (type == REG_MULTI_SZ && len2 > 2)
 					{
-						TCHAR* temp = (TCHAR*)malloc(len2);
+						TCHAR** temp = (TCHAR**)malloc(sizeof(TCHAR*)); //문자열 분리해서 검색
+						int c = splitMulSz(value, len2, &temp);
 
-						concatMulSz(value, len2, temp);
-						wsprintf(value, temp);
+						TCHAR* concat = (TCHAR*)malloc(len2); //리스트뷰에 출력하는 값은 공백으로 붙여서
+						concatMulSz(value, len2, concat);
+						wsprintf(value, concat);
+
+						free(concat);
+
+						for (int i = 0, aclen = 0; i < c; i++)
+						{
+							adr = wcsstr(temp[i], data->targetValue);
+							if (adr != NULL)
+							{
+								//int lparam = i * 10000 + (int)(adr - temp[i]); //CHECKBIT가 800만 정도고 10000의 배수를 MULTI_SZ의 문자열 위치로 정함
+
+								if (data->t_type == FIND)
+									addLVitem(hresultLV, path, stype, value, fcount++, name, aclen + (int)(adr - temp[i]));
+								
+								wsprintf(msg, L"%d finding...", fcount);
+								SetWindowText(hStatic, msg);
+
+								break;
+							}
+							aclen += wcslen(temp[i]) + 1;
+						}
 
 						free(temp);
 					}
-
-					if (len2 / 2 - 1 >= targetLen)
+					else if (len2 / 2 - 1 >= targetLen)
 					{
 						adr = wcsstr(value, data->targetValue);
 						if (adr != NULL)
 						{
-							TCHAR temp[MAX_PATH_LENGTH];
 							if (wcslen(name) == 0)
 								wsprintf(name, L"(기본값)");
 
@@ -357,14 +377,24 @@ void enumValue(HKEY hkey, DATA* data)
 void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 {
 	TCHAR temp[MAX_VALUE_LENGTH];
+	DWORD len, tlen = wcslen(data->targetValue), nlen = wcslen(data->newValue);
 	//fwprintf(fp, L"%ws   %ws:%ws", path, name, value);
 
 	if (data->type == REG_DWORD || data->type == REG_QWORD)
 		wsprintf(temp, data->newValue);
+	else if (data->type == REG_MULTI_SZ)
+	{
+		RegQueryValueEx(hkey, name, NULL, NULL, NULL, &len);
+		RegQueryValueEx(hkey, name, NULL, NULL, (LPBYTE)value, &len);
+
+		memcpy(temp, value, sizeof(TCHAR) * pos);
+		memcpy(temp + pos, data->newValue, nlen * sizeof(TCHAR));
+		memcpy(temp + pos + nlen, value + pos + tlen, (len / 2 - (pos + tlen)) * 2);
+	}
 	else
 	{
 		value[pos] = '\0';
-		wsprintf(temp, L"%ws%ws%ws", value, data->newValue, value + (pos + wcslen(data->targetValue)));
+		wsprintf(temp, L"%ws%ws%ws", value, data->newValue, value + (pos + tlen));
 	}
 
 	//fwprintf(fp, L" -> %ws\n", temp);
@@ -372,7 +402,13 @@ void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->base))
 	{
 		ccount++;
-		wsprintf(value, temp);
+		if (data->type == REG_MULTI_SZ)
+		{
+			memcpy(value, temp, len + (nlen - tlen));
+			concatMulSz(temp, len + (nlen - tlen), value);
+		}
+		else
+			wsprintf(value, temp);
 	}
 }
 
@@ -383,15 +419,15 @@ void changeValue(int n, DATA* tarData)
 	TVITEM ti;
 	LVITEM li;
 	LVFINDINFO lvi;
-	TCHAR temp[MAX_PATH_LENGTH], name[MAX_KEY_LENGTH], value[MAX_KEY_LENGTH], * context = NULL;
+	TCHAR path[MAX_PATH_LENGTH], name[MAX_KEY_LENGTH], value[MAX_KEY_LENGTH];
 	DWORD toi;
 	long long toi64;
 
-	ListView_GetItemText(hresultLV, n, 0, temp, sizeof(temp));
+	ListView_GetItemText(hresultLV, n, 0, path, sizeof(path));
 	ListView_GetItemText(hresultLV, n, 1, name, sizeof(name));
 	ListView_GetItemText(hresultLV, n, 3, value, sizeof(value));
 
-	item = getItemfromPath(temp);
+	item = getItemfromPath(path);
 	ti.mask = TVIF_PARAM;
 	ti.hItem = item;
 	TreeView_GetItem(hTV, &ti);
@@ -400,26 +436,36 @@ void changeValue(int n, DATA* tarData)
 	li.iItem = n;
 	ListView_GetItem(hresultLV, &li);
 
-	if ((hkey = _RegOpenKeyEx(ti.lParam, temp)) != NULL)
+	if ((hkey = _RegOpenKeyEx(ti.lParam, path)) != NULL)
+	{
 		changeValue(hkey, name, value, tarData, li.lParam);
+		
+		if (tarData->type == REG_MULTI_SZ)
+		{
+			if (wcslen(value) >= 200)
+			{
+				value[191] = 0;
+				wsprintf(value, L"%ws...", value);
+			}
+		}
 
-	
-	if (tarData->type == REG_DWORD)
-	{
-		toi = wcstol(value, NULL, tarData->base ? 10 : 16);
-		wsprintf(value, L"0x%08x (%d)", toi, toi);
-	}
-	else if (tarData->type == REG_QWORD)
-	{
-		toi64 = wcstoll(value, NULL, tarData->base ? 10 : 16);
-		wsprintf(value, L"0x%08I64x (%I64d)", toi64, toi64);
-	}
+		if (tarData->type == REG_DWORD)
+		{
+			toi = wcstol(value, NULL, tarData->base ? 10 : 16);
+			wsprintf(value, L"0x%08x (%d)", toi, toi);
+		}
+		else if (tarData->type == REG_QWORD)
+		{
+			toi64 = wcstoll(value, NULL, tarData->base ? 10 : 16);
+			wsprintf(value, L"0x%08I64x (%I64d)", toi64, toi64);
+		}
 
-	ListView_SetItemText(hresultLV, n, 3, value);
-	if (TreeView_GetSelection(hTV) == item)
-	{
-		TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
-		TreeView_SelectItem(hTV, item);
+		ListView_SetItemText(hresultLV, n, 3, value);
+		if (TreeView_GetSelection(hTV) == item)
+		{
+			TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
+			TreeView_SelectItem(hTV, item);
+		}
 	}
 }
 
