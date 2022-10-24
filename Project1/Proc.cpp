@@ -1,4 +1,4 @@
-#include"header.h"
+Ôªø#include"header.h"
 
 HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
 HANDLE hThread[2];
@@ -6,7 +6,7 @@ WNDPROC oldEditProc, oldDlgEditProc[2];
 TCHAR temp[MAX_PATH_LENGTH];
 DWORD gCount[2] = {};
 
-int treeWidth, resultHeight, nchanged;
+int treeWidth, resultHeight, nchanged, isDataLoad;
 SPLIT nSplit = SP_NONE;
 
 DWORD WINAPI ThreadFunc(LPVOID temp)
@@ -98,6 +98,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		lvData.mulstrData = (MULSZ_DATA*)malloc(sizeof(MULSZ_DATA));
 		lvData.nByte = 0;
 		lvData.nMul = 0;
+		isDataLoad = 0;
 		
 		CreateThread(NULL, 0, ThreadFunc, NULL, NULL, NULL);
 		return 0;
@@ -222,22 +223,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			switch (((LPNMHDR)lParam)->code)
 			{
 			case TVN_SELCHANGED:
-				ListView_DeleteAllItems(hLV);
-				for (int i = 0; i < lvData.nByte; i++)
-					free(lvData.byteData[i].bytes);
-				free(lvData.byteData);
+				if(!isDataLoad) ListView_DeleteAllItems(hLV);
+				freeMemory();
 				lvData.nByte = 0;
-
+				lvData.nMul = 0;
+				
 				lvData.byteData = (BYTE_DATA*)malloc(sizeof(BYTE_DATA));
+				lvData.mulstrData = (MULSZ_DATA*)malloc(sizeof(MULSZ_DATA));
 
 				tvitem = ((LPNMTREEVIEW)lParam)->itemNew;
-				getPathfromItem(tvitem.hItem, temp);
-				SetWindowText(hEdit, temp);
+				if (!isDataLoad)
+				{
+					getPathfromItem(tvitem.hItem, temp);
+					SetWindowText(hEdit, temp);
+				}	
 				if (tvitem.hItem != TreeView_GetRoot(hTV)) 
-					loadValue(getValidPath(temp), BASIC_KEY_HANDLE[tvitem.lParam]);
-				ListView_SetColumnWidth(hLV, 2, LVSCW_AUTOSIZE);
-				if (ListView_GetColumnWidth(hLV, 2) < 300)
-					ListView_SetColumnWidth(hLV, 2, 300);
+					loadValue(getValidPath(temp), BASIC_KEY_HANDLE[tvitem.lParam], isDataLoad);
+
+				if (!isDataLoad)
+				{
+					ListView_SetColumnWidth(hLV, 2, LVSCW_AUTOSIZE);
+					if (ListView_GetColumnWidth(hLV, 2) < 300)
+						ListView_SetColumnWidth(hLV, 2, 300);
+				}
 				return 0;
 			case TVN_BEGINLABELEDIT:
 				tvitem = ((LPNMTVDISPINFO)lParam)->item;
@@ -311,7 +319,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 							data = (TCHAR*)malloc(sizeof(TCHAR));
 							*data = L'0';
 						}
-						result = _RegSetValueEx(hkey, temp, REG_TYPE[type[19]], (BYTE*)data, 1);
+						result = _RegSetValueEx(hkey, temp, REG_TYPE[type[19]], (BYTE*)data, -1, 1);
 
 						if (data != NULL) free(data);
 
@@ -361,13 +369,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_DESTROY:
 		freeMemory();
+		free(msg);
 		fclose(fp);
 
 		PostQuitMessage(0);
 		return 0;
 	}
 
-	//¿©µµøÏ «¡∑ŒΩ√¿˙ø°º≠ √≥∏Æµ«¡ˆ æ ¿∫ ≥™∏”¡ˆ ∏ﬁΩ√¡ˆ∏¶ √≥∏Æ«ÿ¡ÿ¥Ÿ
+	//ÏúàÎèÑÏö∞ ÌîÑÎ°úÏãúÏ†ÄÏóêÏÑú Ï≤òÎ¶¨ÎêòÏßÄ ÏïäÏùÄ ÎÇòÎ®∏ÏßÄ Î©îÏãúÏßÄÎ•º Ï≤òÎ¶¨Ìï¥Ï§ÄÎã§
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
 
@@ -436,7 +445,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				index = -1;
 
 				if (!IsDlgButtonChecked(hDlg, IDC_D1_STR) && is_number(data->targetValue, data->base) == 0)
-					MessageBox(hWndMain, L"√£¥¬ ∞™¿Ã ¡§ºˆ∞° æ∆¥’¥œ¥Ÿ.", L"æÀ∏≤", MB_OK);
+					MessageBox(hWndMain, L"Ï∞æÎäî Í∞íÏù¥ Ï†ïÏàòÍ∞Ä ÏïÑÎãôÎãàÎã§.", L"ÏïåÎ¶º", MB_OK);
 				else
 				{
 					ListView_DeleteAllItems(hresultLV);
@@ -470,7 +479,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 							data->t_type = CHANGE;
 
 							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR) && is_number(data->newValue, data->base) == 0)
-								MessageBox(hWndMain, L"πŸ≤Ÿ¥¬ ∞™¿Ã ¡§ºˆ∞° æ∆¥’¥œ¥Ÿ.", L"æÀ∏≤", MB_OK);
+								MessageBox(hWndMain, L"Î∞îÍæ∏Îäî Í∞íÏù¥ Ï†ïÏàòÍ∞Ä ÏïÑÎãôÎãàÎã§.", L"ÏïåÎ¶º", MB_OK);
 							else
 							{
 								EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
@@ -482,7 +491,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 						else
 						{
 							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR) && is_number(data->newValue, data->base) == 0)
-								MessageBox(hWndMain, L"πŸ≤Ÿ¥¬ ∞™¿Ã ¡§ºˆ∞° æ∆¥’¥œ¥Ÿ.", L"æÀ∏≤", MB_OK);
+								MessageBox(hWndMain, L"Î∞îÍæ∏Îäî Í∞íÏù¥ Ï†ïÏàòÍ∞Ä ÏïÑÎãôÎãàÎã§.", L"ÏïåÎ¶º", MB_OK);
 							else
 							{
 								wsprintf(changeData.targetValue, data->targetValue);
@@ -500,14 +509,14 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 					else
 					{
 						if (data->type != changeData.type)
-							wsprintf(temp, L"√£¿∫ ¿Ø«¸∞˙ «ˆ¿Á º±≈√µ» ¿Ø«¸¿Ã ¥Ÿ∏®¥œ¥Ÿ.");
+							wsprintf(temp, L"Ï∞æÏùÄ Ïú†ÌòïÍ≥º ÌòÑÏû¨ ÏÑ†ÌÉùÎêú Ïú†ÌòïÏù¥ Îã§Î¶ÖÎãàÎã§.");
 						else
 						{
-							wsprintf(temp, L"%wsø° ¥Î«— ∞Àªˆ ∞·∞˙∞° æ¯Ω¿¥œ¥Ÿ.", data->targetValue);
+							wsprintf(temp, L"%wsÏóê ÎåÄÌïú Í≤ÄÏÉâ Í≤∞Í≥ºÍ∞Ä ÏóÜÏäµÎãàÎã§.", data->targetValue);
 							EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE), FALSE);
 						}
 
-						MessageBox(hWndMain, temp, L"æÀ∏≤", MB_OK);
+						MessageBox(hWndMain, temp, L"ÏïåÎ¶º", MB_OK);
 					}
 				}
 			}
@@ -563,7 +572,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 					index = -1;
 					ListView_DeleteAllItems(hresultLV);
 					EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE), FALSE);
-					MessageBox(hDlgFind, L"¥ı¿ÃªÛ πŸ≤‹ «◊∏Ò¿Ã æ¯Ω¿¥œ¥Ÿ.", L"æÀ∏≤", MB_OK);
+					MessageBox(hDlgFind, L"ÎçîÏù¥ÏÉÅ Î∞îÍøÄ Ìï≠Î™©Ïù¥ ÏóÜÏäµÎãàÎã§.", L"ÏïåÎ¶º", MB_OK);
 				}
 			}
 			break;
@@ -597,7 +606,8 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	HKEY hkey;
-	static TCHAR text[MAX_VALUE_LENGTH], path[2][MAX_PATH_LENGTH], name[2][MAX_KEY_LENGTH], type[20], * pos, tempvalue[MAX_VALUE_LENGTH];
+	static TCHAR text[MAX_VALUE_LENGTH], path[2][MAX_PATH_LENGTH], name[2][MAX_KEY_LENGTH], type[20];
+	TCHAR* pos, tempvalue[MAX_VALUE_LENGTH];
 	int t = 0, itype;
 	static HWND nh = 0;
 	static int tindex = -1, isdefault = 0, prevBase;
@@ -634,7 +644,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 		else
 			GetWindowText(hEdit, path[0], sizeof(path[0]));
 
-		if (wcscmp(name[0], L"(±‚∫ª∞™)") == 0)
+		if (wcscmp(name[0], L"(Í∏∞Î≥∏Í∞í)") == 0)
 		{
 			HTREEITEM item = getItemfromPath(path[0]), item2 = TreeView_GetSelection(hTV);
 			TreeView_SelectItem(hTV, item);
@@ -643,14 +653,14 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			TreeView_SelectItem(hTV, item2);
 		}
 
-		if (itype < 2) //10¡¯ºˆ ∫Œ∫–∏∏ ∞°¡Æø»
+		if (itype < 2) //10ÏßÑÏàò Î∂ÄÎ∂ÑÎßå Í∞ÄÏ†∏Ïò¥
 		{
 			long long num;
 			swscanf_s(text, L"0x%*I64x (%I64d", &num);
 			wsprintf(text, L"%I64d", num);
 		}
 
-		if (isdefault && wcscmp(L"(∞™ º≥¡§ æ»µ )", text) == 0)
+		if (isdefault && wcscmp(L"(Í∞í ÏÑ§Ï†ï ÏïàÎê®)", text) == 0)
 			SetDlgItemText(hDlg, IDC_D2_VDATA, L"");
 		else
 		{
@@ -675,7 +685,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			{
 				if (!is_number(text, IsDlgButtonChecked(hDlg, IDC_D2_DEC)))
 				{
-					MessageBox(hWndMain, L"¿‘∑¬«— ∞™¿Ã ¡§ºˆ∞° æ∆¥’¥œ¥Ÿ.", L"æÀ∏≤", MB_OK);
+					MessageBox(hWndMain, L"ÏûÖÎ†•Ìïú Í∞íÏù¥ Ï†ïÏàòÍ∞Ä ÏïÑÎãôÎãàÎã§.", L"ÏïåÎ¶º", MB_OK);
 					break;
 				}
 			}
@@ -685,10 +695,9 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
 			{
-				if (_RegSetValueEx(hkey, name[0], REG_TYPE[getType(type)], (BYTE*)text, IsDlgButtonChecked(hDlg, IDC_D2_DEC)))
+				itype = getType(type);
+				if (_RegSetValueEx(hkey, name[0], REG_TYPE[itype], (BYTE*)text, -1, IsDlgButtonChecked(hDlg, IDC_D2_DEC)))
 				{
-					itype = getType(type);
-
 					if (itype == 0)
 					{
 						int j = wcstol(text, NULL, IsDlgButtonChecked(hDlg, IDC_D2_DEC) ? 10 : 16);
@@ -736,8 +745,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 				RegCloseKey(hkey);
 
-				hDlgModify = NULL;
-				EndDialog(hDlg, 0);
+				SendMessage(hDlg, WM_CLOSE, 0, 0);
 				return 0;
 			}
 			break;
@@ -813,9 +821,12 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 
 BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
+	HKEY hkey;
 	static HWND nh;
 	static int tindex;
-	TCHAR text[MAX_VALUE_LENGTH], path[2][MAX_PATH_LENGTH], name[2][MAX_KEY_LENGTH];
+	TCHAR text[MAX_VALUE_LENGTH], *pos;
+	static TCHAR name[2][MAX_KEY_LENGTH], path[2][MAX_PATH_LENGTH];
+	int i, len, idx, sublen;
 
 	switch (iMessage)
 	{
@@ -833,12 +844,150 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 0, name[0], sizeof(name[0]));
 
+		if (tindex)
+			ListView_GetItemText(hresultLV, ListView_GetSelectionMark(hresultLV), 0, path[0], sizeof(path[0]))
+		else
+			GetWindowText(hEdit, path[0], sizeof(path[0]));
+
+		SetWindowText(GetDlgItem(hDlg, IDC_D4_VNAME), name[0]);
+
+		if (tindex)
+		{
+			isDataLoad = 1;
+			HTREEITEM item = TreeView_GetSelection(hTV);
+			TreeView_SelectItem(hTV, getItemfromPath(path[0]));
+			isDataLoad = 0;
+			
+			for (int i = 0; i < lvData.nMul; i++)
+			{
+				ListView_GetItemText(hLV, lvData.mulstrData[i].index, 0, temp, sizeof(temp));
+				if (wcscmp(temp, name[0]) == 0)
+				{
+					memset(text, 0, sizeof(text));
+					for (int j = 0; j < lvData.mulstrData[i].nString; j++)
+					{
+						if (j == 0)
+							wsprintf(text, L"%ws\r\n", lvData.mulstrData[i].strings[j]);
+						else
+							wsprintf(text, L"%ws%ws\r\n", text, lvData.mulstrData[i].strings[j]);
+					}
+					SetWindowText(GetDlgItem(hDlg, IDC_D4_VDATA), text);
+					SendMessage(GetDlgItem(hDlg, IDC_D4_VDATA), EM_SETSEL, 0, -1);
+				}
+			}
+			//TreeView_SelectItem(hTV, item);
+		}
+		else
+		{
+			for (int i = 0; i < lvData.nMul; i++)
+			{
+				if (lvData.mulstrData[i].index == ListView_GetSelectionMark(nh))
+				{
+					memset(text, 0, sizeof(text));
+					for (int j = 0; j < lvData.mulstrData[i].nString; j++)
+					{
+						if (j == 0)
+							wsprintf(text, L"%ws\r\n", lvData.mulstrData[i].strings[j]);
+						else
+							wsprintf(text, L"%ws%ws\r\n", text, lvData.mulstrData[i].strings[j]);
+					}
+
+					SetWindowText(GetDlgItem(hDlg, IDC_D4_VDATA), text);
+					SendMessage(GetDlgItem(hDlg, IDC_D4_VDATA), EM_SETSEL, 0, -1);
+					break;
+				}
+			}
+		}
+
 		SetFocus(GetDlgItem(hDlg, IDC_D4_VDATA));
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
-		case IDC_D3_MODIFY_NO:
+		case IDC_D4_MODIFY_OK:
+			GetWindowText(GetDlgItem(hDlg, IDC_D4_VDATA), text, MAX_VALUE_LENGTH);
+			pos = text;
+			len = wcslen(text);
+			idx = 0;
+			memset(temp, 0, sizeof(temp));
+
+			for (i = 0; i < len; i++)
+			{
+				if (text[i] == '\r')
+				{
+					if (i == 0 || text[i - 1] == 10) //\r\n\r\nÏù∏ Í≤ΩÏö∞
+					{
+						pos += 2;
+						i++;
+						if (i + 1 == len)
+							break;
+
+						continue;
+					}
+					text[i] = 0;
+
+					sublen = wcslen(pos);
+
+					wcscpy(temp + idx, pos);
+					idx += sublen + 1;
+					i++;
+					pos = text + i + 1;
+
+					if (i + 1 == len)
+						break;
+				}
+			}
+
+			if (i == len && i != 0)
+				wcscpy(temp + idx++, pos);
+
+			idx += wcslen(pos) + 1;
+
+			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
+			{
+				if (_RegSetValueEx(hkey, name[0], REG_MULTI_SZ, (BYTE*)temp, idx * sizeof(TCHAR), -1))
+				{
+					concatMulSz(temp, idx - 2, text);
+
+					ListView_SetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, text);
+
+					if (tindex)
+					{
+						GetWindowText(hEdit, path[1], sizeof(path[0]));
+
+						if (wcscmp(path[0], path[1]) == 0)
+						{
+							HTREEITEM t = TreeView_GetSelection(hTV);
+							TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
+							TreeView_SelectItem(hTV, t);
+						}
+					}
+					else
+					{
+						int t = 0;
+						while (t != ListView_GetItemCount(hresultLV))
+						{
+							ListView_GetItemText(hresultLV, t, 0, path[1], sizeof(path[0]));
+							ListView_GetItemText(hresultLV, t, 1, name[1], sizeof(name[0]));
+
+							if (wcscmp(name[0], name[1]) == 0 && wcscmp(path[0], path[1]) == 0)
+							{
+								ListView_SetItemText(hresultLV, t, 3, text);
+								break;
+							}
+
+							t++;
+						}
+					}
+				}
+
+				RegCloseKey(hkey);
+
+				SendMessage(hDlg, WM_CLOSE, 0, 0);
+				return 0;
+			}
+			break;
+		case IDC_D4_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
 			return 0;
 		}
@@ -856,6 +1005,7 @@ LRESULT CALLBACK MainEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM
 {
 	static HTREEITEM item;
 	static TCHAR t_path[MAX_PATH_LENGTH];
+	HDC hdc;
 
 	switch (iMessage)
 	{
@@ -874,7 +1024,12 @@ LRESULT CALLBACK MainEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM
 			if (item != 0)
 				TreeView_SelectItem(hTV, item);
 			else
+			{
 				SetWindowText(hEdit, t_path);
+				hdc = GetDC(hWndMain);
+				MessageBeep(0xFFFFFFFF);
+				ReleaseDC(hWnd, hdc);
+			}
 			SetFocus(hTV);
 
 			break;

@@ -1,5 +1,6 @@
 /*
 MULTI_SZ 수정
+multi_sz 검색된거 수정
 바이너리 수정
 */
 
@@ -45,7 +46,7 @@ MULTI_SZ 수정
 #define CHECKBIT 8388608
 #define ListView_DeSelectAll(handle) {LVITEM li; li.mask = LVIF_STATE; li.stateMask = LVIS_SELECTED; SendMessage(handle, LVM_SETITEMSTATE, (WPARAM)-1, (LPARAM)&li); }
 enum SPLIT { SP_NONE, SP_VERT, SP_HORZ}; //창 분할 정보
-enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD};
+enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD, DATA_LOAD};
 
 typedef struct DATA { //쓰레드 매개변수
 	THREAD_TYPE t_type;;
@@ -76,6 +77,11 @@ typedef struct LV_DATA_MANAGE {
 	int nMul;
 };
 
+typedef struct TVSEL_DATA {
+	NMTREEVIEWW hdr;
+	THREAD_TYPE type;
+};
+
 extern const HKEY BASIC_KEY_HANDLE[5];
 extern const unsigned int REG_TYPE[6];
 extern FILE* fp;
@@ -96,11 +102,11 @@ void enumKeys(HKEY hkey, HTREEITEM parent, TCHAR* subkeystr, DATA* data, int bke
 void enumValue(HKEY hkey, DATA* data); //값 enum
 void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos); //값 변경
 void changeValue(int iItem, DATA *data); //하나씩 바꾸기
-void loadValue(TCHAR* path, HKEY basickey); //listview에 값 로드
+void loadValue(TCHAR* path, HKEY basickey, int isDataLoad); //listview에 값 로드
 void deleteAllSubkey(TCHAR* path, HTREEITEM item); //서브키 모두 삭제
 void deleteAllSubkey(HKEY hkey, HTREEITEM item); //서브키 모두 삭제
 void createValue(int type, HTREEITEM hitem); //값 추가
-int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int base); //SetVlaue 래퍼
+int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int size, int base); //SetVlaue 래퍼
 
 //Proc.cpp
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); //메인 윈도우 프로시저
@@ -124,7 +130,7 @@ int getType(TCHAR* type); //레지스트리 타입 문자열 -> 정의된 값
 void byteToString(BYTE* bytes, int size, TCHAR* dest); //Byte -> String
 int is_number(TCHAR* string, int base); //문자열이 숫자인지 체크
 int splitMulSz(TCHAR* data, int size, TCHAR*** strings); //MULTI_SZ 값 처리
-void concatMulSz(TCHAR* strings, int size, TCHAR* ret); //MULTI_SZ 값 NULL문자 공백으로 바꿈
+void concatMulSz(TCHAR* strings, int len, TCHAR* ret); //MULTI_SZ 값 NULL문자 공백으로 바꿈
 void freeMemory(); //모든 할당 메모리 해제
 
 void initWindow(); //컨트롤 생성

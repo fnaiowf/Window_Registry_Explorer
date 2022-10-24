@@ -236,19 +236,16 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 	it = getType(type);
 	if (it == 5)
 	{
-		lvData.byteData[lvData.nByte].index = index;
-		if (lvData.byteData[lvData.nByte].size != 0)
+		if (lvData.byteData[lvData.nByte - 1].size != 0)
 		{
-			b = (TCHAR*)calloc(lvData.byteData[lvData.nByte].size * 3, sizeof(TCHAR));
-			byteToString(lvData.byteData[lvData.nByte].bytes, lvData.byteData[lvData.nByte].size, b);
+			b = (TCHAR*)calloc(lvData.byteData[lvData.nByte - 1].size * 3, sizeof(TCHAR));
+			byteToString(lvData.byteData[lvData.nByte - 1].bytes, lvData.byteData[lvData.nByte - 1].size, b);
 
 			if (wcslen(b) >= 200)
 			{
 				b[191] = 0; //레지스트리 탐색기에서 보여주는 최대 길이
 				wsprintf(b, L"%ws...", b);
 			}
-
-			lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
 
 			item.pszText = b;
 		}
@@ -259,23 +256,19 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 	{
 		if (hlv == hLV)
 		{
-			lvData.mulstrData[lvData.nMul].index = index;
-
-			if (lvData.mulstrData[lvData.nMul].size > 2)
+			if (lvData.mulstrData[lvData.nMul - 1].size > 2)
 			{
-				b = (TCHAR*)calloc(lvData.mulstrData[lvData.nMul].size, sizeof(TCHAR));
-				wsprintf(b, L"%ws", lvData.mulstrData[lvData.nMul].strings[0]);
+				b = (TCHAR*)calloc(lvData.mulstrData[lvData.nMul - 1].size, sizeof(TCHAR));
+				wsprintf(b, L"%ws", lvData.mulstrData[lvData.nMul - 1].strings[0]);
 
-				for (int i = 1; i < lvData.mulstrData[lvData.nMul].nString; i++)
-					wsprintf(b, L"%ws %ws", b, (lvData.mulstrData[lvData.nMul].strings)[i]);
+				for (int i = 1; i < lvData.mulstrData[lvData.nMul - 1].nString; i++)
+					wsprintf(b, L"%ws %ws", b, (lvData.mulstrData[lvData.nMul - 1].strings)[i]);
 
 				if (wcslen(b) >= 200)
 				{
 					b[191] = 0;
 					wsprintf(b, L"%ws...", b);
 				}
-
-				lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
 
 				item.pszText = b;
 			}
@@ -672,7 +665,7 @@ void processPopup(int id, int index, void* item)
 		case ID_MENU2_MODIFY:
 			if (!IsWindow(hDlgModify))
 			{
-				ListView_GetItemText(hLV, litem, 2, temp, sizeof(temp));
+				ListView_GetItemText(hresultLV, litem, 2, temp, sizeof(temp));
 				t = getType(temp);
 				if (t == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
 				else if (t == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
@@ -787,32 +780,18 @@ int splitMulSz(TCHAR* data, int size, TCHAR*** strings)
 	return count;
 }
 
-void concatMulSz(TCHAR* strings, int size, TCHAR* ret)
+void concatMulSz(TCHAR* strings, int len, TCHAR* ret) //for문으로 바꾸기
 {
-	TCHAR* adr = strings;
-	int t = 0, len = wcslen(adr);
-
-	wsprintf(ret, strings);
-	t += len + 1;
-	adr += len + 1;
-
-	while (1)
+	memset(ret, 0, (len + 1) * 2);
+	for (int i = 0; i < len; i++)
 	{
-		if (t >= size / sizeof(TCHAR) - 1)
-			break;
-
-		len = wcslen(adr);
-
-		wsprintf(ret, L"%ws %ws", ret, adr);
-		t += len + 1;
-		adr += len + 1;
+		if (strings[i] == 0) ret[i] = ' ';
+		else ret[i] = strings[i];
 	}
 }
 
 void freeMemory()
 {
-	free(msg);
-	
 	if (lvData.byteData != NULL)
 	{
 		for (int i = 0; i < lvData.nByte; i++)

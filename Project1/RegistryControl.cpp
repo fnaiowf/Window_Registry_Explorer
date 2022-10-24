@@ -255,6 +255,9 @@ void enumValue(HKEY hkey, DATA* data)
 						lvData.mulstrData[lvData.nMul].nString = c;
 					}
 				}
+				lvData.mulstrData[lvData.nMul].index = i + 1;
+				lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
+
 				break;
 			case REG_NONE:
 				value = (TCHAR*)malloc(sizeof(TCHAR) * 13);
@@ -282,6 +285,9 @@ void enumValue(HKEY hkey, DATA* data)
 						RegQueryValueEx(hkey, name, NULL, NULL, lvData.byteData[lvData.nByte].bytes, &len2);
 					}
 				}
+				lvData.byteData[lvData.nByte].index = i + 1;
+				lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
+
 				break;
 			default:
 				break;
@@ -298,8 +304,8 @@ void enumValue(HKEY hkey, DATA* data)
 						TCHAR** temp = (TCHAR**)malloc(sizeof(TCHAR*)); //문자열 분리해서 검색
 						int c = splitMulSz(value, len2, &temp);
 
-						TCHAR* concat = (TCHAR*)malloc(len2); //리스트뷰에 출력하는 값은 공백으로 붙여서
-						concatMulSz(value, len2, concat);
+						TCHAR* concat = (TCHAR*)calloc(len2, 1); //리스트뷰에 출력하는 값은 공백으로 붙여서
+						concatMulSz(value, (len2 - 2) / 2, concat);
 						wsprintf(value, concat);
 
 						free(concat);
@@ -354,7 +360,7 @@ void enumValue(HKEY hkey, DATA* data)
 					}
 				}
 			}
-			else
+			else if (!(data != NULL && data->t_type == DATA_LOAD))
 			{
 				if (wcslen(name) == 0)
 				{
@@ -376,7 +382,7 @@ void enumValue(HKEY hkey, DATA* data)
 
 void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 {
-	TCHAR temp[MAX_VALUE_LENGTH];
+	TCHAR temp[MAX_VALUE_LENGTH]={};
 	DWORD len, tlen = wcslen(data->targetValue), nlen = wcslen(data->newValue);
 	//fwprintf(fp, L"%ws   %ws:%ws", path, name, value);
 
@@ -390,6 +396,7 @@ void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 		memcpy(temp, value, sizeof(TCHAR) * pos);
 		memcpy(temp + pos, data->newValue, nlen * sizeof(TCHAR));
 		memcpy(temp + pos + nlen, value + pos + tlen, (len / 2 - (pos + tlen)) * 2);
+		len = len + (nlen - tlen);
 	}
 	else
 	{
@@ -399,13 +406,13 @@ void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 
 	//fwprintf(fp, L" -> %ws\n", temp);
 
-	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->base))
+	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->type == REG_MULTI_SZ ? len : -1, data->base))
 	{
 		ccount++;
 		if (data->type == REG_MULTI_SZ)
 		{
-			memcpy(value, temp, len + (nlen - tlen));
-			concatMulSz(temp, len + (nlen - tlen), value);
+			memcpy(value, temp, len);
+			concatMulSz(temp, len, value);
 		}
 		else
 			wsprintf(value, temp);
@@ -419,12 +426,13 @@ void changeValue(int n, DATA* tarData)
 	TVITEM ti;
 	LVITEM li;
 	LVFINDINFO lvi;
-	TCHAR path[MAX_PATH_LENGTH], name[MAX_KEY_LENGTH], value[MAX_KEY_LENGTH];
+	TCHAR path[MAX_PATH_LENGTH], name[MAX_KEY_LENGTH], value[MAX_KEY_LENGTH], type[20];
 	DWORD toi;
 	long long toi64;
 
 	ListView_GetItemText(hresultLV, n, 0, path, sizeof(path));
 	ListView_GetItemText(hresultLV, n, 1, name, sizeof(name));
+	ListView_GetItemText(hresultLV, n, 2, type, sizeof(type));
 	ListView_GetItemText(hresultLV, n, 3, value, sizeof(value));
 
 	item = getItemfromPath(path);
@@ -435,6 +443,8 @@ void changeValue(int n, DATA* tarData)
 	li.mask = LVIF_PARAM;
 	li.iItem = n;
 	ListView_GetItem(hresultLV, &li);
+	
+	tarData->type = REG_TYPE[getType(type)];
 
 	if ((hkey = _RegOpenKeyEx(ti.lParam, path)) != NULL)
 	{
@@ -469,16 +479,20 @@ void changeValue(int n, DATA* tarData)
 	}
 }
 
-void loadValue(TCHAR* mpath, HKEY bkeyH)
+void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 {
 	HKEY hkey;
 	TCHAR temp[3][10] = { L"(기본값)", L"REG_SZ", L"(값 설정 안됨)" };
+	DATA data;
 
-	addLVitem(hLV, temp[0], temp[1], temp[2], 0, NULL, -1);
+	if (isDataLoad)
+		data.t_type = DATA_LOAD;
+	else
+		addLVitem(hLV, temp[0], temp[1], temp[2], 0, NULL, -1);
 
 	if (RegOpenKeyEx(bkeyH, mpath, 0, KEY_READ | KEY_WRITE, &hkey) == ERROR_SUCCESS)
 	{
-		enumValue(hkey, NULL);
+		enumValue(hkey, isDataLoad ? &data : NULL);
 		RegCloseKey(hkey);
 	}
 }
@@ -571,7 +585,7 @@ void createValue(int type, HTREEITEM hitem)
 	ListView_EditLabel(hLV, ListView_GetItemCount(hLV) - 1);
 }
 
-int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int base)
+int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int base)
 {
 	int dword, res;
 	long long qword;
@@ -588,7 +602,9 @@ int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int base)
 	}
 	else
 	{
-		int size = value == NULL ? 0 : wcslen((TCHAR*)value) * sizeof(TCHAR);
+		if(type != REG_MULTI_SZ)
+			size = value == NULL ? 0 : wcslen((TCHAR*)value) * sizeof(TCHAR);
+
 		res = RegSetValueEx(key, name, 0, type, value, size);
 	}
 
