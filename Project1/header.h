@@ -1,6 +1,4 @@
 /*
-MULTI_SZ 수정
-multi_sz 검색된거 수정
 바이너리 수정
 */
 
@@ -65,6 +63,7 @@ typedef struct BYTE_DATA {
 
 typedef struct MULSZ_DATA {
 	TCHAR** strings;
+	TCHAR name[MAX_KEY_LENGTH];
 	int size;
 	int nString;
 	int index;

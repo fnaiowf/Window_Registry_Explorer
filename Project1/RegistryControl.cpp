@@ -228,17 +228,20 @@ void enumValue(HKEY hkey, DATA* data)
 						RegQueryValueEx(hkey, name, NULL, NULL, (LPBYTE)value, &len2);
 						value[len2 / 2 - 1] = 0;
 					}
-						
 				}
 				break;
 			case REG_MULTI_SZ:
 				value = (TCHAR*)calloc(len2, 1);
 				if (len2 <= 2)
 				{
-					if (data == NULL)
+					if (data == NULL || data->t_type == DATA_LOAD)
 					{
+						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
 						lvData.mulstrData[lvData.nMul].size = len2;
 						lvData.mulstrData[lvData.nMul].nString = 0;
+
+						lvData.mulstrData[lvData.nMul].index = i + 1;
+						lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
 					}
 
 					value[0] = 0;
@@ -246,17 +249,20 @@ void enumValue(HKEY hkey, DATA* data)
 				else
 				{
 					RegQueryValueEx(hkey, name, NULL, NULL, (LPBYTE)value, &len2);
-					if (data == NULL)
+					
+					if (data == NULL || data->t_type == DATA_LOAD)
 					{
 						lvData.mulstrData[lvData.nMul].strings = (TCHAR**)calloc(sizeof(TCHAR*), 1);
 
 						int c = splitMulSz(value, len2, &(lvData.mulstrData[lvData.nMul].strings));
 						lvData.mulstrData[lvData.nMul].size = len2;
 						lvData.mulstrData[lvData.nMul].nString = c;
+						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
+
+						lvData.mulstrData[lvData.nMul].index = i + 1;
+						lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
 					}
 				}
-				lvData.mulstrData[lvData.nMul].index = i + 1;
-				lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
 
 				break;
 			case REG_NONE:
@@ -266,10 +272,13 @@ void enumValue(HKEY hkey, DATA* data)
 			case REG_BINARY:
 				if (len2 == 0)
 				{
-					if (data == NULL)
+					if (data == NULL || data->t_type == DATA_LOAD)
 					{
 						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE));
 						lvData.byteData[lvData.nByte].size = len2;
+
+						lvData.byteData[lvData.nByte].index = i + 1;
+						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
 					}
 
 					value = (TCHAR*)malloc(13 * sizeof(TCHAR));
@@ -277,17 +286,17 @@ void enumValue(HKEY hkey, DATA* data)
 				}
 				else
 				{
-					if (data == NULL)
+					if (data == NULL || data->t_type == DATA_LOAD)
 					{
 						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE) * len2);
 						lvData.byteData[lvData.nByte].size = len2;
 
 						RegQueryValueEx(hkey, name, NULL, NULL, lvData.byteData[lvData.nByte].bytes, &len2);
+
+						lvData.byteData[lvData.nByte].index = i + 1;
+						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
 					}
 				}
-				lvData.byteData[lvData.nByte].index = i + 1;
-				lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
-
 				break;
 			default:
 				break;
@@ -484,6 +493,8 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 	HKEY hkey;
 	TCHAR temp[3][10] = { L"(기본값)", L"REG_SZ", L"(값 설정 안됨)" };
 	DATA data;
+	TCHAR name[100];
+	DWORD len = 100;
 
 	if (isDataLoad)
 		data.t_type = DATA_LOAD;

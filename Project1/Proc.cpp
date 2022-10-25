@@ -232,11 +232,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				lvData.mulstrData = (MULSZ_DATA*)malloc(sizeof(MULSZ_DATA));
 
 				tvitem = ((LPNMTREEVIEW)lParam)->itemNew;
+				getPathfromItem(tvitem.hItem, temp);
 				if (!isDataLoad)
-				{
-					getPathfromItem(tvitem.hItem, temp);
 					SetWindowText(hEdit, temp);
-				}	
+
 				if (tvitem.hItem != TreeView_GetRoot(hTV)) 
 					loadValue(getValidPath(temp), BASIC_KEY_HANDLE[tvitem.lParam], isDataLoad);
 
@@ -856,12 +855,10 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 			isDataLoad = 1;
 			HTREEITEM item = TreeView_GetSelection(hTV);
 			TreeView_SelectItem(hTV, getItemfromPath(path[0]));
-			isDataLoad = 0;
 			
 			for (int i = 0; i < lvData.nMul; i++)
 			{
-				ListView_GetItemText(hLV, lvData.mulstrData[i].index, 0, temp, sizeof(temp));
-				if (wcscmp(temp, name[0]) == 0)
+				if (wcscmp(lvData.mulstrData[i].name, name[0]) == 0)
 				{
 					memset(text, 0, sizeof(text));
 					for (int j = 0; j < lvData.mulstrData[i].nString; j++)
@@ -875,7 +872,8 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 					SendMessage(GetDlgItem(hDlg, IDC_D4_VDATA), EM_SETSEL, 0, -1);
 				}
 			}
-			//TreeView_SelectItem(hTV, item);
+			TreeView_SelectItem(hTV, item);
+			isDataLoad = 0;
 		}
 		else
 		{
