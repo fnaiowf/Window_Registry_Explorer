@@ -254,7 +254,7 @@ void enumValue(HKEY hkey, DATA* data)
 					{
 						lvData.mulstrData[lvData.nMul].strings = (TCHAR**)calloc(sizeof(TCHAR*), 1);
 
-						int c = splitMulSz(value, len2, &(lvData.mulstrData[lvData.nMul].strings));
+						int c = splitMulSz(value, len2, &(lvData.mulstrData[lvData.nMul].strings), 1);
 						lvData.mulstrData[lvData.nMul].size = len2;
 						lvData.mulstrData[lvData.nMul].nString = c;
 						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
@@ -311,7 +311,7 @@ void enumValue(HKEY hkey, DATA* data)
 					if (type == REG_MULTI_SZ && len2 > 2)
 					{
 						TCHAR** temp = (TCHAR**)malloc(sizeof(TCHAR*)); //문자열 분리해서 검색
-						int c = splitMulSz(value, len2, &temp);
+						int c = splitMulSz(value, len2, &temp, 1);
 
 						TCHAR* concat = (TCHAR*)calloc(len2, 1); //리스트뷰에 출력하는 값은 공백으로 붙여서
 						concatMulSz(value, (len2 - 2) / 2, concat);
@@ -460,13 +460,7 @@ void changeValue(int n, DATA* tarData)
 		changeValue(hkey, name, value, tarData, li.lParam);
 		
 		if (tarData->type == REG_MULTI_SZ)
-		{
-			if (wcslen(value) >= 200)
-			{
-				value[191] = 0;
-				wsprintf(value, L"%ws...", value);
-			}
-		}
+			cutString(value);
 
 		if (tarData->type == REG_DWORD)
 		{

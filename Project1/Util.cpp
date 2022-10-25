@@ -241,11 +241,7 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 			b = (TCHAR*)calloc(lvData.byteData[lvData.nByte - 1].size * 3, sizeof(TCHAR));
 			byteToString(lvData.byteData[lvData.nByte - 1].bytes, lvData.byteData[lvData.nByte - 1].size, b);
 
-			if (wcslen(b) >= 200)
-			{
-				b[191] = 0; //레지스트리 탐색기에서 보여주는 최대 길이
-				wsprintf(b, L"%ws...", b);
-			}
+			cutString(b);
 
 			item.pszText = b;
 		}
@@ -264,11 +260,7 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 				for (int i = 1; i < lvData.mulstrData[lvData.nMul - 1].nString; i++)
 					wsprintf(b, L"%ws %ws", b, (lvData.mulstrData[lvData.nMul - 1].strings)[i]);
 
-				if (wcslen(b) >= 200)
-				{
-					b[191] = 0;
-					wsprintf(b, L"%ws...", b);
-				}
+				cutString(b);
 
 				item.pszText = b;
 			}
@@ -277,11 +269,7 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 		}
 		else
 		{
-			if (wcslen(value) >= 200)
-			{
-				value[191] = 0;
-				wsprintf(value, L"%ws...", value);
-			}
+			cutString(value);
 			item.pszText = value;
 		}
 	}
@@ -754,7 +742,7 @@ int is_number(TCHAR* string, int base)
 	return 1;
 }
 
-int splitMulSz(TCHAR* data, int size, TCHAR*** strings)
+int splitMulSz(TCHAR* data, int size, TCHAR*** strings, int alloc)
 {
 	int t = 0, count = 0, len;
 	TCHAR* adr;
@@ -764,7 +752,9 @@ int splitMulSz(TCHAR* data, int size, TCHAR*** strings)
 	{
 		len = wcslen(adr);
 
-		(*strings)[count] = (TCHAR*)malloc(sizeof(TCHAR) * (len + 1));
+		if(alloc)
+			(*strings)[count] = (TCHAR*)malloc(sizeof(TCHAR) * (len + 1));
+
 		wsprintf((*strings)[count], adr);
 
 		t += len + 1;
@@ -774,7 +764,8 @@ int splitMulSz(TCHAR* data, int size, TCHAR*** strings)
 		if (t >= size / sizeof(TCHAR) - 1)
 			break;
 
-		*strings = (TCHAR**)realloc(*strings, sizeof(TCHAR*) * (count + 1));
+		if(alloc)
+			*strings = (TCHAR**)realloc(*strings, sizeof(TCHAR*) * (count + 1));
 	}
 
 	return count;
@@ -812,4 +803,13 @@ void freeMemory()
 		free(lvData.mulstrData);
 	}
 	
+}
+
+void cutString(TCHAR* string)
+{
+	if (wcslen(string) >= 200)
+	{
+		string[191] = 0; //레지스트리 탐색기에서 보여주는 최대 길이
+		wsprintf(string, L"%ws...", string);
+	}
 }

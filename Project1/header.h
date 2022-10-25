@@ -1,4 +1,5 @@
 /*
+MULTI_SZ 수정하거나 삭제할 때 데이터 갱신
 바이너리 수정
 */
 
@@ -128,9 +129,10 @@ void processPopup(int id, int index, void* item); //팝업 메뉴 프로시저
 int getType(TCHAR* type); //레지스트리 타입 문자열 -> 정의된 값
 void byteToString(BYTE* bytes, int size, TCHAR* dest); //Byte -> String
 int is_number(TCHAR* string, int base); //문자열이 숫자인지 체크
-int splitMulSz(TCHAR* data, int size, TCHAR*** strings); //MULTI_SZ 값 처리
+int splitMulSz(TCHAR* data, int size, TCHAR*** strings, int alloc); //MULTI_SZ 값 처리
 void concatMulSz(TCHAR* strings, int len, TCHAR* ret); //MULTI_SZ 값 NULL문자 공백으로 바꿈
 void freeMemory(); //모든 할당 메모리 해제
+void cutString(TCHAR* string);
 
 void initWindow(); //컨트롤 생성
 SPLIT getSplitter(POINT pt); //창 분할 정보
