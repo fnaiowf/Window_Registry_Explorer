@@ -129,8 +129,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModifyProc.cpp" />
     <ClCompile Include="Proc.cpp" />
     <ClCompile Include="RegistryControl.cpp" />
+    <ClCompile Include="SubProc.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>

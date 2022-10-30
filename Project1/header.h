@@ -1,5 +1,4 @@
 /*
-MULTI_SZ 수정하거나 삭제할 때 데이터 갱신
 바이너리 수정
 */
 
@@ -85,13 +84,13 @@ typedef struct TVSEL_DATA {
 extern const HKEY BASIC_KEY_HANDLE[5];
 extern const unsigned int REG_TYPE[6];
 extern FILE* fp;
-extern HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgModify;
+extern HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
 extern HINSTANCE g_hInst;
-extern WNDPROC oldEditProc;
+extern WNDPROC oldEditProc, oldDlgEditProc[2];
 extern LV_DATA_MANAGE lvData;
 
-extern int treeWidth, resultHeight, nchanged;
-extern TCHAR path[MAX_PATH_LENGTH], * msg;
+extern int treeWidth, resultHeight, nchanged, isDataLoad;
+extern TCHAR path[MAX_PATH_LENGTH], * msg, temp[MAX_VALUE_LENGTH];
 extern SPLIT nSplit;
 extern DWORD gCount[2];
 
