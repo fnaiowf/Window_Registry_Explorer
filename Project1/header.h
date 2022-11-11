@@ -37,6 +37,9 @@
 #define ID_resLV 3
 
 #define CHECKBIT 8388608
+#define DEFAULT_VALUE_PARAM -1
+#define PREV_NEW_VALUE_PARAM -2
+
 #define ListView_DeSelectAll(handle) {LVITEM li; li.mask = LVIF_STATE; li.stateMask = LVIS_SELECTED; SendMessage(handle, LVM_SETITEMSTATE, (WPARAM)-1, (LPARAM)&li); }
 enum SPLIT { SP_NONE, SP_VERT, SP_HORZ}; //창 분할 정보
 enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD, DATA_LOAD};
@@ -52,6 +55,7 @@ typedef struct DATA { //쓰레드 매개변수
 
 typedef struct BYTE_DATA {
 	BYTE* bytes;
+	TCHAR name[MAX_KEY_LENGTH];
 	int size;
 	int index;
 };
@@ -69,11 +73,6 @@ typedef struct LV_DATA_MANAGE {
 	MULSZ_DATA* mulstrData;
 	int nByte;
 	int nMul;
-};
-
-typedef struct TVSEL_DATA {
-	NMTREEVIEWW hdr;
-	THREAD_TYPE type;
 };
 
 extern const HKEY BASIC_KEY_HANDLE[5];

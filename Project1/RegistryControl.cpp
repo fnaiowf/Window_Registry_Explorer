@@ -38,6 +38,8 @@ int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int b
 		qword = wcstoll((TCHAR*)value, NULL, base ? 10 : 16);
 		res = RegSetValueEx(key, name, 0, type, (BYTE*)&qword, sizeof(qword));
 	}
+	else if (type == REG_BINARY)
+		res = RegSetValueEx(key, name, 0, type, value, size);
 	else
 	{
 		if (type != REG_MULTI_SZ)
@@ -522,7 +524,7 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 	if (isDataLoad)
 		data.t_type = DATA_LOAD;
 	else
-		addLVitem(hLV, temp[0], temp[1], temp[2], 0, NULL, -1);
+		addLVitem(hLV, temp[0], temp[1], temp[2], 0, NULL, DEFAULT_VALUE_PARAM);
 
 	if (RegOpenKeyEx(bkeyH, mpath, 0, KEY_READ | KEY_WRITE, &hkey) == ERROR_SUCCESS)
 	{
@@ -612,7 +614,7 @@ void createValue(int type, HTREEITEM hitem)
 
 	wsprintf(typeName, L"%ws", getTypeName(REG_TYPE[type]));
 
-	addLVitem(hLV, tstr, typeName, type < 2 ? ivalue : NULL, ListView_GetItemCount(hLV), NULL, 0);
+	addLVitem(hLV, tstr, typeName, type < 2 ? ivalue : NULL, ListView_GetItemCount(hLV), NULL, PREV_NEW_VALUE_PARAM);
 
 	SetFocus(hLV);
 	ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED);

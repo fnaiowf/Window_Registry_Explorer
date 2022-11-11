@@ -46,7 +46,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 		{
 			HTREEITEM item = getItemfromPath(path[0]), item2 = TreeView_GetSelection(hTV);
 			TreeView_SelectItem(hTV, item);
-			if (getListViewItem(hLV, LVIF_PARAM, 0).lParam == -1)
+			if (getListViewItem(hLV, LVIF_PARAM, 0).lParam == DEFAULT_VALUE_PARAM)
 				isdefault = 1;
 			TreeView_SelectItem(hTV, item2);
 		}
@@ -203,11 +203,11 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 0, name[0], sizeof(name[0]));
 
+		oldItem = TreeView_GetSelection(hTV);
+
 		if (tindex)
 		{
 			ListView_GetItemText(hresultLV, ListView_GetSelectionMark(hresultLV), 0, path[0], sizeof(path[0]));
-
-			oldItem = TreeView_GetSelection(hTV);
 
 			isDataLoad = 1;
 
@@ -271,7 +271,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 		}
 
 		SetFocus(GetDlgItem(hDlg, IDC_D4_VDATA));
-		return 1;
+		return 0;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -355,11 +355,11 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 				}
 
 				RegCloseKey(hkey);
-
 				SendMessage(hDlg, WM_CLOSE, 0, 0);
-				return 1;
 			}
-			break;
+			else
+				printf("key open fail\n");
+			return 1;
 		case IDC_D4_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
 			return 1;
@@ -380,25 +380,66 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	static HFONT hf;
+	static TCHAR name[MAX_KEY_LENGTH], path[MAX_PATH_LENGTH];
+	static int i;
+
+	TCHAR byte1[10], byte2[10];
+	HKEY hkey;
 
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
+		hDlgModify = hDlg; //CreateDialog는 WM_INITDIALOG가 처리되고 리턴함
 		inputOnce = 0;
 		nbyte = 0;
 		binaryOldEditProc[0] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA), GWLP_WNDPROC, (LONG_PTR)BinaryEditSubProc);
 		binaryOldEditProc[1] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), GWLP_WNDPROC, (LONG_PTR)BinaryAsciiEditSubProc);
 		binaryOldEditProc[2] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), GWLP_WNDPROC, (LONG_PTR)BinaryNumberingEditSubProc);
 
-		SetWindowText(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), L"00000000");
-
 		hf = CreateFont(17, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, L"Raize");
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA), WM_SETFONT, (WPARAM)hf, TRUE);
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), WM_SETFONT, (WPARAM)hf, TRUE);
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), WM_SETFONT, (WPARAM)hf, TRUE);
-		SetFocus(GetDlgItem(hDlg, IDC_D3_VDATA));
 
-		return 1;
+		ListView_GetItemText(hLV, ListView_GetSelectionMark(hLV), 0, name, sizeof(name));
+		SetWindowText(GetDlgItem(hDlg, IDC_D3_VNAME), name);
+
+		GetWindowText(hEdit, path, sizeof(path));
+
+		SetWindowText(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), L"00000000");
+		
+		for (i = 0; i < lvData.nByte; i++)
+			if (lvData.byteData[i].index == ListView_GetSelectionMark(hLV))
+				break;
+
+		for (int j = 0; j < lvData.byteData[i].size; j++)
+		{
+			if ((j + 1) % 8 == 0)
+			{
+				wsprintf(byte1, L" %02X  \r\n", lvData.byteData[i].bytes[j]);
+				wsprintf(byte2, L"%c \r\n", isprint(lvData.byteData[i].bytes[j]) ? lvData.byteData[i].bytes[j] : '.');
+			}
+			else
+			{
+				wsprintf(byte1, L" %02X  ", lvData.byteData[i].bytes[j]);
+				wsprintf(byte2, L"%c ", isprint(lvData.byteData[i].bytes[j]) ? lvData.byteData[i].bytes[j] : '.');
+			}
+			bytes[j] = lvData.byteData[i].bytes[j];
+
+			SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA), EM_REPLACESEL, TRUE, (LPARAM)byte1);
+			SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), EM_REPLACESEL, TRUE, (LPARAM)byte2);
+			nbyte++;
+
+			GetWindowText(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), temp, 10);
+
+			Numbering(0);
+		}
+
+		SetSel(GetDlgItem(hDlg, IDC_D3_VDATA), 0);
+		SetSel(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), 0);
+
+		SetFocus(GetDlgItem(hDlg, IDC_D3_VDATA));
+		return 0;
 	case WM_CTLCOLORSTATIC: //numbering edit background color
 		if ((HWND)lParam == GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING))
 			return (INT_PTR)((HBRUSH)GetStockObject(WHITE_BRUSH));
@@ -409,10 +450,44 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 		switch (LOWORD(wParam))
 		{
 		case IDC_D3_MODIFY_OK:
-			for (int i = 0; i < nbyte; i++)
-				printf("%02X%c", bytes[i], (i + 1) % 8 == 0 ? '\n' : ' ');
-			printf("\n\n");
-			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			if ((hkey = _RegOpenKeyEx(getBasicKey(path), path)) != NULL)
+			{
+				if (_RegSetValueEx(hkey, name, REG_BINARY, bytes, nbyte, -1))
+				{
+					if (nbyte == 0)
+					{
+						wsprintf(temp, L"(길이가 0인 이진값)");
+						ListView_SetItemText(hLV, ListView_GetSelectionMark(hLV), 2, temp);
+
+						memset(lvData.byteData[i].bytes, 0, sizeof(BYTE) * lvData.byteData[i].size);
+						lvData.byteData[i].bytes = (BYTE*)realloc(lvData.byteData[i].bytes, sizeof(BYTE));
+					}
+					else
+					{
+						TCHAR* b = (TCHAR*)calloc(nbyte * 3, sizeof(TCHAR));
+						byteToString(bytes, nbyte, b);
+
+						cutString(b);
+						ListView_SetItemText(hLV, ListView_GetSelectionMark(hLV), 2, b);
+
+						lvData.byteData[i].bytes = (BYTE*)realloc(lvData.byteData[i].bytes, sizeof(BYTE) * nbyte);
+						memset(lvData.byteData[i].bytes, 0, sizeof(BYTE) * nbyte);
+						memcpy(lvData.byteData[i].bytes, bytes, sizeof(BYTE) * nbyte);
+					}
+
+					lvData.byteData[i].size = nbyte;
+				}
+
+				for (int j = 0; j < nbyte; j++)
+					printf("%02X%c", lvData.byteData[i].bytes[j], (j + 1) % 8 == 0 ? '\n' : ' ');
+				printf("\n\n");
+
+				RegCloseKey(hkey);
+				SendMessage(hDlg, WM_CLOSE, 0, 0);
+			}
+			else
+				printf("key open fail\n");
+
 			return 1;
 		case IDC_D3_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);

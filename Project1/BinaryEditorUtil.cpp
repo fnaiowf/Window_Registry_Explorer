@@ -81,18 +81,17 @@ void Numbering(HWND hWnd)
 	{
 		if (nbyte % 8 == 0) //줄이 늘어날 때
 		{
-			TCHAR* temp = (TCHAR*)malloc(sizeof(TCHAR) * (nbyte / 8 + 2) * 10 + 1);
-			GetWindowText(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), temp, 1000);
+			TCHAR* temp = (TCHAR*)malloc(sizeof(TCHAR) * (nbyte / 8 + 1) * 10 + 1);
+			GetWindowText(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), temp, (nbyte / 8 + 1) * 10 + 1);
 
 			wsprintf(temp, L"%ws\r\n%08x", temp, (nbyte / 8 + 1) * 8);
 			SetWindowText(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), temp);
 
 			free(temp);
 
-			line = SendMessage(GetFocus(), EM_GETLINECOUNT, 0, 0);
+			line = SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_ASCII), EM_GETLINECOUNT, 0, 0);
 			if (line == 12)
 			{
-				SetWindowPos(GetDlgItem(hDlgModify, IDC_D3_VDATA_ASCII), NULL, 0, 0, 138, 195, SWP_NOMOVE);
 				ShowWindow(GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR), SW_SHOW);
 				EnableWindow(GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR), TRUE);
 
@@ -128,9 +127,7 @@ void Numbering(HWND hWnd)
 
 		line = SendMessage(GetFocus(), EM_GETLINECOUNT, 0, 0);
 		if (line == 11)
-		{
 			EnableWindow(GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR), FALSE);
-		}
 	}
 }
 
@@ -311,12 +308,12 @@ void ScrollEdits(int lParam, int wParam)
 		nscroll = 1;
 		break;
 	case SB_PAGEUP:
-		scrollPos = max(0, scrollPos - 5);
-		nscroll = -5;
+		scrollPos = max(0, scrollPos - 12);
+		nscroll = -12;
 		break;
 	case SB_PAGEDOWN:
-		scrollPos = min(line - 11, scrollPos + 5);
-		nscroll = 5;
+		scrollPos = min(line - 11, scrollPos + 12);
+		nscroll = 12;
 		break;
 	case SB_THUMBTRACK:
 		nscroll = HIWORD(wParam) - scrollPos;

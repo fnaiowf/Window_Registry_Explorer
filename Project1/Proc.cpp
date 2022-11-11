@@ -291,6 +291,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				}
 				break;
 			case LVN_BEGINLABELEDIT:
+				if (getListViewItem(hLV, LVIF_PARAM, ((LPNMLVDISPINFO)lParam)->item.iItem).lParam != PREV_NEW_VALUE_PARAM)
+					return 1;
+
 				ListView_GetItemText(hLV, ((LPNMLVDISPINFO)lParam)->item.iItem, 0, temp, sizeof(temp));
 				break;
 			case LVN_ENDLABELEDIT:

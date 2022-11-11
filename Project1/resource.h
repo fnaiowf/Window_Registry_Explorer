@@ -7,7 +7,7 @@
 #define IDD_DIALOG1                     103
 #define IDD_DIALOG2                     104
 #define IDD_DIALOG3                     105
-#define IDD_DIALOG4                     107
+#define IDD_DIALOG4                     106
 #define IDC_BUTTON_FIND                 1001
 #define IDC_BUTTON_CHANGE               1002
 #define IDC_EDIT_FIND                   1003
@@ -33,7 +33,7 @@
 #define IDC_D3_BOX						1023
 #define IDC_D3_MODIFY_OK                1024
 #define IDC_D3_MODIFY_NO                1025
-#define IDC_D3_SCROLLBAR                   1026
+#define IDC_D3_SCROLLBAR                1026
 #define IDC_D4_VNAME                    1027
 #define IDC_D4_VDATA                    1028
 #define IDC_D4_MODIFY_OK                1029
@@ -56,9 +56,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        109
+#define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         40014
-#define _APS_NEXT_CONTROL_VALUE         1032
+#define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
