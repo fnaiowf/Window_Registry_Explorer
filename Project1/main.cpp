@@ -2,12 +2,10 @@
 
 LPCTSTR lpszClass = TEXT("RegistryChange");
 HINSTANCE g_hInst;
-HMODULE hMod;
+TCHAR* msg;
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpszCmdParam, _In_ int nCmdShow)
 {
-	hMod = LoadLibrary(L"riched20.dll");
-
 	setlocale(LC_ALL, "");
 	fp = fopen("Log.txt", "w");
 	if (fp == NULL)
@@ -48,8 +46,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		TranslateMessage(&Message);
 		DispatchMessage(&Message); //메세지를 프로시저로 보냄
 	}
-
-	FreeModule(hMod);
 
 	return (int)(Message.wParam);
 }

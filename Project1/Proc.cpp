@@ -1,10 +1,8 @@
 ﻿#include"header.h"
 
 HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
-HANDLE hThread[2];
-WNDPROC oldEditProc, oldDlgEditProc[2];
+WNDPROC oldDlgEditProc[2];
 TCHAR temp[MAX_PATH_LENGTH];
-DWORD gCount[2] = {};
 
 int treeWidth, resultHeight, nchanged, isDataLoad;
 SPLIT nSplit = SP_NONE;
@@ -400,7 +398,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 
 		startChange = 0;
 		index = -1;
-		break;
+		return 1;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -596,7 +594,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 		hDlgFind = NULL;
 		startChange = 0;
 		EndDialog(hDlg, 0);
-		return 0;
+		return 1;
 	}
 
 	return 0;

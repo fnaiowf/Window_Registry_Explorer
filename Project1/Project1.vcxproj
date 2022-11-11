@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BinaryEditorUtil.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModifyProc.cpp" />
     <ClCompile Include="Proc.cpp" />
@@ -136,6 +137,7 @@
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BinaryEditor.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

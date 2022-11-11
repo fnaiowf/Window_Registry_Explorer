@@ -1,4 +1,5 @@
 #include"header.h"
+#include"BinaryEditor.h"
 
 BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
@@ -69,7 +70,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 		SetFocus(GetDlgItem(hDlg, IDC_D2_VDATA));
 		oldDlgEditProc[1] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D2_VDATA), GWLP_WNDPROC, (LONG_PTR)DlgEditSubProc);
-		break;
+		return 1;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -143,7 +144,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 				RegCloseKey(hkey);
 
 				SendMessage(hDlg, WM_CLOSE, 0, 0);
-				return 0;
+				return 1;
 			}
 			break;
 		case IDC_D2_DEC:
@@ -163,13 +164,13 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			break;
 		case IDC_D2_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
-			return 0;
+			return 1;
 		}
 		break;
 	case WM_CLOSE:
 		hDlgModify = NULL;
 		EndDialog(hDlg, 0);
-		return 0;
+		return 1;
 	}
 
 	return 0;
@@ -270,7 +271,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 		}
 
 		SetFocus(GetDlgItem(hDlg, IDC_D4_VDATA));
-		break;
+		return 1;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -356,12 +357,12 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 				RegCloseKey(hkey);
 
 				SendMessage(hDlg, WM_CLOSE, 0, 0);
-				return 0;
+				return 1;
 			}
 			break;
 		case IDC_D4_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
-			return 0;
+			return 1;
 		}
 		break;
 	case WM_CLOSE:
@@ -370,7 +371,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 		hDlgModify = NULL;
 		EndDialog(hDlg, 0);
-		return 0;
+		return 1;
 	}
 
 	return 0;
@@ -379,38 +380,60 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	static HFONT hf;
+
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
-		hf = CreateFont(17, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, VARIABLE_PITCH | FF_DONTCARE, L"Arial");
+		inputOnce = 0;
+		nbyte = 0;
+		binaryOldEditProc[0] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA), GWLP_WNDPROC, (LONG_PTR)BinaryEditSubProc);
+		binaryOldEditProc[1] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), GWLP_WNDPROC, (LONG_PTR)BinaryAsciiEditSubProc);
+		binaryOldEditProc[2] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), GWLP_WNDPROC, (LONG_PTR)BinaryNumberingEditSubProc);
+
+		SetWindowText(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), L"00000000");
+
+		hf = CreateFont(17, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, L"Raize");
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA), WM_SETFONT, (WPARAM)hf, TRUE);
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), WM_SETFONT, (WPARAM)hf, TRUE);
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), WM_SETFONT, (WPARAM)hf, TRUE);
-
 		SetFocus(GetDlgItem(hDlg, IDC_D3_VDATA));
-		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case IDC_D3_MODIFY_NO:
-			SendMessage(hDlg, WM_CLOSE, 0, 0);
-			return 0;
-		}
-		break;
-	case WM_CTLCOLORSTATIC:
+
+		return 1;
+	case WM_CTLCOLORSTATIC: //numbering edit background color
 		if ((HWND)lParam == GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING))
-		{
-			SetBkMode((HDC)wParam, TRANSPARENT);
 			return (INT_PTR)((HBRUSH)GetStockObject(WHITE_BRUSH));
-		}
 		else
 			return DefWindowProc(hDlg, iMessage, wParam, lParam);
 		break;
+	case WM_COMMAND :
+		switch (LOWORD(wParam))
+		{
+		case IDC_D3_MODIFY_OK:
+			for (int i = 0; i < nbyte; i++)
+				printf("%02X%c", bytes[i], (i + 1) % 8 == 0 ? '\n' : ' ');
+			printf("\n\n");
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			return 1;
+		case IDC_D3_MODIFY_NO:
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			return 1;
+		case IDCANCEL:
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			return 1;
+		}
+	break;
+	case WM_VSCROLL:
+		if (lParam == NULL)
+			break;
+
+		ScrollEdits(lParam, wParam);
+		return 1;
 	case WM_CLOSE:
 		DeleteObject(hf);
+
 		hDlgModify = NULL;
 		EndDialog(hDlg, 0);
-		return 0;
+		return 1;
 	}
 
 	return 0;

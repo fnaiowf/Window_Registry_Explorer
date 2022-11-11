@@ -1,5 +1,7 @@
 #include"header.h"
 
+WNDPROC oldEditProc;
+
 SPLIT getSplitter(POINT pt)
 {
 	RECT crt, vrt, hrt;

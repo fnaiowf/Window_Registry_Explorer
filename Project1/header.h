@@ -1,7 +1,3 @@
-/*
-바이너리 수정
-*/
-
 #pragma once
 #pragma warning(disable : 6387)
 #pragma warning(disable : 4267)
@@ -14,7 +10,6 @@
 #include<conio.h>
 #include<locale.h>
 #include<commctrl.h>
-#include<richedit.h>
 #include"resource.h"
 
 #ifdef UNICODE
@@ -90,9 +85,8 @@ extern WNDPROC oldEditProc, oldDlgEditProc[2];
 extern LV_DATA_MANAGE lvData;
 
 extern int treeWidth, resultHeight, nchanged, isDataLoad;
-extern TCHAR path[MAX_PATH_LENGTH], * msg, temp[MAX_VALUE_LENGTH];
+extern TCHAR path[MAX_PATH_LENGTH], * msg, temp[MAX_PATH_LENGTH];
 extern SPLIT nSplit;
-extern DWORD gCount[2];
 
 //RegistryControl.cpp
 HKEY _RegOpenKeyEx(int bKeyIndex, TCHAR* path); //레지스트리 오픈 함수 래퍼
@@ -109,14 +103,16 @@ int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int size, int 
 
 //Proc.cpp
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); //메인 윈도우 프로시저
-LRESULT CALLBACK MainEditSubProc(HWND, UINT, WPARAM, LPARAM); //메인 윈도우 EDIT 서브클래싱
 BOOL CALLBACK FindDlgProc(HWND, UINT, WPARAM, LPARAM); //찾기&바꾸기 다이얼로그 프로시저
-LRESULT CALLBACK DlgEditSubProc(HWND, UINT, WPARAM, LPARAM); //다이얼로그 EDIT 서브클래싱
 BOOL CALLBACK ModifySzNumDlgProc(HWND, UINT, WPARAM, LPARAM); //값 수정 다이얼로그 프로시저
 BOOL CALLBACK ModifyBinaryDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ModifyMultiSzDlgProc(HWND, UINT, WPARAM, LPARAM);
 int CALLBACK CompareFunc(LPARAM, LPARAM, LPARAM); //검색 결과 리스트뷰 정렬 함수
 DWORD WINAPI ThreadFunc(LPVOID); // 쓰레드 함수
+
+//SubProc
+LRESULT CALLBACK MainEditSubProc(HWND, UINT, WPARAM, LPARAM); //메인 윈도우 EDIT 서브클래싱
+LRESULT CALLBACK DlgEditSubProc(HWND, UINT, WPARAM, LPARAM); //다이얼로그 EDIT 서브클래싱
 
 //Util.cpp
 const TCHAR* getBasicKey(int idx); //기본키 이름 리턴

@@ -30,10 +30,10 @@
 #define IDC_D3_VDATA                    1020
 #define IDC_D3_VDATA_ASCII              1021
 #define IDC_D3_VDATA_NUMBERING          1022
-#define IDC_D3_GROUP                    1023
+#define IDC_D3_BOX						1023
 #define IDC_D3_MODIFY_OK                1024
 #define IDC_D3_MODIFY_NO                1025
-#define IDC_SCROLLBAR2                  1026
+#define IDC_D3_SCROLLBAR                   1026
 #define IDC_D4_VNAME                    1027
 #define IDC_D4_VDATA                    1028
 #define IDC_D4_MODIFY_OK                1029

@@ -2,7 +2,7 @@
 
 LONG kcount, vcount, fcount, ccount;
 FILE* fp;
-TCHAR path[MAX_PATH_LENGTH] = TEXT(""), * msg;
+TCHAR path[MAX_PATH_LENGTH] = TEXT("");
 const HKEY BASIC_KEY_HANDLE[5] = { HKEY_CLASSES_ROOT, HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, HKEY_USERS, HKEY_CURRENT_CONFIG };
 const unsigned int REG_TYPE[6] = { REG_DWORD, REG_QWORD, REG_SZ, REG_EXPAND_SZ, REG_MULTI_SZ, REG_BINARY };
 LV_DATA_MANAGE lvData;
@@ -21,6 +21,35 @@ HKEY _RegOpenKeyEx(int bKeyIndex, TCHAR* path)
 		return hkey;
 	else
 		return NULL;
+}
+
+int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int base)
+{
+	int dword, res;
+	long long qword;
+
+	if (type == REG_DWORD)
+	{
+		dword = wcstol((TCHAR*)value, NULL, base ? 10 : 16);
+		res = RegSetValueEx(key, name, 0, type, (BYTE*)&dword, sizeof(dword));
+	}
+	else if (type == REG_QWORD)
+	{
+		qword = wcstoll((TCHAR*)value, NULL, base ? 10 : 16);
+		res = RegSetValueEx(key, name, 0, type, (BYTE*)&qword, sizeof(qword));
+	}
+	else
+	{
+		if (type != REG_MULTI_SZ)
+			size = value == NULL ? 0 : wcslen((TCHAR*)value) * sizeof(TCHAR);
+
+		res = RegSetValueEx(key, name, 0, type, value, size);
+	}
+
+	if (res == ERROR_SUCCESS)
+		return 1;
+	else
+		return 0;
 }
 
 int enumRegistry(DATA* data)
@@ -588,33 +617,4 @@ void createValue(int type, HTREEITEM hitem)
 	SetFocus(hLV);
 	ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED);
 	ListView_EditLabel(hLV, ListView_GetItemCount(hLV) - 1);
-}
-
-int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int base)
-{
-	int dword, res;
-	long long qword;
-
-	if (type == REG_DWORD)
-	{
-		dword = wcstol((TCHAR*)value, NULL, base ? 10 : 16);
-		res = RegSetValueEx(key, name, 0, type, (BYTE*)&dword, sizeof(dword));
-	}
-	else if (type == REG_QWORD)
-	{
-		qword = wcstoll((TCHAR*)value, NULL, base ? 10 : 16);
-		res = RegSetValueEx(key, name, 0, type, (BYTE*)&qword, sizeof(qword));
-	}
-	else
-	{
-		if(type != REG_MULTI_SZ)
-			size = value == NULL ? 0 : wcslen((TCHAR*)value) * sizeof(TCHAR);
-
-		res = RegSetValueEx(key, name, 0, type, value, size);
-	}
-
-	if (res == ERROR_SUCCESS)
-		return 1;
-	else
-		return 0;
 }
