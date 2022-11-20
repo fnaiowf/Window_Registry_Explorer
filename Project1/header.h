@@ -118,7 +118,7 @@ const TCHAR* getBasicKey(int idx); //기본키 이름 리턴
 int getBasicKey(TCHAR* path); //기본키 리턴
 TCHAR* getValidPath(TCHAR* path); //경로 -> 키 주소
 const TCHAR* getTypeName(int type); //레지스트리 타입 문자열 리턴
-void openPopupMenu(HMENU menu, int x, int y); //오른쪽 마우스 버튼 누를 때 팝업 메뉴 열기
+void openPopupMenu(int x, int y); //오른쪽 마우스 버튼 누를 때 팝업 메뉴 열기
 void processPopup(int id, int index, void* item); //팝업 메뉴 프로시저
 int getType(TCHAR* type); //레지스트리 타입 문자열 -> 정의된 값
 void byteToString(BYTE* bytes, int size, TCHAR* dest); //Byte -> String

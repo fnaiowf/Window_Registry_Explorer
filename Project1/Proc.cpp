@@ -81,8 +81,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	RECT crt;
 	POINT pt;
 	DWORD t;
-	HMENU hmenu;
 	HDC hdc;
+	HMENU hmenu;
 	static DATA data;
 	static TVITEM tvitem;
 
@@ -162,9 +162,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		return 0;
 	case WM_CONTEXTMENU:
-		hmenu = 0;
-		openPopupMenu(hmenu, LOWORD(lParam), HIWORD(lParam));
-		DestroyMenu(hmenu);
+		openPopupMenu(LOWORD(lParam), HIWORD(lParam));
 
 		break;
 	case WM_MOUSEMOVE:

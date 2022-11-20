@@ -73,8 +73,9 @@ LRESULT CALLBACK DlgEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM 
 
 LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
-	int pos, rpos, li, prevpos[2], nline, pos2, ascii;
+	int pos, rpos, li, prevpos[2], nline, pos2, ascii, newpos;
 	static TCHAR msg[10], msg2[10];
+	static int oldpos;
 	HWND hWnd2 = GetDlgItem(hDlgModify, IDC_D3_VDATA_ASCII);
 
 	switch (iMessage)
@@ -92,6 +93,8 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 
 			if (inputOnce == 0) //바이트 입력 시작
 			{
+				RemoveSelections(hWnd);
+
 				if (rpos == 40) //한 줄의 마지막 위치에서 입력하면 다음 줄로 이동
 				{
 					SetSel(hWnd, pos + 2);
@@ -117,7 +120,7 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 
 				prevpos[0] = pos;
 				prevpos[1] = pos2;
-				autoLineFeed(1, hWnd, pos);
+				autoLineFeed(2, hWnd, pos);
 				SetSel(hWnd, prevpos[0]);
 				SetSel(hWnd2, prevpos[1]); //ascii 에디트에서는 여기서 문자열을 입력할 위치로 이동
 
@@ -137,7 +140,8 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 
 				nbyte++;
 
-				Numbering(0);
+				if (nbyte % 8 == 0)
+					Numbering(1);
 
 				inputOnce = 1;
 			}
@@ -146,7 +150,7 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 				wsprintf(msg + 2, L"%c", wParam);
 
 				ascii = wcstol(msg + 1, NULL, 16);
-				wsprintf(msg2, L"%c", isprint(ascii) ? ascii : '.');
+				wsprintf(msg2, L"%c", isprint(ascii) && ascii != VK_TAB ? ascii : '.');
 
 				ReplaceSel(hWnd, pos - 1, pos, msg + 2);
 				SetSel(hWnd, pos + 2);
@@ -164,11 +168,30 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 		}
 		return 0;
 	case WM_KEYDOWN:
-		KeyDownProcess(wParam, hWnd, GetPos(hWnd));
+		if (!shortCutHandler(wParam, hWnd))
+		{
+			pos = GetPos(hWnd);
+			KeyDownProcess(wParam, hWnd, pos);
+		}
+
+		return 0;
+	case WM_CONTEXTMENU:
+		openBinaryEditorMenu(LOWORD(lParam), HIWORD(lParam));
 
 		return 0;
 	case WM_LBUTTONDOWN:
 		LbuttonDownProcess(hWnd, LOWORD(SendMessage(hWnd, EM_CHARFROMPOS, 0, MAKELPARAM(LOWORD(lParam), HIWORD(lParam)))));
+		isDrag = 1;
+		oldpos = GetPos(hWnd);
+		SetCapture(hWnd); //edit 밖으로 마우스 나가도 마우스 정보 갱신됨
+
+		return 0;
+	case WM_LBUTTONUP:
+		isDrag = 0;
+		ReleaseCapture();
+		break;
+	case WM_MOUSEMOVE:
+		MouseMoveProcess(hWnd, lParam, oldpos);
 
 		return 0;
 	case WM_MOUSEWHEEL:
@@ -182,14 +205,17 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 LRESULT CALLBACK BinaryAsciiEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	TCHAR msg[5], msg2[8];
-	int pos, rpos, li, nline, prevpos[2], nowindex, pos2;
+	int pos, rpos, li, nline, prevpos[2], nowindex, pos2, newpos;
+	static int oldpos;
 	HWND hWnd2 = GetDlgItem(hDlgModify, IDC_D3_VDATA);
 
 	switch (iMessage)
 	{
 	case WM_CHAR:
-		if (isprint(wParam))
+		if (isprint(wParam) && wParam != VK_TAB)
 		{
+			RemoveSelections(hWnd);
+
 			pos = GetPos(hWnd);
 			rpos = pos - SendMessage(hWnd, EM_LINEINDEX, -1, 0);
 			nline = SendMessage(hWnd, EM_LINEFROMCHAR, pos, 0);
@@ -206,7 +232,7 @@ LRESULT CALLBACK BinaryAsciiEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam,
 
 			prevpos[0] = pos;
 			prevpos[1] = pos2;
-			autoLineFeed(1, hWnd, pos);
+			autoLineFeed(2, hWnd, pos);
 			SetSel(hWnd, prevpos[0]);
 			SetSel(hWnd2, prevpos[1]);
 
@@ -234,15 +260,37 @@ LRESULT CALLBACK BinaryAsciiEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam,
 
 			nbyte++;
 
-			Numbering(0);
+			if (nbyte % 8 == 0)
+				Numbering(1);
 		}
+
 		return 0;
 	case WM_KEYDOWN:
-		KeyDownProcess(wParam, hWnd, GetPos(hWnd));
+		if (!shortCutHandler(wParam, hWnd))
+		{
+			pos = GetPos(hWnd);
+			KeyDownProcess(wParam, hWnd, pos);
+		}
+
+		return 0;
+	case WM_CONTEXTMENU:
+		openBinaryEditorMenu(LOWORD(lParam), HIWORD(lParam));
 
 		return 0;
 	case WM_LBUTTONDOWN:
 		LbuttonDownProcess(hWnd, LOWORD(SendMessage(hWnd, EM_CHARFROMPOS, 0, MAKELPARAM(LOWORD(lParam), HIWORD(lParam)))));
+		isDrag = 1;
+		oldpos = GetPos(hWnd);
+		SetCapture(hWnd);
+
+		return 0;
+	case WM_LBUTTONUP:
+		isDrag = 0;
+		ReleaseCapture();
+
+		break;
+	case WM_MOUSEMOVE:
+		MouseMoveProcess(hWnd, lParam, oldpos);
 
 		return 0;
 	case WM_MOUSEWHEEL:

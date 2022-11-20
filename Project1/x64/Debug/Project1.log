@@ -1,9 +1,46 @@
-﻿  Proc.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x14fd 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+﻿  BinaryEditorUtil.cpp
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x14f1 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
 C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(54,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(61,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(69,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(76,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(263,38): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(85,6): warning C4101: 'hdc' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditor.h(12,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'CLIPBOARD_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(21,13): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(22,21): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(33,18): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(69,11): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(113,13): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(114,21): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(154,19): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(164,15): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(165,15): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(171,23): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(222,21): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(240,18): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(307,21): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(308,21): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(313,81): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(314,81): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(315,19): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(349,11): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(374,27): warning C4312: '형식 캐스트': 'int'에서 더 큰 'HWND'(으)로의 변환입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(401,23): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(405,29): warning C4838: 'LRESULT'에서 'int'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(405,29): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(405,84): warning C4838: 'LRESULT'에서 'int'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(405,84): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(407,12): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(408,9): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(434,23): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(435,15): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(474,23): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(484,13): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(488,29): warning C4838: 'LRESULT'에서 'int'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(488,29): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(488,84): warning C4838: 'LRESULT'에서 'int'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(488,84): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(490,12): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(491,9): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(517,22): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(462): warning C4715: 'shortCutHandler': 모든 제어 경로에서 값을 반환하지는 않습니다.
   Project1.vcxproj -> C:\Users\jinwoo\Desktop\registryControl\x64\Debug\Project1.exe

@@ -401,8 +401,9 @@ void setMarquee(int opt)
 	}
 }
 
-void openPopupMenu(HMENU menu, int x, int y)
+void openPopupMenu(int x, int y)
 {
+	HMENU menu, hPopup;
 	TVHITTESTINFO tvinfo;
 	LVHITTESTINFO lvinfo, lvinfo2;
 	POINT pt2;
@@ -430,7 +431,7 @@ void openPopupMenu(HMENU menu, int x, int y)
 	pt2 = { x, y };
 
 	menu = LoadMenu(g_hInst, MAKEINTRESOURCE(IDR_MENU2));
-	HMENU hPopup = GetSubMenu(menu, 0);
+	hPopup = GetSubMenu(menu, 0);
 
 	if (tvinfo.hItem != NULL)
 	{
@@ -508,6 +509,8 @@ void openPopupMenu(HMENU menu, int x, int y)
 	}
 
 	processPopup(id, index, item);
+
+	DestroyMenu(menu);
 }
 
 void processPopup(int id, int index, void* item)

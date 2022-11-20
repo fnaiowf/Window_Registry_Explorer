@@ -412,6 +412,8 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 			if (lvData.byteData[i].index == ListView_GetSelectionMark(hLV))
 				break;
 
+		SetFocus(GetDlgItem(hDlg, IDC_D3_VDATA));
+
 		for (int j = 0; j < lvData.byteData[i].size; j++)
 		{
 			if ((j + 1) % 8 == 0)
@@ -432,13 +434,11 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 
 			GetWindowText(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), temp, 10);
 
-			Numbering(0);
+			Numbering(1);
 		}
 
 		SetSel(GetDlgItem(hDlg, IDC_D3_VDATA), 0);
 		SetSel(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), 0);
-
-		SetFocus(GetDlgItem(hDlg, IDC_D3_VDATA));
 		return 0;
 	case WM_CTLCOLORSTATIC: //numbering edit background color
 		if ((HWND)lParam == GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING))
@@ -500,8 +500,8 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 	case WM_VSCROLL:
 		if (lParam == NULL)
 			break;
-
-		ScrollEdits(lParam, wParam);
+		
+		ScrollProcess(lParam, wParam);
 		return 1;
 	case WM_CLOSE:
 		DeleteObject(hf);

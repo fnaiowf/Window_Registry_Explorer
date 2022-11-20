@@ -4,10 +4,11 @@
 //
 #define IDR_MENU1                       101
 #define IDR_MENU2                       102
-#define IDD_DIALOG1                     103
-#define IDD_DIALOG2                     104
-#define IDD_DIALOG3                     105
-#define IDD_DIALOG4                     106
+#define IDR_MENU3                       103
+#define IDD_DIALOG1                     104
+#define IDD_DIALOG2                     105
+#define IDD_DIALOG3                     106
+#define IDD_DIALOG4                     107
 #define IDC_BUTTON_FIND                 1001
 #define IDC_BUTTON_CHANGE               1002
 #define IDC_EDIT_FIND                   1003
@@ -30,7 +31,7 @@
 #define IDC_D3_VDATA                    1020
 #define IDC_D3_VDATA_ASCII              1021
 #define IDC_D3_VDATA_NUMBERING          1022
-#define IDC_D3_BOX						1023
+#define IDC_D3_BOX                      1023
 #define IDC_D3_MODIFY_OK                1024
 #define IDC_D3_MODIFY_NO                1025
 #define IDC_D3_SCROLLBAR                1026
@@ -51,13 +52,18 @@
 #define ID_MENU_EXSTR                   40011
 #define ID_MENU2_MULSTR                 40012
 #define ID_MENU2_DELETE                 40013
+#define ID_MENU3_CUT                    40014
+#define ID_MENU3_COPY                   40015
+#define ID_MENU3_PASTE					40016
+#define ID_MENU3_DELETE                 40017
+#define ID_MENU3_SELECTALL              40018
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        107
-#define _APS_NEXT_COMMAND_VALUE         40014
+#define _APS_NEXT_RESOURCE_VALUE        108
+#define _APS_NEXT_COMMAND_VALUE         40019
 #define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
