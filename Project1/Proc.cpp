@@ -1,7 +1,7 @@
 ﻿#include"header.h"
 
 HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
-WNDPROC oldDlgEditProc[2];
+WNDPROC oldDlgEditProc[3];
 TCHAR temp[MAX_PATH_LENGTH];
 
 int treeWidth, resultHeight, nchanged, isDataLoad;
@@ -9,7 +9,7 @@ SPLIT nSplit = SP_NONE;
 
 DWORD WINAPI ThreadFunc(LPVOID temp)
 {
-	if (temp != NULL && ((DATA*)temp)->t_type == REFRESH)
+	if (temp != NULL && ((DATA*)temp)->t_type == REFRESH) //F5 눌렀을 때 기존에 추가되어 있던 것들 전부 삭제
 	{
 		ListView_DeleteAllItems(hLV);
 		ListView_DeleteAllItems(hresultLV);
@@ -17,8 +17,8 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 		TreeView_DeleteAllItems(hTV);
 	}
 
-	setMarquee(1);
-	if (temp != NULL && ((DATA*)temp)->t_type == CHANGE)
+	setMarquee(1); //프로그레스바 ON
+	if (temp != NULL && ((DATA*)temp)->t_type == CHANGE) //전부 바꾸기 체크한 경우
 	{
 		for (int i = 0; i < ListView_GetItemCount(hresultLV); i++)
 			if (getListViewItem(hresultLV, LVIF_GROUPID, i).iGroupId == 1)
@@ -47,7 +47,7 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 			switch (((DATA*)temp)->t_type)
 			{
 			case REFRESH:
-				item = getItemfromPath(((DATA*)temp)->path);
+				item = getItemfromPath(((DATA*)temp)->path); //새로고침 하기 전의 경로로 이동
 				TreeView_SelectItem(hTV, item);
 				TreeView_EnsureVisible(hTV, item);
 				SetWindowText(hEdit, ((DATA*)temp)->path);
@@ -58,6 +58,7 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 					EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE), TRUE);
 
 				SetFocus(hresultLV);
+				ListView_DeSelectAll(hresultLV);
 				ListView_SetSelectionMark(hresultLV, 0);
 				ListView_SetItemState(hresultLV, 0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 				free((DATA*)temp);
@@ -66,14 +67,14 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 		}
 	}
 
-	setMarquee(0);
+	setMarquee(0); //프로그레스바 OFF
 
 	return 0;
 }
 
 int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	return lParam1 > lParam2 ? -1 : 1;
+	return lParam1 < lParam2 ? -1 : 1; //lParam1, lParam2 : 리스트뷰 인덱스 lParamSort : SortItemsEx 호출할 때 넘겨주는 파라미터
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -98,13 +99,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		lvData.nMul = 0;
 		isDataLoad = 0;
 		
-		CreateThread(NULL, 0, ThreadFunc, NULL, NULL, NULL);
+		CreateThread(NULL, 0, ThreadFunc, NULL, NULL, NULL); //맨 처음 레지스트리 키 로드
 		return 0;
 
 	case WM_HOTKEY:
 		switch(wParam)
 		{
-		case 0:
+		case 0: //F5
 			{
 				DATA* d = (DATA*)malloc(sizeof(DATA));
 				d->t_type = REFRESH;
@@ -113,7 +114,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				CreateThread(NULL, 0, ThreadFunc, d, NULL, NULL);
 				break;
 			}
-		case 1:
+		case 1: //Ctrl + F
 			if (!IsWindow(hDlgFind))
 			{
 				hDlgFind = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWndMain, (DLGPROC)FindDlgProc);
@@ -123,7 +124,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_SIZE:
-		if (wParam != SIZE_MINIMIZED)
+		if (wParam != SIZE_MINIMIZED) //프로그램 크기에 맞춰 자동 조절
 		{
 			GetClientRect(hWnd, &crt);
 			MoveWindow(hEdit, 0, 0, crt.right, 20, TRUE);
@@ -135,7 +136,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				MoveWindow(hresultLV, 0, crt.bottom - resultHeight + GAP, crt.right, resultHeight - GAP, TRUE);
 		}
 		return 0;
-	case WM_SETCURSOR:
+	case WM_SETCURSOR: //커서 모양 변경
 		if (LOWORD(lParam) == HTCLIENT)
 		{
 			GetCursorPos(&pt);
@@ -169,12 +170,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		GetClientRect(hWnd, &crt);
 		if (nSplit == SP_VERT)
 		{
-			treeWidth = min(max((int)LOWORD(lParam), MIN_WIDTH), MAX_WIDTH);
+			treeWidth = min(max((int)LOWORD(lParam), MIN_TREE_WIDTH), MAX_TREE_WIDTH);
 			SendMessage(hWnd, WM_SIZE, SIZE_RESTORED, 0);
 		}
 		else if (nSplit == SP_HORZ)
 		{
-			resultHeight = min(max(crt.bottom - (int)HIWORD(lParam), MIN_HEIGHT), MAX_HEIGHT);
+			resultHeight = min(max(crt.bottom - (int)HIWORD(lParam), MIN_RTREE_HEIGHT), MAX_RTREE_HEIGHT);
 			SendMessage(hWnd, WM_SIZE, SIZE_RESTORED, 0);
 		}
 		return 0;
@@ -218,7 +219,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		case ID_TV:
 			switch (((LPNMHDR)lParam)->code)
 			{
-			case TVN_SELCHANGED:
+			case TVN_SELCHANGED: //isDataLoad가 1이면 리스트뷰와 경로 edit을 건들지 않음
 				if(!isDataLoad) ListView_DeleteAllItems(hLV);
 				freeMemory();
 				lvData.nByte = 0;
@@ -242,18 +243,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						ListView_SetColumnWidth(hLV, 2, 300);
 				}
 				return 0;
-			case TVN_BEGINLABELEDIT:
-				tvitem = ((LPNMTVDISPINFO)lParam)->item;
-				break;
 			case TVN_ENDLABELEDIT:
 				{
 					TCHAR oldName[MAX_KEY_LENGTH];
 					HKEY hkey;
 
+					tvitem = ((LPNMTVDISPINFO)lParam)->item;
 					tvitem.mask = TVIF_TEXT;
 					tvitem.pszText = oldName;
 					TreeView_GetItem(hTV, &tvitem);
-					
+
 					GetWindowText(TreeView_GetEditControl(hTV), temp, sizeof(temp));
 
 					getPathfromItem(TreeView_GetParent(hTV, ((LPNMTVDISPINFO)lParam)->item.hItem), path);
@@ -262,7 +261,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					{
 						if (RegRenameKey(hkey, oldName, temp) == ERROR_SUCCESS)
 						{
-							tvitem.hItem = ((LPNMTVDISPINFO)lParam)->item.hItem;
 							tvitem.pszText = temp;
 							TreeView_SetItem(hTV, &tvitem);
 						}
@@ -276,23 +274,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			switch (((LPNMHDR)lParam)->code)
 			{
 			case NM_DBLCLK:
-				if (!IsWindow(hDlgModify))
-				{
-					ListView_GetItemText(hLV, ((LPNMITEMACTIVATE)lParam)->iItem, 1, temp, sizeof(temp));
-					t = getType(temp);
-
-					if (t == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
-					else if (t == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
-					else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
-
-					ShowWindow(hDlgModify, SW_SHOW);
-				}
+				ListView_GetItemText(hLV, ((LPNMITEMACTIVATE)lParam)->iItem, 1, temp, sizeof(temp));
+				openModifyDlg(getType(temp));
 				break;
 			case LVN_BEGINLABELEDIT:
-				if (getListViewItem(hLV, LVIF_PARAM, ((LPNMLVDISPINFO)lParam)->item.iItem).lParam != PREV_NEW_VALUE_PARAM)
+				if (getListViewItem(hLV, LVIF_PARAM, ((LPNMLVDISPINFO)lParam)->item.iItem).lParam != PREV_NEW_VALUE_PARAM) //아이템을 2번 천천히 누르면 labeledit으로 자동으로 들어가는데 이를 막기 위함
 					return 1;
-
-				ListView_GetItemText(hLV, ((LPNMLVDISPINFO)lParam)->item.iItem, 0, temp, sizeof(temp));
 				break;
 			case LVN_ENDLABELEDIT:
 				{
@@ -302,7 +289,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 					GetWindowText(hEdit, path, sizeof(path));
 					ListView_GetItemText(hLV, index, 1, type, sizeof(type));
-					type[19] = getType(type);
+					type[19] = getType(type); //변수 하나 선언 하는 대신 안 쓰이는 type[19]에 값을 넣음
 
 					if ((hkey = _RegOpenKeyEx(getBasicKey(path), path)) != NULL)
 					{
@@ -325,7 +312,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						{
 							addLVitem(hLV, temp, type, type[19] < 2 ? ivalue : NULL, index, NULL, 0);
 
-							ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED);
+							ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED); //전부 선택 해제
 							ListView_SetItemState(hLV, index, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
 						}
 
@@ -384,13 +371,14 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 	TCHAR temp[100];
 	DATA* data;
 	static int startChange, index;
-	static DATA changeData;
+	static DATA changeData; //하나씩 바꾸는 경우에는 입력했던 데이터를 저장해 놔야 됨
 	LVITEM li;
 
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
 		oldDlgEditProc[0] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_FIND), GWLP_WNDPROC, (LONG_PTR)DlgEditSubProc);
+		oldDlgEditProc[1] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_EDIT_CHANGE), GWLP_WNDPROC, (LONG_PTR)DlgEditSubProc);
 		GetClientRect(hWndMain, &rt);
 		GetClientRect(hDlg, &rt2);
 		MoveWindow(hDlg, (rt.left + rt.right) / 2, (rt.top + rt.bottom) / 2, rt2.right - rt2.left + 10, rt2.bottom - rt2.top + 30, TRUE);
@@ -398,8 +386,8 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 		SendMessage(GetDlgItem(hDlg, IDC_D1_DEC), BM_SETCHECK, BST_CHECKED, 1);
 
 		startChange = 0;
-		index = -1;
-		return 1;
+		index = -1; //초기값 음수로 설정
+		return 0;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -430,7 +418,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 			{
 				wsprintf(changeData.targetValue, data->targetValue);
 				
-				wsprintf(data->newValue, L"");
+				wsprintf(data->newValue, L""); //찾기만 할 경우에는 바꿀 문자열을 공백으로
 				data->type = IsDlgButtonChecked(hDlg, IDC_D1_STR) ? REG_SZ : (IsDlgButtonChecked(hDlg, IDC_D1_DWORD) ? REG_DWORD : REG_QWORD);
 				data->t_type = FIND;
 
@@ -458,7 +446,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 			if (GetMenuState(GetMenu(hWndMain), ID_MENU_RESULT_TAB, MF_BYCOMMAND) == MF_UNCHECKED)
 				SendMessage(hWndMain, WM_COMMAND, MAKEWPARAM(ID_MENU_RESULT_TAB, 0), 0);
 
-			if (startChange == 0)
+			if (startChange == 0) //아직 바꾸기 한 번도 누르지 않은 경우
 			{
 				data = (DATA*)malloc(sizeof(DATA));
 				GetWindowText(GetDlgItem(hDlg, IDC_EDIT_FIND), data->targetValue, sizeof(data->targetValue));
@@ -498,8 +486,8 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 								if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
 									data->base = IsDlgButtonChecked(hDlg, IDC_D1_DEC);
 
-								startChange = 1;
-								index = 0;
+								startChange = 1; 
+								index = 0; //전부 바꾸는 경우는 index가 초기값인 음수여서 아래 바꾸기 과정을 수행하기 위한 index >=0 을 만족하지 않음
 								nchanged = 0;
 							}
 						}
@@ -523,6 +511,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 			{
 				changeData.base = IsDlgButtonChecked(hDlg, IDC_D1_DEC);
 
+				//다 바꿨는지 검사하기 위한 정보
 				LVGROUP lg = {}, lg2 = {}; 
 				lg.cbSize = sizeof(LVGROUP);
 				lg.mask = LVGF_ITEMS;
@@ -535,13 +524,12 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				ListView_GetGroupInfo(hresultLV, 2, &lg2);
 
 				index = ListView_GetSelectionMark(hresultLV);
-				if ( !(getListViewItem(hresultLV, LVIF_PARAM, index).lParam & CHECKBIT) && getListViewItem(hresultLV, LVIF_GROUPID, index).iGroupId == 1)
+				if (getListViewItem(hresultLV, LVIF_GROUPID, index).iGroupId == 1)
 				{
 					changeValue(index, &changeData);
-					li.mask = LVIF_PARAM | LVIF_GROUPID;
+					li.mask = LVIF_GROUPID;
 					li.iItem = index;
 					li.iGroupId = 2;
-					li.lParam = getListViewItem(hresultLV, LVIF_PARAM, index).lParam | CHECKBIT; //8388608 : 1000 0000 0000 0000 0000 0000
 					ListView_SetItem(hresultLV, &li);
 
 					nchanged++;
@@ -553,8 +541,8 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				{
 					while (1)
 					{
-						if (++index == ListView_GetItemCount(hresultLV)) index = 0;
-						if (getListViewItem(hresultLV, LVIF_PARAM, index).lParam & CHECKBIT || getListViewItem(hresultLV, LVIF_GROUPID, index).iGroupId != 1)
+						if (++index == ListView_GetItemCount(hresultLV)) index = 0; //끝까지 갔으면 처음으로
+						if (getListViewItem(hresultLV, LVIF_GROUPID, index).iGroupId != 1) //바꿀 수 있는 다음 index 선택
 							continue;
 						else
 							break;
@@ -570,7 +558,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 					index = -1;
 					ListView_DeleteAllItems(hresultLV);
 					EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE), FALSE);
-					MessageBox(hDlgFind, L"더이상 바꿀 항목이 없습니다.", L"알림", MB_OK);
+					MessageBox(hWndMain, L"더이상 바꿀 항목이 없습니다.", L"알림", MB_OK);
 				}
 			}
 			break;

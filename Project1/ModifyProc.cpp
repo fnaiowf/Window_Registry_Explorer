@@ -23,13 +23,13 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			nh = hLV;
 			tindex = 0;
 		}
-
+		//검색 결과 탭이면 1을 더 더해서 인덱스 맞춤
 		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, text, sizeof(text));
 		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 1, type, sizeof(type));
 		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 0, name[0], sizeof(name[0]));
 		itype = getType(type);
 
-		if (itype < 2)
+		if (itype < 2) //정수
 		{
 			EnableWindow(GetDlgItem(hDlg, IDC_D2_DEC), TRUE);
 			EnableWindow(GetDlgItem(hDlg, IDC_D2_HEX), TRUE);
@@ -37,12 +37,12 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			prevBase = 1;
 		}
 
-		if (tindex)
+		if (tindex) //검색 결과에서는 0번 인덱스가 경로, 데이터 표시 리스트뷰에서는 경로 edit에서 경로 가져옴
 			ListView_GetItemText(hresultLV, ListView_GetSelectionMark(hresultLV), 0, path[0], sizeof(path[0]))
 		else
 			GetWindowText(hEdit, path[0], sizeof(path[0]));
 
-		if (wcscmp(name[0], L"(기본값)") == 0)
+		if (wcscmp(name[0], L"(기본값)") == 0) //기본값이 아니어도 값 이름이 (기본값)일 수 있음
 		{
 			HTREEITEM item = getItemfromPath(path[0]), item2 = TreeView_GetSelection(hTV);
 			TreeView_SelectItem(hTV, item);
@@ -69,8 +69,8 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 		SetDlgItemText(hDlg, IDC_D2_VNAME, name[0]);
 
 		SetFocus(GetDlgItem(hDlg, IDC_D2_VDATA));
-		oldDlgEditProc[1] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D2_VDATA), GWLP_WNDPROC, (LONG_PTR)DlgEditSubProc);
-		return 1;
+		oldDlgEditProc[2] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D2_VDATA), GWLP_WNDPROC, (LONG_PTR)DlgEditSubProc);
+		return 0;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -96,12 +96,12 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 				itype = getType(type);
 				if (_RegSetValueEx(hkey, name[0], REG_TYPE[itype], (BYTE*)text, -1, IsDlgButtonChecked(hDlg, IDC_D2_DEC)))
 				{
-					if (itype == 0)
+					if (itype == 0) //DWORD
 					{
 						int j = wcstol(text, NULL, IsDlgButtonChecked(hDlg, IDC_D2_DEC) ? 10 : 16);
 						wsprintf(tempvalue, L"0x%08x (%d)", j, j);
 					}
-					else if (itype == 1)
+					else if (itype == 1) //QWORD
 					{
 						long long j = wcstoll(text, NULL, IsDlgButtonChecked(hDlg, IDC_D2_DEC) ? 10 : 16);
 						wsprintf(tempvalue, L"0x%08I64x (%I64d)", j, j);
@@ -111,21 +111,21 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 					ListView_SetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, tempvalue);
 
-					if (tindex)
+					if (tindex) //검색 결과 탭인 경우 데이터 리스트뷰에 수정하는 값이 있다면 같이 바꿔줌
 					{
 						GetWindowText(hEdit, path[1], sizeof(path[0]));
 
 						if (wcscmp(path[0], path[1]) == 0)
 						{
 							HTREEITEM t = TreeView_GetSelection(hTV);
-							TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
+							TreeView_SelectItem(hTV, TreeView_GetRoot(hTV)); //루트로 바꿨다가 다시 바꿔서 값을 다시 로드
 							TreeView_SelectItem(hTV, t);
 						}
 					}
 					else
 					{
 						t = 0;
-						while (t != ListView_GetItemCount(hresultLV))
+						while (t != ListView_GetItemCount(hresultLV)) //검색 결과 탭의 모든 아이템에서 이름과 경로가 같은 경우는 유일하므로 이로 아이템을 판별
 						{
 							ListView_GetItemText(hresultLV, t, 0, path[1], sizeof(path[0]));
 							ListView_GetItemText(hresultLV, t, 1, name[1], sizeof(name[0]));
@@ -139,12 +139,12 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 							t++;
 						}
 					}
+
+					RegCloseKey(hkey);
 				}
 
-				RegCloseKey(hkey);
-
 				SendMessage(hDlg, WM_CLOSE, 0, 0);
-				return 1;
+				return 0;
 			}
 			break;
 		case IDC_D2_DEC:
@@ -164,13 +164,13 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			break;
 		case IDC_D2_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
-			return 1;
+			return 0;
 		}
 		break;
 	case WM_CLOSE:
 		hDlgModify = NULL;
 		EndDialog(hDlg, 0);
-		return 1;
+		return 0;
 	}
 
 	return 0;
@@ -203,13 +203,13 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 0, name[0], sizeof(name[0]));
 
-		oldItem = TreeView_GetSelection(hTV);
+		oldItem = TreeView_GetSelection(hTV); //MULTI_SZ는 데이터를 따로 불러오는데 이를 위해 검색 결과 탭에서는 이전 선택을 저장한 뒤 데이터만 불러오기 위해 그 키를 선택해서 처리하고 저장한 선택으로 돌아옴
 
 		if (tindex)
 		{
 			ListView_GetItemText(hresultLV, ListView_GetSelectionMark(hresultLV), 0, path[0], sizeof(path[0]));
 
-			isDataLoad = 1;
+			isDataLoad = 1; //TVN_SELCHANGED에서 리스트뷰 초기화 하지 않고 데이터만 불러옴
 
 			NMTREEVIEW t;
 			TVITEM b;
@@ -252,7 +252,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 		{
 			for (int i = 0; i < lvData.nMul; i++)
 			{
-				if (lvData.mulstrData[i].index == ListView_GetSelectionMark(nh))
+				if (lvData.mulstrData[i].index == ListView_GetSelectionMark(nh)) //hLV에서는 인덱스만 비교하는 것이 연산이 더 적음
 				{
 					memset(text, 0, sizeof(text));
 					for (int j = 0; j < lvData.mulstrData[i].nString; j++)
@@ -286,22 +286,22 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 			{
 				if (text[i] == '\r')
 				{
-					if (i == 0 || text[i - 1] == 10) //\r\n\r\n인 경우
+					if (i == 0 || text[i - 1] == 10) //한 줄이 \r\n로 끝나거나 \r\n\r\n인 경우 \r\n을 건너 뜀
 					{
 						pos += 2;
 						i++;
-						if (i + 1 == len)
+						if (i + 1 == len) //\r\n으로 끝난 경우 종료
 							break;
 
 						continue;
 					}
-					text[i] = 0;
+					text[i] = 0; //문자열 자르기 위해 NULL로 바꿈
 
 					sublen = wcslen(pos);
 
 					wcscpy(temp + idx, pos);
 					idx += sublen + 1;
-					i++;
+					i++; //\n 건너뜀
 					pos = text + i + 1;
 
 					if (i + 1 == len)
@@ -309,16 +309,16 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 				}
 			}
 
-			if (i == len && i != 0)
+			if (i == len && i != 0) //문자열의 끝이 \r\n이 아닌 경우에는 i+1==len이 만족하지 않아 마지막 문자열은 안 들어감, 따로 처리 / idx++ 해주는 이유는 문자열 끝에 NULL 추가
 				wcscpy(temp + idx++, pos);
 
-			idx += wcslen(pos) + 1;
+			idx += wcslen(pos) + 1; //+1 해주는 이유는 MULTI_SZ는 끝에 널 문자 하나 더 추가되어 있기 때문
 
 			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
 			{
 				if (_RegSetValueEx(hkey, name[0], REG_MULTI_SZ, (BYTE*)temp, idx * sizeof(TCHAR), -1))
 				{
-					concatMulSz(temp, idx - 2, text);
+					concatMulSz(temp, idx - 2, text); //맨 뒤에 널 2개 있어서 idx-2
 					cutString(temp);
 
 					ListView_SetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, text);
@@ -330,7 +330,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 						if (wcscmp(path[0], path[1]) == 0)
 						{
 							ListView_SetItemText(hLV, lvData.mulstrData[tarindex].index, 2, text);
-							splitMulSz(temp, idx * sizeof(TCHAR), &(lvData.mulstrData[tarindex].strings), 0);
+							splitMulSz(temp, idx * sizeof(TCHAR), &(lvData.mulstrData[tarindex].strings), 0); //할당 안하고 데이터 넣기만
 						}
 					}
 					else
@@ -358,11 +358,12 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 				SendMessage(hDlg, WM_CLOSE, 0, 0);
 			}
 			else
-				printf("key open fail\n");
-			return 1;
+				MessageBox(hWndMain, L"Error", L"Error", MB_OK);
+
+			return 0;
 		case IDC_D4_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
-			return 1;
+			return 0;
 		}
 		break;
 	case WM_CLOSE:
@@ -371,7 +372,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 		hDlgModify = NULL;
 		EndDialog(hDlg, 0);
-		return 1;
+		return 0;
 	}
 
 	return 0;
@@ -389,18 +390,18 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
-		hDlgModify = hDlg; //CreateDialog는 WM_INITDIALOG가 처리되고 리턴함
+		hDlgModify = hDlg; //CreateDialog는 WM_INITDIALOG가 처리되고 나서야 리턴함
 		inputOnce = 0;
 		nbyte = 0;
 		binaryOldEditProc[0] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA), GWLP_WNDPROC, (LONG_PTR)BinaryEditSubProc);
 		binaryOldEditProc[1] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), GWLP_WNDPROC, (LONG_PTR)BinaryAsciiEditSubProc);
 		binaryOldEditProc[2] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), GWLP_WNDPROC, (LONG_PTR)BinaryNumberingEditSubProc);
-
-		hf = CreateFont(17, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, L"Raize");
-		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA), WM_SETFONT, (WPARAM)hf, TRUE);
+		
+ 		hf = CreateFont(17, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, L"Raize"); //monospaced 폰트(글자 크기 고정)
+	 	SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA), WM_SETFONT, (WPARAM)hf, TRUE);
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), WM_SETFONT, (WPARAM)hf, TRUE);
-		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), WM_SETFONT, (WPARAM)hf, TRUE);
-
+	 	SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), WM_SETFONT, (WPARAM)hf, TRUE);
+		 
 		ListView_GetItemText(hLV, ListView_GetSelectionMark(hLV), 0, name, sizeof(name));
 		SetWindowText(GetDlgItem(hDlg, IDC_D3_VNAME), name);
 
@@ -432,9 +433,8 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 			SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), EM_REPLACESEL, TRUE, (LPARAM)byte2);
 			nbyte++;
 
-			GetWindowText(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), temp, 10);
-
-			Numbering(1);
+			if ((j + 1) % 8 == 0)
+				Numbering(1);
 		}
 
 		SetSel(GetDlgItem(hDlg, IDC_D3_VDATA), 0);
@@ -470,8 +470,8 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 						cutString(b);
 						ListView_SetItemText(hLV, ListView_GetSelectionMark(hLV), 2, b);
 
+						memset(lvData.byteData[i].bytes, 0, sizeof(BYTE) * lvData.byteData[i].size);
 						lvData.byteData[i].bytes = (BYTE*)realloc(lvData.byteData[i].bytes, sizeof(BYTE) * nbyte);
-						memset(lvData.byteData[i].bytes, 0, sizeof(BYTE) * nbyte);
 						memcpy(lvData.byteData[i].bytes, bytes, sizeof(BYTE) * nbyte);
 					}
 
@@ -486,7 +486,7 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 				SendMessage(hDlg, WM_CLOSE, 0, 0);
 			}
 			else
-				printf("key open fail\n");
+				MessageBox(hWndMain, L"Error", L"Error", MB_OK);
 
 			return 1;
 		case IDC_D3_MODIFY_NO:
@@ -498,7 +498,7 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 		}
 	break;
 	case WM_VSCROLL:
-		if (lParam == NULL)
+		if (lParam == NULL) //표준 스크롤바인 경우는 lParam이 NULL
 			break;
 		
 		ScrollProcess(lParam, wParam);

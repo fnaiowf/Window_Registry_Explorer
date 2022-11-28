@@ -92,8 +92,39 @@ void Numbering(int increase) //호출할 때마다 텍스트를 처음부터 구성해서 오래 걸�
 	}
 }
 
+void RemoveSelections(HWND hWnd)
+{
+	int chwidth = hWnd == GetDlgItem(hDlgModify, IDC_D3_VDATA) ? 5 : 2;
+	int getSel = SendMessage(hWnd, EM_GETSEL, 0, 0);
+
+	if (LOWORD(getSel) != HIWORD(getSel))
+	{
+		int lfc[2] = { SendMessage(hWnd, EM_LINEFROMCHAR, LOWORD(getSel), 0), SendMessage(hWnd, EM_LINEFROMCHAR, HIWORD(getSel), 0) };
+
+		int idx1 = lfc[0] * 8 + (LOWORD(getSel) - SendMessage(hWnd, EM_LINEINDEX, lfc[0], 0)) / chwidth,
+			idx2 = lfc[1] * 8 + (HIWORD(getSel) - SendMessage(hWnd, EM_LINEINDEX, lfc[1], 0)) / chwidth;
+
+		SendMessage(hWnd, EM_REPLACESEL, TRUE, (LPARAM)L"");
+		for (int i = idx1, j = idx2; j < nbyte; i++, j++)
+			bytes[i] = bytes[j];
+
+		nbyte -= (idx2 - idx1);
+
+		autoLineFeed(1, hWnd, LOWORD(getSel));
+		SetSel(hWnd, LOWORD(getSel));
+
+		Numbering(0);
+	}
+}
+
 void KeyDownProcess(int vkey, HWND hWnd, int pos)
 {
+	if (vkey == VK_RETURN)
+	{
+		SendMessage(hDlgModify, WM_COMMAND, MAKEWPARAM(IDC_D3_MODIFY_OK, BN_CLICKED), (LPARAM)GetDlgItem(hDlgModify, IDC_D3_MODIFY_OK));
+		return;
+	}
+
 	HWND hWnd2;
 	int chwidth[2] = { 5, 2 }, rpos, nline, pos2, li, getSel, itemIndex;
 
@@ -220,6 +251,84 @@ void KeyDownProcess(int vkey, HWND hWnd, int pos)
 		SendMessage(hDlgModify, WM_VSCROLL, MAKEWPARAM(SB_LINEUP, 0), (LPARAM)GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR));
 	else if (nline == FirstVisibleLine(hWnd) + 11)
 		SendMessage(hDlgModify, WM_VSCROLL, MAKEWPARAM(SB_LINEDOWN, 0), (LPARAM)GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR));
+}
+
+int shortCutHandler(int wParam, HWND hWnd)
+{
+	int getSel, chwidth[2] = { 5, 2 }, pos, nline, rpos;
+
+	if (hWnd != GetDlgItem(hDlgModify, IDC_D3_VDATA))
+		chwidth[0] = 2, chwidth[1] = 5;
+
+	//키보드 입력으로는 wParam에 음수가 전달되지 않기 때문에 마우스 오른쪽 버튼으로 여는 메뉴에서 선택하는 경우에는 wParam을 음수 값으로 해서 조건문을 만족시킴
+	if (wParam == -5 || (GetKeyState(VK_CONTROL) & 0x8000 && wParam == 'A')) //모두 선택
+	{
+		SendMessage(hWnd, EM_SETSEL, 0, -1);
+		return 1;
+	}
+	else if ((wParam == -1 || wParam == -2) || (GetKeyState(VK_CONTROL) & 0x8000 && (wParam == 'C' || wParam == 'X'))) //복사, 잘라내기
+	{
+		getSel = SendMessage(hWnd, EM_GETSEL, 0, 0);
+		if (LOWORD(getSel) == HIWORD(getSel))
+			return 1;
+
+		int lfc[2] = { SendMessage(hWnd, EM_LINEFROMCHAR, LOWORD(getSel), 0), SendMessage(hWnd, EM_LINEFROMCHAR, HIWORD(getSel), 0) };
+
+		int idx1 = lfc[0] * 8 + (LOWORD(getSel) - SendMessage(hWnd, EM_LINEINDEX, lfc[0], 0)) / chwidth[0],
+			idx2 = lfc[1] * 8 + (HIWORD(getSel) - SendMessage(hWnd, EM_LINEINDEX, lfc[1], 0)) / chwidth[0];
+
+		if (clipBoardData.len != 0)
+			clipBoardData.bytes = (BYTE*)realloc(clipBoardData.bytes, idx2 - idx1);
+		else
+			clipBoardData.bytes = (BYTE*)malloc(idx2 - idx1);
+
+		if (clipBoardData.bytes != NULL)
+		{
+			clipBoardData.len = idx2 - idx1;
+			memcpy(clipBoardData.bytes, bytes + idx1, idx2 - idx1);
+
+			if (wParam == 'X' || wParam == -1)
+				RemoveSelections(hWnd);
+		}
+
+		return 1;
+	}
+	else if (wParam == -3 || (GetKeyState(VK_CONTROL) & 0x8000 && wParam == 'V')) //붙여넣기
+	{
+		if (clipBoardData.len != 0)
+		{
+			int len = clipBoardData.len;
+			RemoveSelections(hWnd);
+
+			pos = GetPos(hWnd);
+			nline = SendMessage(hWnd, EM_LINEFROMCHAR, -1, 0);
+			rpos = pos - SendMessage(hWnd, EM_LINEINDEX, -1, 0);
+			int idx = nline * 8 + rpos / chwidth[0];
+
+			for (int i = nbyte - 1; i >= idx; i--) //데이터 밀기
+				bytes[i + len] = bytes[i];
+
+			memcpy(bytes + idx, clipBoardData.bytes, len);
+
+			nbyte += len;
+
+			pos = rpos == chwidth[0] * 8 ? pos + 2 : pos;
+			SetSel(hWnd, pos);
+
+			autoLineFeed(1, hWnd, pos);
+
+			for (int i = idx; i < idx + len; i++) //복사 후 위치 계산
+				pos += (i + 1) % 8 == 0 ? chwidth[0] + 2 : chwidth[0];
+
+			SetSel(hWnd, pos);
+
+			Numbering(1);
+
+			return 1;
+		}
+	}
+	else
+		return 0;
 }
 
 void LbuttonDownProcess(HWND hWnd, int pos)
@@ -379,84 +488,6 @@ void ScrollEdits(int nscroll)
 	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), EM_LINESCROLL, 0, nscroll);
 }
 
-int shortCutHandler(int wParam, HWND hWnd)
-{
-	int getSel, chwidth[2] = { 5, 2 }, pos, nline, rpos;
-
-	if (hWnd != GetDlgItem(hDlgModify, IDC_D3_VDATA))
-		chwidth[0] = 2, chwidth[1] = 5;
-
-	//키보드 입력으로는 wParam에 음수가 전달되지 않기 때문에 마우스 오른쪽 버튼으로 여는 메뉴에서 선택하는 경우에는 wParam을 음수 값으로 해서 조건문을 만족시킴
-	if (wParam == -5 || (GetKeyState(VK_CONTROL) & 0x8000 && wParam == 'A')) //모두 선택
-	{
-		SendMessage(hWnd, EM_SETSEL, 0, -1);
-		return 1;
-	}
-	else if ((wParam == -1 || wParam == -2) || (GetKeyState(VK_CONTROL) & 0x8000 && (wParam == 'C' || wParam == 'X'))) //복사, 잘라내기
-	{
-		getSel = SendMessage(hWnd, EM_GETSEL, 0, 0);
-		if (LOWORD(getSel) == HIWORD(getSel))
-			return 1;
-
-		int lfc[2] = { SendMessage(hWnd, EM_LINEFROMCHAR, LOWORD(getSel), 0), SendMessage(hWnd, EM_LINEFROMCHAR, HIWORD(getSel), 0) };
-
-		int idx1 = lfc[0] * 8 + (LOWORD(getSel) - SendMessage(hWnd, EM_LINEINDEX, lfc[0], 0)) / chwidth[0],
-			idx2 = lfc[1] * 8 + (HIWORD(getSel) - SendMessage(hWnd, EM_LINEINDEX, lfc[1], 0)) / chwidth[0];
-
-		if (clipBoardData.len != 0)
-			clipBoardData.bytes = (BYTE*)realloc(clipBoardData.bytes, idx2 - idx1 + 3);
-		else
-			clipBoardData.bytes = (BYTE*)malloc(idx2 - idx1 + 3);
-
-		if (clipBoardData.bytes != NULL)
-		{
-			clipBoardData.len = idx2 - idx1;
-			memcpy(clipBoardData.bytes, bytes + idx1, idx2 - idx1);
-
-			if (wParam == 'X' || wParam == -1)
-				RemoveSelections(hWnd);
-		}
-
-		return 1;
-	}
-	else if (wParam == -3 || (GetKeyState(VK_CONTROL) & 0x8000 && wParam == 'V')) //붙여넣기
-	{
-		if (clipBoardData.len != 0)
-		{
-			int len = clipBoardData.len;
-			RemoveSelections(hWnd);
-
-			pos = GetPos(hWnd);
-			nline = SendMessage(hWnd, EM_LINEFROMCHAR, -1, 0);
-			rpos = pos - SendMessage(hWnd, EM_LINEINDEX, -1, 0);
-			int idx = nline * 8 + rpos / chwidth[0];
-
-			for (int i = nbyte - 1; i >= idx; i--) //데이터 밀기
-				bytes[i + len] = bytes[i];
-
-			memcpy(bytes + idx, clipBoardData.bytes, len);
-
-			nbyte += len;
-
-			pos = rpos == chwidth[0] * 8 ? pos + 2 : pos;
-			SetSel(hWnd, pos);
-
-			autoLineFeed(1, hWnd, pos);
-
-			for (int i = idx; i < idx + len; i++) //복사 후 위치 계산
-				pos += (i + 1) % 8 == 0 ? chwidth[0] + 2 : chwidth[0];
-
-			SetSel(hWnd, pos);
-
-			Numbering(1);
-
-			return 1;
-		}
-	}
-	else
-		return 0;
-}
-
 void SetScroll(int lineCount)
 {
 	SCROLLINFO si = {};
@@ -472,31 +503,6 @@ void SetScroll(int lineCount)
 	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), EM_LINESCROLL, 0, scrollPos - FirstVisibleLine(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING))); //나머지 두 edit은 자동 스크롤
 
 	SetScrollInfo(GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR), SB_CTL, &si, TRUE);
-}
-
-void RemoveSelections(HWND hWnd)
-{
-	int chwidth = hWnd == GetDlgItem(hDlgModify, IDC_D3_VDATA) ? 5 : 2;
-	int getSel = SendMessage(hWnd, EM_GETSEL, 0, 0);
-
-	if (LOWORD(getSel) != HIWORD(getSel))
-	{
-		int lfc[2] = { SendMessage(hWnd, EM_LINEFROMCHAR, LOWORD(getSel), 0), SendMessage(hWnd, EM_LINEFROMCHAR, HIWORD(getSel), 0) };
-
-		int idx1 = lfc[0] * 8 + (LOWORD(getSel) - SendMessage(hWnd, EM_LINEINDEX, lfc[0], 0)) / chwidth,
-			idx2 = lfc[1] * 8 + (HIWORD(getSel) - SendMessage(hWnd, EM_LINEINDEX, lfc[1], 0)) / chwidth;
-
-		SendMessage(hWnd, EM_REPLACESEL, TRUE, (LPARAM)L"");
-		for (int i = idx1, j = idx2; j < nbyte; i++, j++)
-			bytes[i] = bytes[j];
-
-		nbyte -= (idx2 - idx1);
-
-		autoLineFeed(1, hWnd, LOWORD(getSel));
-		SetSel(hWnd, LOWORD(getSel));
-
-		Numbering(0);
-	}
 }
 
 void openBinaryEditorMenu(int x, int y)

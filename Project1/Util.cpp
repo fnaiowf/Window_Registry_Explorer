@@ -20,6 +20,23 @@ SPLIT getSplitter(POINT pt)
 	return SP_NONE;
 }
 
+TCHAR* getValidPath(TCHAR* path)
+{
+	TCHAR* pos = path + 4;
+
+	if (*(pos - 1) == L'\0') //컴퓨터 일 경우
+		return NULL;
+
+	while (*pos != L'\\')
+	{
+		pos++;
+		if (*pos == L'\0') //컴퓨터\HKEY_~ 일 경우
+			return NULL;
+	}
+
+	return pos + 1;
+}
+
 const TCHAR* getBasicKey(int idx)
 {
 	switch (idx)
@@ -49,7 +66,7 @@ int getBasicKey(TCHAR* path)
 	if (pos == NULL)
 		pos = temp + 4;
 
-	*(pos-1) = NULL;
+	*(pos-1) = NULL; //getVlidPath가 NULL이 아닐 경우 pos를 출력하면 HKEY~\경로 에서 경로 부분이므로 여기서 \를 NULL로 바꿔 wcscmp를 사용할 수 있게 함
 
 	if (wcscmp(temp + 4, L"HKEY_CLASSES_ROOT") == 0)
 		return 0;
@@ -65,26 +82,8 @@ int getBasicKey(TCHAR* path)
 		return -1;
 }
 
-TCHAR* getValidPath(TCHAR* path)
-{
-	TCHAR* pos = path + 4;
-	
-	if (*(pos - 1) == L'\0') //컴퓨터 일 경우
-		return NULL;
-
-	while (*pos != L'\\')
-	{
-		pos++;
-		if (*pos == L'\0') //컴퓨터\HKEY_~ 일 경우
-			return NULL;
-	}
-
-	return pos + 1;
-}
-
 int getType(TCHAR* type)
 {
-	
 	if (wcscmp(type, L"REG_DWORD") == 0)
 		return 0;
 	else if (wcscmp(type, L"REG_QWORD") == 0)
@@ -99,6 +98,32 @@ int getType(TCHAR* type)
 		return 5;
 
 	else return -1;
+}
+
+const TCHAR* getTypeName(int type)
+{
+	switch (type)
+	{
+	case REG_SZ:
+		return L"REG_SZ";
+	case REG_DWORD:
+		return L"REG_DWORD";
+	case REG_BINARY:
+		return L"REG_BINARY";
+	case REG_EXPAND_SZ:
+		return L"REG_EXPAND_SZ";
+	case REG_MULTI_SZ:
+		return L"REG_MULTI_SZ";
+	case REG_NONE:
+		return L"REG_NONE";
+	case REG_LINK:
+		return L"REG_LINK";
+	case REG_QWORD:
+		return L"REG_QWORD";
+	default:
+		wprintf(L"%d", type);
+		return L"";
+	}
 }
 
 void initWindow()
@@ -202,16 +227,17 @@ HTREEITEM addTVitem(const TCHAR* text, HTREEITEM parent, int bkey)
 	return (HTREEITEM)SendMessage(hTV, TVM_INSERTITEM, 0, (LPARAM)&ti);
 }
 
-void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHAR* opt, LPARAM lParam)
+void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHAR* path, LPARAM lParam)
 {
 	LVITEM item;
 	TCHAR *b = NULL;
-	int t = 0, it;
+	int t = 0, it; //데이터 출력하는 리스트뷰에서는 name, type, value의 subitem 인덱스가 0 1 2인데 검색 결과 탭은 앞에 path가 더 있기 때문에 t변수를 더하는 식으로 해서 코드를 줄임
 
 	item.mask = LVIF_TEXT | LVIF_PARAM;
 	item.iItem = index;
+
 	item.iSubItem = t++;
-	item.pszText = name;
+	item.pszText = hlv == hresultLV ? path : name;
 	item.lParam = lParam;
 
 	if (hlv == hresultLV)
@@ -224,10 +250,10 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 
 	item.mask = LVIF_TEXT;
 
-	if (opt != NULL)
+	if (hlv == hresultLV)
 	{
 		item.iSubItem = t++;
-		item.pszText = opt;
+		item.pszText = name;
 		ListView_SetItem(hlv, &item);
 	}
 
@@ -236,21 +262,21 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 	ListView_SetItem(hlv, &item);
 
 	it = getType(type);
-	if (it == 5)
+	if (it == 5) //REG_BINARY
 	{
 		if (lvData.byteData[lvData.nByte - 1].size != 0)
 		{
 			b = (TCHAR*)calloc(lvData.byteData[lvData.nByte - 1].size * 3, sizeof(TCHAR));
 			byteToString(lvData.byteData[lvData.nByte - 1].bytes, lvData.byteData[lvData.nByte - 1].size, b);
 
-			cutString(b);
+			cutString(b); //문자열 길면 자름
 
 			item.pszText = b;
 		}
 		else
 			item.pszText = value;
 	}
-	else if (it == 4)
+	else if (it == 4) //REG_MULTI_SZ
 	{
 		if (hlv == hLV)
 		{
@@ -269,7 +295,7 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 			else
 				item.pszText = value;
 		}
-		else
+		else //검색 결과 탭에 추가할 때는 value에 multi_sz가 연결된 상태로 전달됨
 		{
 			cutString(value);
 			item.pszText = value;
@@ -304,7 +330,7 @@ void getPathfromItem(HTREEITEM item, TCHAR* retpath)
 	}
 	wsprintf(temp, L"%ws", temp2);
 
-	while (1)
+	while (1) //루트가 될 때까지 상위 노드로 올라가면서 경로 추가
 	{
 		parent.hItem = TreeView_GetParent(hTV, parent.hItem);
 		memset(temp2, 0, sizeof(temp2));
@@ -325,11 +351,10 @@ HTREEITEM getItemfromPath(const TCHAR* path)
 	wcscpy(temp, path);
 	ret = wcstok(temp, L"\\", &context);
 	ti.mask = TVIF_TEXT;
-	ti.hItem = item;
 	ti.pszText = temp2;
 	ti.cchTextMax = 100;
 	
-	while(ret != NULL)
+	while(1) //현재 노드에서 아래로 내려가면서 같은 위치에 있는 노드들을 검사해 경로에 해당하는 노드를 골라 아래로 계속 내려감, 더이상 wcstok로 경로를 자를 수 없으면 리턴
 	{
 		while (1)
 		{
@@ -353,42 +378,26 @@ HTREEITEM getItemfromPath(const TCHAR* path)
 	return 0;
 }
 
-const TCHAR* getTypeName(int type)
+LVITEM getListViewItem(HWND handle, UINT mask, UINT index)
 {
-	switch (type)
-	{
-	case REG_SZ:
-		return L"REG_SZ";
-	case REG_DWORD:
-		return L"REG_DWORD";
-	case REG_BINARY:
-		return L"REG_BINARY";
-	case REG_EXPAND_SZ:
-		return L"REG_EXPAND_SZ";
-	case REG_MULTI_SZ:
-		return L"REG_MULTI_SZ";
-	case REG_NONE:
-		return L"REG_NONE";
-	case REG_LINK:
-		return L"REG_LINK";
-	case REG_QWORD:
-		return L"REG_QWORD";
-	default:
-		wprintf(L"%d", type);
-		return L"";
-	}
+	static LVITEM li;
+	li.mask = mask;
+	li.iItem = index;
+	ListView_GetItem(handle, &li);
+
+	return li;
 }
 
 void setMarquee(int opt)
 {
 	LONG style;
-	if (opt)
+	if (opt) //on
 	{
 		style = GetWindowLongPtr(hProgress, GWL_STYLE);
 		SetWindowLongPtr(hProgress, GWL_STYLE, style | PBS_MARQUEE);
 		SendMessage(hProgress, PBM_SETMARQUEE, 1, 20);
 	}
-	else
+	else //off
 	{
 		SendMessage(hProgress, PBM_SETMARQUEE, 0, 0);
 		style = GetWindowLongPtr(hProgress, GWL_STYLE);
@@ -401,34 +410,114 @@ void setMarquee(int opt)
 	}
 }
 
+void byteToString(BYTE* bytes, int size, TCHAR* dest)
+{
+	wsprintf(dest, L"%02X", bytes[0]);
+	for (int i = 1; i < size; ++i)
+	{
+		TCHAR hex[4];
+		wsprintf(hex, L" %02X", bytes[i]);
+		wcscat(dest, hex);
+	}
+}
+
+int splitMulSz(TCHAR* data, int size, TCHAR*** strings, int alloc) //alloc이 0이면 메모리 할당 필요 없다는 뜻
+{
+	int t = 0, count = 0, len;
+	TCHAR* adr = data;
+
+	while (1)
+	{
+		len = wcslen(adr);
+
+		if(alloc)
+			(*strings)[count] = (TCHAR*)malloc(sizeof(TCHAR) * (len + 1));
+
+		wsprintf((*strings)[count], adr);
+
+		t += len + 1;
+		adr += len + 1;
+		count++;
+
+		if (t >= size / sizeof(TCHAR) - 1)
+			break;
+
+		if(alloc)
+			*strings = (TCHAR**)realloc(*strings, sizeof(TCHAR*) * (count + 1));
+	}
+
+	return count;
+}
+
+void concatMulSz(TCHAR* strings, int len, TCHAR* ret)
+{
+	memset(ret, 0, (len + 1) * 2);
+	for (int i = 0; i < len; i++)
+	{
+		if (strings[i] == 0) ret[i] = ' ';
+		else ret[i] = strings[i];
+	}
+}
+
+void cutString(TCHAR* string)
+{
+	if (wcslen(string) >= 200)
+	{
+		string[191] = 0; //레지스트리 탐색기에서 보여주는 최대 길이
+		wsprintf(string, L"%ws...", string);
+	}
+}
+
+int is_number(TCHAR* string, int base)
+{
+	TCHAR* pos = string;
+	while (*pos != NULL)
+	{
+		if (base) //10진수
+		{
+			if (!(*pos <= '9' && *pos >= '0'))
+				return 0;
+		}
+		else //16진수
+		{
+			if (!(*pos <= '9' && *pos >= '0') && !(*pos <= 'F' && *pos >= 'A') && !(*pos <= 'f' && *pos >= 'a'))
+				return 0;
+		}
+
+		pos++;
+	}
+
+	return 1;
+}
+
 void openPopupMenu(int x, int y)
 {
 	HMENU menu, hPopup;
 	TVHITTESTINFO tvinfo;
 	LVHITTESTINFO lvinfo, lvinfo2;
-	POINT pt2;
+	POINT pt;
 	RECT rt;
-	void* item = NULL;
+	void* item = NULL; //트리뷰의 item인지 리스트뷰의 item인지 모름
 	int id = -1, index = -1;
 
 	GetWindowRect(hLV, &rt);
 
-	pt2 = { x, y };
-	ScreenToClient(hTV, &pt2);
-	tvinfo.pt = pt2;
+	pt = { x, y };
+	ScreenToClient(hTV, &pt);
+	tvinfo.pt = pt;
 	TreeView_HitTest(hTV, &tvinfo);
 
-	pt2 = { x, y };
-	ScreenToClient(hLV, &pt2);
-	lvinfo.pt = pt2;
+	pt = { x, y };
+	ScreenToClient(hLV, &pt);
+	lvinfo.pt = pt;
 	ListView_HitTest(hLV, &lvinfo);
 
-	pt2 = { x, y };
-	ScreenToClient(hresultLV, &pt2);
-	lvinfo2.pt = pt2;
+	pt = { x, y };
+	ScreenToClient(hresultLV, &pt);
+	lvinfo2.pt = pt;
 	ListView_HitTest(hresultLV, &lvinfo2);
 
-	pt2 = { x, y };
+	pt = { x, y };
 
 	menu = LoadMenu(g_hInst, MAKEINTRESOURCE(IDR_MENU2));
 	hPopup = GetSubMenu(menu, 0);
@@ -442,7 +531,7 @@ void openPopupMenu(int x, int y)
 
 		if (tvinfo.hItem == TreeView_GetRoot(hTV))
 		{
-			for(int i=0;i<3;i++)
+			for (int i = 0; i < 3; i++)
 				EnableMenuItem(hPopup, i, MF_BYPOSITION | MF_DISABLED);
 		}
 		if (TreeView_GetParent(hTV, tvinfo.hItem) == TreeView_GetRoot(hTV))
@@ -453,7 +542,7 @@ void openPopupMenu(int x, int y)
 
 		item = (void*)&(tvinfo.hItem);
 		index = 0;
-		id = TrackPopupMenu(hPopup, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWndMain, NULL);
+		id = TrackPopupMenu(hPopup, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWndMain, NULL); //TPM_RETURNCMD : 선택하면 값을 바로 리턴, 원래는 WM_COMMAND로 결과를 전달함
 	}
 	else if (lvinfo.iItem != -1)
 	{
@@ -465,9 +554,9 @@ void openPopupMenu(int x, int y)
 		index = 1;
 		id = TrackPopupMenu(hPopup, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWndMain, NULL);
 	}
-	else if (PtInRect(&rt, pt2))
+	else if (PtInRect(&rt, pt)) //데이터 표시하는 리스트뷰의 빈공간
 	{
-		for(int i=0;i<4;i++)
+		for (int i = 0; i < 4; i++)
 			DeleteMenu(hPopup, 0, MF_BYPOSITION);
 		DeleteMenu(hPopup, 1, MF_BYPOSITION);
 		DeleteMenu(GetSubMenu(hPopup, 0), 0, MF_BYPOSITION);
@@ -479,7 +568,7 @@ void openPopupMenu(int x, int y)
 
 		if (TreeView_GetSelection(hTV) == TreeView_GetRoot(hTV))
 		{
-			for(int i=0;i<5;i++)
+			for (int i = 0; i < 5; i++)
 				EnableMenuItem(GetSubMenu(hPopup, 0), i, MF_BYPOSITION | MF_DISABLED);
 		}
 
@@ -494,7 +583,7 @@ void openPopupMenu(int x, int y)
 		DeleteMenu(hPopup, 3, MF_BYPOSITION);
 		item = (void*)&(lvinfo2.iItem);
 		index = 2;
-		
+
 		LVITEM li;
 		li.mask = LVIF_GROUPID;
 		li.iItem = lvinfo2.iItem;
@@ -530,7 +619,7 @@ void processPopup(int id, int index, void* item)
 		{
 		case ID_MENU2_RENAME:
 			TreeView_EditLabel(hTV, hitem);
-			
+
 			break;
 		case ID_MENU2_KEY:
 			ti.mask = TVIF_TEXT;
@@ -541,11 +630,11 @@ void processPopup(int id, int index, void* item)
 			t = 0;
 			wsprintf(tstr, L"새 키 #");
 
-			while (citem != NULL)
+			while (citem != NULL) //새 키 #? 가 중복되게 하지 않기 위해 정확한 값을 구함
 			{
 				ti.hItem = citem;
 				TreeView_GetItem(hTV, &ti);
-				
+
 				if (wcsncmp(temp, tstr, 5) == 0)
 				{
 					wtoi = _wtoi(temp + 5);
@@ -603,7 +692,7 @@ void processPopup(int id, int index, void* item)
 
 			if ((hkey = _RegOpenKeyEx(getBasicKey(temp), temp)) != NULL)
 			{
-				if (getListViewItem(hLV, LVIF_PARAM, litem).lParam == -1)
+				if (getListViewItem(hLV, LVIF_PARAM, litem).lParam == -1) //기본값인 경우
 				{
 					if (RegDeleteValue(hkey, L"") == ERROR_SUCCESS)
 					{
@@ -622,17 +711,8 @@ void processPopup(int id, int index, void* item)
 			}
 			break;
 		case ID_MENU2_MODIFY:
-			if (!IsWindow(hDlgModify))
-			{
-				ListView_GetItemText(hLV, litem, 1, temp, sizeof(temp));
-				t = getType(temp);
-
-				if (t == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
-				else if(t == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
-				else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
-
-				ShowWindow(hDlgModify, SW_SHOW);
-			}
+			ListView_GetItemText(hLV, litem, 1, temp, sizeof(temp));
+			openModifyDlg(getType(temp));
 			break;
 		default:
 			break;
@@ -650,23 +730,12 @@ void processPopup(int id, int index, void* item)
 			li.iGroupId = li.iGroupId ? 0 : 1;
 			ListView_SetItem(hresultLV, &li);
 
-			if (li.iGroupId == 0 && li.lParam & CHECKBIT) //이미 바꾼 항목을 제외로 옮길 때
-				nchanged--;
-
-			ListView_SortItemsEx(hresultLV, CompareFunc, 0);
+			ListView_SortItemsEx(hresultLV, CompareFunc, 0); //아이템 그룹을 바꾸면 바꾼 아이템은 무조건 제일 아래로 가기 때문에 원래 순서대로 정렬
 			break;
 		case ID_MENU2_MODIFY:
-			if (!IsWindow(hDlgModify))
-			{
-				ListView_GetItemText(hresultLV, litem, 2, temp, sizeof(temp));
-				t = getType(temp);
-				if (t == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
-				else if (t == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
-				else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
+			ListView_GetItemText(hresultLV, litem, 2, temp, sizeof(temp));
+			openModifyDlg(getType(temp));
 
-
-				ShowWindow(hDlgModify, SW_SHOW);
-			}
 			break;
 		case ID_MENU2_DELETE:
 			if (MessageBox(hWndMain, L"정말 삭제하시겠습니까?", L"알림", MB_YESNO) == IDNO)
@@ -704,85 +773,15 @@ void processPopup(int id, int index, void* item)
 	}
 }
 
-LVITEM getListViewItem(HWND handle, UINT mask, UINT index)
+void openModifyDlg(int type)
 {
-	static LVITEM li;
-	li.mask = mask;
-	li.iItem = index;
-	ListView_GetItem(handle, &li);
-
-	return li;
-}
-
-void byteToString(BYTE* bytes, int size, TCHAR* dest)
-{
-	wsprintf(dest, L"%02X", bytes[0]);
-	for (int i = 1; i < size; ++i)
+	if (!IsWindow(hDlgModify))
 	{
-		TCHAR hex[4];
-		wsprintf(hex, L" %02X", bytes[i]);
-		wcscat(dest, hex);
-	}
-}
+		if (type == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
+		else if (type == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
+		else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
 
-int is_number(TCHAR* string, int base)
-{
-	TCHAR* pos = string;
-	while (*pos != NULL)
-	{
-		if (base)
-		{
-			if (!(*pos <= '9' && *pos >= '0'))
-				return 0;
-		}
-		else
-		{
-			if (!(*pos <= '9' && *pos >= '0') && !(*pos <= 'F' && *pos >= 'A') && !(*pos <= 'f' && *pos >= 'a'))
-				return 0;
-		}
-		
-		pos++;
-	}
-
-	return 1;
-}
-
-int splitMulSz(TCHAR* data, int size, TCHAR*** strings, int alloc)
-{
-	int t = 0, count = 0, len;
-	TCHAR* adr;
-	adr = data;
-
-	while (1)
-	{
-		len = wcslen(adr);
-
-		if(alloc)
-			(*strings)[count] = (TCHAR*)malloc(sizeof(TCHAR) * (len + 1));
-
-		wsprintf((*strings)[count], adr);
-
-		t += len + 1;
-		adr += len + 1;
-		count++;
-
-		if (t >= size / sizeof(TCHAR) - 1)
-			break;
-
-		if(alloc)
-			*strings = (TCHAR**)realloc(*strings, sizeof(TCHAR*) * (count + 1));
-	}
-
-	return count;
-}
-
-void concatMulSz(TCHAR* strings, int len, TCHAR* ret) //for문으로 바꾸기
-{
-	memset(ret, 0, (len + 1) * 2);
-	for (int i = 0; i < len; i++)
-	{
-		if (strings[i] == 0) ret[i] = ' ';
-		else ret[i] = strings[i];
+		ShowWindow(hDlgModify, SW_SHOW);
 	}
 }
 
@@ -807,14 +806,5 @@ void freeMemory()
 
 		free(lvData.mulstrData);
 	}
-	
-}
 
-void cutString(TCHAR* string)
-{
-	if (wcslen(string) >= 200)
-	{
-		string[191] = 0; //레지스트리 탐색기에서 보여주는 최대 길이
-		wsprintf(string, L"%ws...", string);
-	}
 }

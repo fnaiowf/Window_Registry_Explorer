@@ -1,6 +1,6 @@
 ﻿#include"header.h"
 
-LONG kcount, vcount, fcount, ccount;
+LONG kcount, fcount;
 FILE* fp;
 TCHAR path[MAX_PATH_LENGTH] = TEXT("");
 const HKEY BASIC_KEY_HANDLE[5] = { HKEY_CLASSES_ROOT, HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, HKEY_USERS, HKEY_CURRENT_CONFIG };
@@ -11,11 +11,8 @@ HKEY _RegOpenKeyEx(int bKeyIndex, TCHAR* path)
 {
 	HKEY hkey;
 
-	if (*(path + 3) == L'\0')
+	if (getValidPath(path) == NULL) //유효한 경로 아닌 경우 
 		return NULL;
-
-	if (getValidPath(path) == NULL)
-		return BASIC_KEY_HANDLE[bKeyIndex];
 
 	if (RegOpenKeyEx(BASIC_KEY_HANDLE[bKeyIndex], getValidPath(path), 0, KEY_READ | KEY_WRITE, &hkey) == ERROR_SUCCESS)
 		return hkey;
@@ -54,20 +51,20 @@ int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int b
 		return 0;
 }
 
-int enumRegistry(DATA* data)
+void enumRegistry(DATA* data)
 {
 	HKEY hkey;
 	TCHAR* key = (TCHAR*)malloc(sizeof(TCHAR) * MAX_KEY_LENGTH);
 	if (key == NULL)
 	{
-		//fwprintf(fp, TEXT("In main : variable \"key1\" memory alloction failed.\n"));
+		fwprintf(fp, TEXT("In main : variable \"key1\" memory alloction failed.\n"));
 		fclose(fp);
-		return -1;
+		return;
 	}
 	DWORD i = 0, len = MAX_KEY_LENGTH;
 	HTREEITEM root = 0, item = 0;
 	DATA* dt;
-	kcount = vcount = fcount = ccount =  0;
+	kcount = fcount = 0;
 
 	if (data == NULL) dt = NULL;
 	else if (data->t_type == REFRESH) dt = NULL;
@@ -78,13 +75,13 @@ int enumRegistry(DATA* data)
 
 	for (int k = 3; k < 5; k++) //BASIC KEY
 	{
-		wsprintf(path, TEXT("컴퓨터\\%ws"), getBasicKey(k));
+		wsprintf(path, L"컴퓨터\\%ws", getBasicKey(k));
 		if(dt == NULL)
 			item = addTVitem(path+4, root, k);
 		kcount++;
 		
 		if(dt == NULL)
-			wsprintf(msg, L"%d key  %d value loading...", kcount, vcount);
+			wsprintf(msg, L"%d key loading...", kcount);
 		else
 			wsprintf(msg, L"%d finding...", fcount);
 		SetWindowText(hStatic, msg);
@@ -101,24 +98,21 @@ int enumRegistry(DATA* data)
 				
 				if (dt == NULL)
 				{
-					if (kcount % 100 == 0)
+					if (kcount %(100 + rand() % 150) == 0)
 					{
 						wsprintf(msg, L"%d key loading...", kcount);
 						SetWindowText(hStatic, msg);
 					}
 					enumKeys(hkey, addTVitem(key, item, k), key, data, k);
 				}
-				else
+				else //FIND, DATA_LOAD인 경우 트리뷰 추가 X
 					enumKeys(hkey, NULL, key, data, k);
 					
 				RegCloseKey(hkey);
 			}
 			else //접근 권한 X
 			{
-				wsprintf(msg, TEXT("%ws open failed\n"), path);
-				//fwprintf(fp, msg);
-
-				for (int j = lstrlen(path) - 1;; j--)
+				for (int j = lstrlen(path) - 1;; j--) //경로 갱신
 				{
 					path[j] = '\0';
 					if (path[j - 1] == '\\')
@@ -134,16 +128,13 @@ int enumRegistry(DATA* data)
 
 	free(key);
 	TreeView_Expand(hTV, TreeView_GetRoot(hTV), TVE_EXPAND);
+
 	if(dt == NULL)
 		wsprintf(msg, L"%d key loaded", kcount);
-	else if(dt->t_type == CHANGE)
-		wsprintf(msg, L"%d value changed", ccount);
 	else
 		wsprintf(msg, L"%d value found", fcount);
 
 	SetWindowText(hStatic, msg);
-
-	return ccount;
 }
 
 void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
@@ -153,7 +144,7 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 	TCHAR* key = (TCHAR*)malloc(sizeof(TCHAR) * MAX_KEY_LENGTH);
 	if (key == NULL)
 	{
-		//fwprintf(fp, TEXT("In func : variable \"key1\" memory alloction failed.\n"));
+		fwprintf(fp, TEXT("In func : variable \"key1\" memory alloction failed.\n"));
 		return;
 	}
 
@@ -182,9 +173,6 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 		}
 		else
 		{
-			wsprintf(msg, TEXT("%ws open failed\n"), path);
-			//fwprintf(fp, msg);
-
 			for (int j = lstrlen(path) - 1;; j--)
 			{
 				path[j] = '\0';
@@ -219,7 +207,7 @@ void enumValue(HKEY hkey, DATA* data)
 	long long dvalue64;
 	TCHAR name[MAX_VALUE_LENGTH], * value = NULL, * adr, stype[30];
 	BYTE* byte;
-	int j, t, targetLen;
+	int targetLen, defValueOpt = 1;
 	LVITEM li;
 
 	while (RegEnumValue(hkey, i, name, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
@@ -228,7 +216,6 @@ void enumValue(HKEY hkey, DATA* data)
 
 		if (RegQueryValueEx(hkey, name, NULL, &type, NULL, &len2) == ERROR_SUCCESS)
 		{
-			vcount++;
 			wsprintf(stype, getTypeName(type));
 			switch (type)
 			{
@@ -335,7 +322,7 @@ void enumValue(HKEY hkey, DATA* data)
 
 			if (data!=NULL && data->t_type == FIND)
 			{
-				if ((type == REG_EXPAND_SZ || type == REG_MULTI_SZ || type == REG_SZ) && data->type == REG_SZ) //FIND
+				if ((type == REG_EXPAND_SZ || type == REG_MULTI_SZ || type == REG_SZ) && data->type == REG_SZ)
 				{
 					targetLen = wcslen(data->targetValue);
 
@@ -350,22 +337,23 @@ void enumValue(HKEY hkey, DATA* data)
 
 						free(concat);
 
-						for (int i = 0, aclen = 0; i < c; i++)
+						for (int i = 0, aclen = 0; i < c; i++) //aclen : multi_sz를 공백으로 합친 문자열에서 찾은 위치
 						{
-							adr = wcsstr(temp[i], data->targetValue);
-							if (adr != NULL)
+							if(wcslen(temp[i]) >= targetLen)
 							{
-								//int lparam = i * 10000 + (int)(adr - temp[i]); //CHECKBIT가 800만 정도고 10000의 배수를 MULTI_SZ의 문자열 위치로 정함
+								adr = wcsstr(temp[i], data->targetValue);
+								if (adr != NULL)
+								{
+									if (data->t_type == FIND)
+										addLVitem(hresultLV, name, stype, value, fcount++, path, aclen + (int)(adr - temp[i]));
 
-								if (data->t_type == FIND)
-									addLVitem(hresultLV, path, stype, value, fcount++, name, aclen + (int)(adr - temp[i]));
-								
-								wsprintf(msg, L"%d finding...", fcount);
-								SetWindowText(hStatic, msg);
+									wsprintf(msg, L"%d finding...", fcount);
+									SetWindowText(hStatic, msg);
 
-								break;
+									break;
+								}
+								aclen += wcslen(temp[i]) + 1;
 							}
-							aclen += wcslen(temp[i]) + 1;
 						}
 
 						free(temp);
@@ -379,7 +367,7 @@ void enumValue(HKEY hkey, DATA* data)
 								wsprintf(name, L"(기본값)");
 
 							if(data->t_type == FIND)
-								addLVitem(hresultLV, path, stype, value, fcount++, name, (int)(adr - value));
+								addLVitem(hresultLV, name, stype, value, fcount++, path, (int)(adr - value));
 
 							wsprintf(msg, L"%d finding...", fcount);
 							SetWindowText(hStatic, msg);
@@ -393,17 +381,18 @@ void enumValue(HKEY hkey, DATA* data)
 					if (is_number(data->targetValue, data->base) && cmp)
 					{
 						if(data->t_type == FIND)
-							addLVitem(hresultLV, path, stype, value, fcount++, name, 0);
+							addLVitem(hresultLV, name, stype, value, fcount++, path, 0);
 
 						wsprintf(msg, L"%d finding...", fcount);
 						SetWindowText(hStatic, msg);
 					}
 				}
 			}
-			else if (!(data != NULL && data->t_type == DATA_LOAD))
+			else if (!(data != NULL && data->t_type == DATA_LOAD)) //DATA_LOAD 아닌 경우 리스트뷰 추가 X
 			{
 				if (wcslen(name) == 0)
 				{
+					defValueOpt = 0;
 					li.mask = LVIF_TEXT;
 					li.iItem = 0;
 					li.iSubItem = 2;
@@ -411,7 +400,7 @@ void enumValue(HKEY hkey, DATA* data)
 					ListView_SetItem(hLV, &li);
 				}
 				else
-					addLVitem(hLV, name, stype, value, i + 1, NULL, 0);
+					addLVitem(hLV, name, stype, value, i + defValueOpt, NULL, 0);
 			}
 
 			if(!value) free(value);
@@ -424,7 +413,7 @@ void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 {
 	TCHAR temp[MAX_VALUE_LENGTH]={};
 	DWORD len, tlen = wcslen(data->targetValue), nlen = wcslen(data->newValue);
-	//fwprintf(fp, L"%ws   %ws:%ws", path, name, value);
+	fwprintf(fp, L"%ws   %ws:%ws", path, name, value);
 
 	if (data->type == REG_DWORD || data->type == REG_QWORD)
 		wsprintf(temp, data->newValue);
@@ -444,11 +433,10 @@ void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 		wsprintf(temp, L"%ws%ws%ws", value, data->newValue, value + (pos + tlen));
 	}
 
-	//fwprintf(fp, L" -> %ws\n", temp);
+	fwprintf(fp, L" -> %ws\n", temp);
 
 	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->type == REG_MULTI_SZ ? len : -1, data->base))
 	{
-		ccount++;
 		if (data->type == REG_MULTI_SZ)
 		{
 			memcpy(value, temp, len);
@@ -465,7 +453,6 @@ void changeValue(int n, DATA* tarData)
 	HKEY hkey;
 	TVITEM ti;
 	LVITEM li;
-	LVFINDINFO lvi;
 	TCHAR path[MAX_PATH_LENGTH], name[MAX_KEY_LENGTH], value[MAX_KEY_LENGTH], type[20];
 	DWORD toi;
 	long long toi64;
@@ -478,11 +465,11 @@ void changeValue(int n, DATA* tarData)
 	item = getItemfromPath(path);
 	ti.mask = TVIF_PARAM;
 	ti.hItem = item;
-	TreeView_GetItem(hTV, &ti);
+	TreeView_GetItem(hTV, &ti); //기본 키 얻기 위해
 
 	li.mask = LVIF_PARAM;
 	li.iItem = n;
-	ListView_GetItem(hresultLV, &li);
+	ListView_GetItem(hresultLV, &li); //파라미터 값이 문자열에서 찾은 위치
 	
 	tarData->type = REG_TYPE[getType(type)];
 
@@ -518,8 +505,6 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 	HKEY hkey;
 	TCHAR temp[3][10] = { L"(기본값)", L"REG_SZ", L"(값 설정 안됨)" };
 	DATA data;
-	TCHAR name[100];
-	DWORD len = 100;
 
 	if (isDataLoad)
 		data.t_type = DATA_LOAD;
@@ -533,7 +518,7 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 	}
 }
 
-void deleteAllSubkey(TCHAR* path, HTREEITEM item)
+void deleteAllSubkey(TCHAR* path, HTREEITEM item) //처음 호출하는 함수 -> 재귀함수는 다른 함수 호출
 {
 	HKEY hkey;
 	TVITEM ti;
@@ -548,7 +533,7 @@ void deleteAllSubkey(TCHAR* path, HTREEITEM item)
 		deleteAllSubkey(hkey, item);
 		RegCloseKey(hkey);
 
-		while (path[i] != '\0')
+		while (path[i] != '\0') //경로 하나 전으로 이동
 		{
 			if (path[i] == '\\')
 				t = i;
@@ -566,7 +551,7 @@ void deleteAllSubkey(TCHAR* path, HTREEITEM item)
 	}
 }
 
-void deleteAllSubkey(HKEY hkey, HTREEITEM item)
+void deleteAllSubkey(HKEY hkey, HTREEITEM item) //재귀 함수용
 {
 	HKEY skey;
 	HTREEITEM citem;
@@ -592,7 +577,7 @@ void deleteAllSubkey(HKEY hkey, HTREEITEM item)
 void createValue(int type, HTREEITEM hitem)
 {
 	HKEY hkey;
-	int index = 0, data = -1;
+	int index = 0;
 	TCHAR tstr[100] = L"새 값 #1", typeName[20], ivalue[15] = L"0x00000000 (0)";
 	LVFINDINFO lfi;
 	LVITEM li;
@@ -610,13 +595,11 @@ void createValue(int type, HTREEITEM hitem)
 
 	GetWindowText(hEdit, path, sizeof(path));
 
-	if (type < 2) data = 0;
-
 	wsprintf(typeName, L"%ws", getTypeName(REG_TYPE[type]));
 
 	addLVitem(hLV, tstr, typeName, type < 2 ? ivalue : NULL, ListView_GetItemCount(hLV), NULL, PREV_NEW_VALUE_PARAM);
 
 	SetFocus(hLV);
 	ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED);
-	ListView_EditLabel(hLV, ListView_GetItemCount(hLV) - 1);
+	ListView_EditLabel(hLV, ListView_GetItemCount(hLV) - 1); //아직 레지스트리 값 추가 하지 않고 이름을 입력했을 때 LVN_ENDLABELEDIT에서 값을 생성
 }
