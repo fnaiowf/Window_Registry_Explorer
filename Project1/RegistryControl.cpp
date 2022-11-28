@@ -363,11 +363,16 @@ void enumValue(HKEY hkey, DATA* data)
 						adr = wcsstr(value, data->targetValue);
 						if (adr != NULL)
 						{
+							int param = adr - value;
+
 							if (wcslen(name) == 0)
+							{
 								wsprintf(name, L"(기본값)");
+								param = param != 0 ? -param : -1;
+							}
 
 							if(data->t_type == FIND)
-								addLVitem(hresultLV, name, stype, value, fcount++, path, (int)(adr - value));
+								addLVitem(hresultLV, name, stype, value, fcount++, path, param);
 
 							wsprintf(msg, L"%d finding...", fcount);
 							SetWindowText(hStatic, msg);

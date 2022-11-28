@@ -329,7 +329,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			case NM_DBLCLK:
 				{
 					LPNMITEMACTIVATE iteminfo = (LPNMITEMACTIVATE)lParam;
-					LVFINDINFO lvi;
+					int selitem = 0;
+					TCHAR n[MAX_KEY_LENGTH];
 					if (iteminfo->iItem != -1)
 					{
 						ListView_GetItemText(hresultLV, iteminfo->iItem, 0, temp, sizeof(temp));
@@ -337,11 +338,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						TreeView_SelectItem(hTV, item);
 
 						ListView_GetItemText(hresultLV, iteminfo->iItem, 1, temp, sizeof(temp));
-						lvi.flags = LVFI_STRING;
-						lvi.psz = temp;
+
+						if (getListViewItem(hresultLV, LVIF_PARAM, iteminfo->iItem).lParam < 0)
+							selitem = 0;
+
+						for (int i = 1; i < ListView_GetItemCount(hLV); i++)
+						{
+							ListView_GetItemText(hLV, i, 0, n, sizeof(n));
+							if (wcscmp(n, temp) == 0)
+							{
+								selitem = i;
+								break;
+							}
+						}
 
 						ListView_DeSelectAll(hLV);
-						ListView_SetItemState(hLV, ListView_FindItem(hLV, 0, &lvi), LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+						ListView_SetItemState(hLV, selitem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 						SetFocus(hLV);
 					}
 				}
