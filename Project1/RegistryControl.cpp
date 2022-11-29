@@ -90,6 +90,11 @@ void enumRegistry(DATA* data)
 		i = 0;
 		while (RegEnumKeyEx(BASIC_KEY_HANDLE[k], i, key, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
 		{
+			if (funcState == 0) {
+				free(key);
+				return;
+			}
+
 			len = MAX_KEY_LENGTH;
 			wsprintf(path, TEXT("%ws\\%ws"), path, key);
 			if (RegOpenKeyEx(BASIC_KEY_HANDLE[k], key, 0, KEY_READ | KEY_WRITE, &hkey) == ERROR_SUCCESS)
@@ -150,6 +155,8 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 
 	while (RegEnumKeyEx(hkey, i, key, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
 	{
+		if (funcState == 0) return;
+
 		len = MAX_KEY_LENGTH;
 		wsprintf(path, TEXT("%ws\\%ws"), path, key);
 		
@@ -190,6 +197,8 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 	if (data != NULL && data->t_type != REFRESH)
 		enumValue(hkey, data);
 
+	if (funcState == 0) return;
+
 	for (int j = lstrlen(path) - 1;; j--)
 	{
 		path[j] = '\0';
@@ -212,6 +221,8 @@ void enumValue(HKEY hkey, DATA* data)
 
 	while (RegEnumValue(hkey, i, name, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
 	{
+		if (funcState == 0) return;
+
 		len = MAX_KEY_LENGTH;
 
 		if (RegQueryValueEx(hkey, name, NULL, &type, NULL, &len2) == ERROR_SUCCESS)

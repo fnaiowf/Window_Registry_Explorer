@@ -4,11 +4,13 @@ HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgMod
 WNDPROC oldDlgEditProc[3];
 TCHAR temp[MAX_PATH_LENGTH];
 
-int treeWidth, resultHeight, nchanged, isDataLoad;
+int treeWidth, resultHeight, nchanged, isDataLoad, funcState;
 SPLIT nSplit = SP_NONE;
 
 DWORD WINAPI ThreadFunc(LPVOID temp)
 {
+	funcState = 1;
+
 	if (temp != NULL && ((DATA*)temp)->t_type == REFRESH) //F5 눌렀을 때 기존에 추가되어 있던 것들 전부 삭제
 	{
 		ListView_DeleteAllItems(hLV);
@@ -53,7 +55,7 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 				SetWindowText(hEdit, ((DATA*)temp)->path);
 				break;
 			case FIND:
-				EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_FIND), TRUE);
+				SetWindowText(GetDlgItem(hDlgFind, IDC_BUTTON_FIND), L"찾기");
 				if (ListView_GetItemCount(hresultLV) != 0 && IsDlgButtonChecked(hDlgFind, IDC_CHECK_CHANGE))
 					EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE), TRUE);
 
@@ -67,6 +69,7 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 		}
 	}
 
+	funcState = 0;
 	setMarquee(0); //프로그레스바 OFF
 
 	return 0;
@@ -398,6 +401,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 		SendMessage(GetDlgItem(hDlg, IDC_D1_DEC), BM_SETCHECK, BST_CHECKED, 1);
 
 		startChange = 0;
+		funcState = 0;
 		index = -1; //초기값 음수로 설정
 		return 0;
 	case WM_COMMAND:
@@ -408,6 +412,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 			{
 				if (ListView_GetItemCount(hresultLV) != 0)
 					EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), TRUE);
+
 				EnableWindow(GetDlgItem(hDlg, IDC_EDIT_CHANGE), TRUE);
 				EnableWindow(GetDlgItem(hDlg, IDC_CHECK_ALL), TRUE);
 				SetWindowText(GetDlgItem(hDlg, IDC_EDIT_CHANGE), 0);
@@ -421,6 +426,11 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 			}
 			break;
 		case IDC_BUTTON_FIND:
+			if (funcState) {
+				funcState = 0;
+				break;
+			}
+
 			if (GetMenuState(GetMenu(hWndMain), ID_MENU_RESULT_TAB, MF_BYCOMMAND) == MF_UNCHECKED)
 				SendMessage(hWndMain, WM_COMMAND, MAKEWPARAM(ID_MENU_RESULT_TAB, 0), 0);
 
@@ -444,25 +454,23 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
 				{
 					if(is_number(data->targetValue, data->base) == 0)
-						MessageBox(hWndMain, L"찾는 값이 정수가 아닙니다.", L"알림", MB_OK);
-					else if (checkStringOverflow(data->targetValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD)))
-						MessageBox(hWndMain, L"찾는 값이 범위를 벗어납니다.", L"알림", MB_OK);
-					else
 					{
-						EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
-						EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
-
-						CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
+						MessageBox(hWndMain, L"찾는 값이 정수가 아닙니다.", L"알림", MB_OK);
+						break;
+					}
+					else if (checkStringOverflow(data->targetValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD)))
+					{
+						MessageBox(hWndMain, L"찾는 값이 범위를 벗어납니다.", L"알림", MB_OK);
+						break;
 					}
 				}
-				else
-				{
-					ListView_DeleteAllItems(hresultLV);
-					EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
 
-					CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
-				}
+				ListView_DeleteAllItems(hresultLV);
+				//EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
+				SetWindowText(GetDlgItem(hDlg, IDC_BUTTON_FIND), L"중지");
+				EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
+
+				CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
 			}
 			break;
 		case IDC_BUTTON_CHANGE:
@@ -490,53 +498,47 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
 							{
 								if (is_number(data->newValue, data->base) == 0)
-									MessageBox(hWndMain, L"바꾸는 값이 정수가 아닙니다.", L"알림", MB_OK);
-								else if (checkStringOverflow(data->newValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD))) //범위 검사
-									MessageBox(hWndMain, L"바꾸는 값이 범위를 벗어납니다.", L"알림", MB_OK);
-								else
 								{
-									EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
-									EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
-
-									CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
+									MessageBox(hWndMain, L"바꾸는 값이 정수가 아닙니다.", L"알림", MB_OK);
+									break;
+								}
+								else if (checkStringOverflow(data->newValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD))) //범위 검사
+								{
+									MessageBox(hWndMain, L"바꾸는 값이 범위를 벗어납니다.", L"알림", MB_OK);
+									break;
 								}
 							}
-							else
-							{
-								EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
-								EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
 
-								CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
-							}
+							EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
+							EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
+
+							CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
 						}
 						else
 						{
 							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
 							{
 								if (is_number(data->newValue, data->base) == 0)
-									MessageBox(hWndMain, L"바꾸는 값이 정수가 아닙니다.", L"알림", MB_OK);
-								else if (checkStringOverflow(data->newValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD)))
-									MessageBox(hWndMain, L"바꾸는 값이 범위를 벗어납니다.", L"알림", MB_OK);
-								else
 								{
-									EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
-									EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
-
-									CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
+									MessageBox(hWndMain, L"바꾸는 값이 정수가 아닙니다.", L"알림", MB_OK);
+									break;
+								}
+								else if (checkStringOverflow(data->newValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD)))
+								{
+									MessageBox(hWndMain, L"바꾸는 값이 범위를 벗어납니다.", L"알림", MB_OK);
+									break;
 								}
 							}
-							else
-							{
-								wsprintf(changeData.targetValue, data->targetValue);
-								wsprintf(changeData.newValue, data->newValue);
-								changeData.type = IsDlgButtonChecked(hDlg, IDC_D1_STR) ? REG_SZ : (IsDlgButtonChecked(hDlg, IDC_D1_DWORD) ? REG_DWORD : REG_QWORD);
-								if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
-									data->base = IsDlgButtonChecked(hDlg, IDC_D1_DEC);
 
-								startChange = 1; 
-								index = 0; //전부 바꾸는 경우는 index가 초기값인 음수여서 아래 바꾸기 과정을 수행하기 위한 index >=0 을 만족하지 않음
-								nchanged = 0;
-							}
+							wsprintf(changeData.targetValue, data->targetValue);
+							wsprintf(changeData.newValue, data->newValue);
+							changeData.type = IsDlgButtonChecked(hDlg, IDC_D1_STR) ? REG_SZ : (IsDlgButtonChecked(hDlg, IDC_D1_DWORD) ? REG_DWORD : REG_QWORD);
+							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
+								data->base = IsDlgButtonChecked(hDlg, IDC_D1_DEC);
+
+							startChange = 1; 
+							index = 0; //전부 바꾸는 경우는 index가 초기값인 음수여서 아래 바꾸기 과정을 수행하기 위한 index >=0 을 만족하지 않음
+							nchanged = 0;
 						}
 					}
 					else

@@ -90,7 +90,7 @@ extern HINSTANCE g_hInst;
 extern WNDPROC oldEditProc, oldDlgEditProc[3];
 extern LV_DATA_MANAGE lvData;
 
-extern int treeWidth, resultHeight, nchanged, isDataLoad;
+extern int treeWidth, resultHeight, nchanged, isDataLoad, funcState;
 extern TCHAR path[MAX_PATH_LENGTH], * msg, temp[MAX_PATH_LENGTH];
 extern SPLIT nSplit;
 
