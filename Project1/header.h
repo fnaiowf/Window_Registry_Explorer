@@ -5,11 +5,9 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 /*
-	BINARY 에디터 서브클래싱 함수 합치기
 	찾기 대화상자 tab 키
 	검색 결과 탭에서 삭제, 삭제할 때 데이터 표시 리스트뷰에 그 값 있으면 거기도 삭제
 	검색 결과 탭에서 삭제,수정,바꾸기 할 때 실제로 그 값이 있는지 체크
-	검색 중지
 */
 
 #include<stdio.h>

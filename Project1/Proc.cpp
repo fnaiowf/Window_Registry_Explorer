@@ -4,7 +4,7 @@ HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgMod
 WNDPROC oldDlgEditProc[3];
 TCHAR temp[MAX_PATH_LENGTH];
 
-int treeWidth, resultHeight, nchanged, isDataLoad, funcState;
+int treeWidth, resultHeight, nchanged, isDataLoad, funcState; //funcState : enumRegistry함수에서 값이 0이면 함수를 빠져나옴(검색 중지시킬때)
 SPLIT nSplit = SP_NONE;
 
 DWORD WINAPI ThreadFunc(LPVOID temp)
@@ -69,7 +69,6 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 		}
 	}
 
-	funcState = 0;
 	setMarquee(0); //프로그레스바 OFF
 
 	return 0;

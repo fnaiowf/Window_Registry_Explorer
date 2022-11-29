@@ -17,7 +17,6 @@ extern BYTE bytes[5000];
 
 //SubProc.cpp
 LRESULT CALLBACK BinaryEditSubProc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK BinaryAsciiEditSubProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK BinaryNumberingEditSubProc(HWND, UINT, WPARAM, LPARAM);
 
 //BinaryEditorUtil.cpp

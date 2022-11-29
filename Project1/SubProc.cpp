@@ -70,99 +70,134 @@ LRESULT CALLBACK DlgEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM 
 
 LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
-	int pos, rpos, li, prevpos[2], nline, pos2, ascii, newpos;
+	int pos, rpos, nline, pos2, prevpos[2], ascii, chwidth[2] = { 5, 2 }; //chwidth: 문자 폭, edit 종류마다 다름
 	static TCHAR msg[10], msg2[10];
 	static int oldpos;
-	HWND hWnd2 = GetDlgItem(hDlgModify, IDC_D3_VDATA_ASCII);
+	HWND hWnd2 = hWnd == GetDlgItem(hDlgModify, IDC_D3_VDATA) ? GetDlgItem(hDlgModify, IDC_D3_VDATA_ASCII) : GetDlgItem(hDlgModify, IDC_D3_VDATA);
 
 	switch (iMessage)
 	{
 	case WM_CHAR:
-		if ((wParam >= '0' && wParam <= '9') || (wParam >= 'a' && wParam <= 'f') || (wParam >= 'A' && wParam <= 'F'))
+		if (hWnd == GetDlgItem(hDlgModify, IDC_D3_VDATA)) //가운데 edit
 		{
-			if (wParam >= 'a' && wParam <= 'f')
-				wParam -= 32;
-
-			pos = GetPos(hWnd);
-			rpos = pos - SendMessage(hWnd, EM_LINEINDEX, -1, 0); //줄의 첫번째를 0으로 한 위치
-			nline = SendMessage(hWnd, EM_LINEFROMCHAR, pos, 0); //현재 커서 줄
-			pos2 = nline * 18 + rpos / 5 * 2; //ASCII edit의 커서 위치
-
-			if (inputOnce == 0) //바이트 입력 시작(첫번째 문자)
+			if ((wParam >= '0' && wParam <= '9') || (wParam >= 'a' && wParam <= 'f') || (wParam >= 'A' && wParam <= 'F'))
 			{
-				RemoveSelections(hWnd); //선택 영역이 있다면 지우고 시작
+				if (wParam >= 'a' && wParam <= 'f')
+					wParam -= 32;
+			}
+			else
+				return 0;
+		}
+		else //오른쪽 edit
+		{
+			if (isprint(wParam) && wParam != VK_TAB)
+			{
+				chwidth[0] = 2;
+				chwidth[1] = 5;
+			}
+			else
+				return 0;
+		}
 
-				if (rpos == 40) //한 줄의 마지막 위치에서 입력하면 다음 줄로 이동
-				{
-					SetSel(hWnd, pos + 2);
-					SetSel(hWnd2, pos2 + 2);
-					pos += 2;
-					pos2 += 2;
-					rpos = 0;
-				}
+		pos = GetPos(hWnd);
+		rpos = pos - SendMessage(hWnd, EM_LINEINDEX, -1, 0); //줄의 첫번째를 0으로 한 위치
+		nline = SendMessage(hWnd, EM_LINEFROMCHAR, pos, 0); //현재 커서 줄
+		pos2 = nline * (chwidth[1] * 8 + 2) + rpos / chwidth[0] * chwidth[1]; //ASCII edit의 커서 위치
 
-				if (rpos % 35 == 0 && rpos != 0) //8번째 문자의 경우 개행 문자 추가
+		if (chwidth[0] == 2 || inputOnce == 0) //가운데 edit의 경우 바이트 입력 시작(첫번째 문자)
+		{
+			RemoveSelections(hWnd); //선택 영역이 있다면 지우고 시작
+
+			if (rpos == chwidth[0] * 8) //한 줄의 마지막 위치에서 입력하면 다음 줄로 이동
+			{
+				SetSel(hWnd, pos + 2);
+				SetSel(hWnd2, pos2 + 2);
+				pos += 2;
+				pos2 += 2;
+				rpos = 0;
+			}
+
+			if (rpos % (chwidth[0] * 7) == 0 && rpos != 0) //8번째 문자의 경우 개행 문자 추가
+			{
+				if (chwidth[0] == 5) //가운데 edit
 				{
 					wsprintf(msg, L" %c0  \r\n", wParam);
 					wsprintf(msg2, L"%c \r\n", wParam);
 				}
-				else
+				else //오른쪽 edit
+				{
+					wsprintf(msg, L"%c \r\n", wParam);
+					wsprintf(msg2, L" %02X  \r\n", wParam);
+				}
+			}
+			else
+			{
+				if(chwidth[0] == 5)
 				{
 					wsprintf(msg, L" %c0  ", wParam);
 					wsprintf(msg2, L"%c ", wParam);
 				}
+				else
+				{
+					wsprintf(msg, L"%c ", wParam);
+					wsprintf(msg2, L" %02X  ", wParam);
+				}
+			}
 
+			if (chwidth[0] == 5)
+			{
 				ascii = wcstol(msg + 1, NULL, 16);
 				msg2[0] = isprint(ascii) ? ascii : '.'; // 입력 불가능한 문자는 .으로 대체
+			}
 
-				prevpos[0] = pos; //기존 위치를 저장해 둔 뒤 개행이 끝나면 기존 위치로 이동
-				prevpos[1] = pos2;
-				autoLineFeed(2, hWnd, pos);
-				SetSel(hWnd, prevpos[0]);
-				SetSel(hWnd2, prevpos[1]); //ascii 에디트에서는 여기서 문자열을 입력할 위치로 이동
+			prevpos[0] = pos; //기존 위치를 저장해 둔 뒤 개행이 끝나면 기존 위치로 이동
+			prevpos[1] = pos2;
+			autoLineFeed(2, hWnd, pos);
+			SetSel(hWnd, prevpos[0]);
+			SetSel(hWnd2, prevpos[1]);
 
-				SendMessage(hWnd, EM_REPLACESEL, TRUE, (LPARAM)msg);
-				SendMessage(hWnd2, EM_REPLACESEL, TRUE, (LPARAM)msg2);
+			SendMessage(hWnd, EM_REPLACESEL, TRUE, (LPARAM)msg);
+			SendMessage(hWnd2, EM_REPLACESEL, TRUE, (LPARAM)msg2);
 
+			if (chwidth[0] == 5)
 				SetSel(hWnd, pos + 3); //바이트 첫 문자를 입력하면 두 번째 문자 다음으로 커서를 이동
 
-				//데이터 저장
-				int nowindex = nline * 8 + rpos / 5;
-				if (nowindex < nbyte) //중간에 데이터를 추가해야 하는 경우 한 칸씩 밀기
-				{
-					for (int i = nbyte - 1; i >= nowindex; i--)
-						bytes[i + 1] = bytes[i];
-				}
-				bytes[nowindex] = ascii;
-
-				nbyte++;
-
-				if (nbyte % 8 == 0)
-					Numbering(1);
-
-				inputOnce = 1; //다음 입력은 바이트의 두 번째 문자라는 것을 표시
-			}
-			else //바이트 두 번째 문자
+			//데이터 저장
+			int nowindex = nline * 8 + rpos / chwidth[0];
+			if (nowindex < nbyte) //중간에 데이터를 추가해야 하는 경우 한 칸씩 밀기
 			{
-				wsprintf(msg + 2, L"%c", wParam); //msg에는 " XX  "로 저장되어 있어서 msg+2에 입력한 값을 넣으면 바이트 두 번째 문자를 입력한 것이 됨
-
-				ascii = wcstol(msg + 1, NULL, 16);
-				wsprintf(msg2, L"%c", isprint(ascii) && ascii != VK_TAB ? ascii : '.');
-
-				ReplaceSel(hWnd, pos - 1, pos, msg + 2); //첫 문자를 입력할 때 0을 임시로 넣었기 때문에 이를 지우고 입력
-				SetSel(hWnd, pos + 2);
-
-				ReplaceSel(hWnd2, pos2, pos2 + 1, msg2);
-
-				if ((rpos - 3) % 35 == 0 && rpos != 3) //줄의 마지막 문자인 경우 rpos는 38
-					SetSel(hWnd, pos + 4);
-
-				bytes[nline * 8 + rpos / 5] = ascii;
-				inputOnce = 0;
+				for (int i = nbyte - 1; i >= nowindex; i--)
+					bytes[i + 1] = bytes[i];
 			}
+			bytes[nowindex] = chwidth[0] == 5 ? ascii : wcstol(msg2, NULL, 16);;
 
-			return 0;
+			nbyte++;
+
+			if (nbyte % 8 == 0)
+				Numbering(1);
+
+			if (chwidth[0] == 5)
+				inputOnce = 1; //다음 입력은 바이트의 두 번째 문자라는 것을 표시
 		}
+		else //바이트 두 번째 문자
+		{
+			wsprintf(msg + 2, L"%c", wParam); //msg에는 " XX  "로 저장되어 있어서 msg+2에 입력한 값을 넣으면 바이트 두 번째 문자를 입력한 것이 됨
+
+			ascii = wcstol(msg + 1, NULL, 16);
+			wsprintf(msg2, L"%c", isprint(ascii) && ascii != VK_TAB ? ascii : '.');
+
+			ReplaceSel(hWnd, pos - 1, pos, msg + 2); //첫 문자를 입력할 때 0을 임시로 넣었기 때문에 이를 지우고 입력
+			SetSel(hWnd, pos + 2);
+
+			ReplaceSel(hWnd2, pos2, pos2 + 1, msg2);
+
+			if ((rpos - 3) % 35 == 0 && rpos != 3) //줄의 마지막 문자인 경우 rpos는 38
+				SetSel(hWnd, pos + 4);
+
+			bytes[nline * 8 + rpos / 5] = ascii;
+			inputOnce = 0;
+		}
+
 		return 0;
 	case WM_KEYDOWN:
 		if (!shortCutHandler(wParam, hWnd)) //ctrl + a 같은 단축키를 먼저 처리
@@ -186,117 +221,17 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 	case WM_LBUTTONUP:
 		isDrag = 0;
 		ReleaseCapture();
+
 		break;
 	case WM_MOUSEMOVE:
 		MouseMoveProcess(hWnd, lParam, oldpos);
-
 		return 0;
 	case WM_MOUSEWHEEL:
 		MouseWheelProcess(wParam);
 		return TRUE;
 	}
 
-	return CallWindowProc(binaryOldEditProc[0], hWnd, iMessage, wParam, lParam);
-}
-
-LRESULT CALLBACK BinaryAsciiEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
-{
-	TCHAR msg[5], msg2[8];
-	int pos, rpos, li, nline, prevpos[2], nowindex, pos2, newpos;
-	static int oldpos;
-	HWND hWnd2 = GetDlgItem(hDlgModify, IDC_D3_VDATA);
-
-	switch (iMessage)
-	{
-	case WM_CHAR:
-		if (isprint(wParam) && wParam != VK_TAB)
-		{
-			RemoveSelections(hWnd);
-
-			pos = GetPos(hWnd);
-			rpos = pos - SendMessage(hWnd, EM_LINEINDEX, -1, 0);
-			nline = SendMessage(hWnd, EM_LINEFROMCHAR, pos, 0);
-			pos2 = nline * 42 + rpos / 2 * 5;
-
-			if (rpos == 16)
-			{
-				SetSel(hWnd, pos + 2);
-				SetSel(hWnd2, pos2 + 2);
-				pos += 2;
-				pos2 += 2;
-				rpos = 0;
-			}
-
-			prevpos[0] = pos;
-			prevpos[1] = pos2;
-			autoLineFeed(2, hWnd, pos);
-			SetSel(hWnd, prevpos[0]);
-			SetSel(hWnd2, prevpos[1]);
-
-			if (rpos % 14 == 0 && rpos != 0)
-			{
-				wsprintf(msg, L"%c \r\n", wParam);
-				wsprintf(msg2, L" %02X  \r\n", wParam);
-			}
-			else
-			{
-				wsprintf(msg, L"%c ", wParam);
-				wsprintf(msg2, L" %02X  ", wParam);
-			}
-
-			SendMessage(hWnd, EM_REPLACESEL, TRUE, (LPARAM)msg);
-			SendMessage(hWnd2, EM_REPLACESEL, TRUE, (LPARAM)msg2);
-
-			nowindex = nline * 8 + rpos / 2;
-			if (nowindex < nbyte)
-			{
-				for (int i = nbyte - 1; i >= nowindex; i--)
-					bytes[i + 1] = bytes[i];
-			}
-			bytes[nowindex] = wcstol(msg2, NULL, 16);
-
-			nbyte++;
-
-			if (nbyte % 8 == 0)
-				Numbering(1);
-		}
-
-		return 0;
-	case WM_KEYDOWN:
-		if (!shortCutHandler(wParam, hWnd))
-		{
-			pos = GetPos(hWnd);
-			KeyDownProcess(wParam, hWnd, pos);
-		}
-
-		return 0;
-	case WM_CONTEXTMENU:
-		openBinaryEditorMenu(LOWORD(lParam), HIWORD(lParam));
-
-		return 0;
-	case WM_LBUTTONDOWN:
-		LbuttonDownProcess(hWnd, LOWORD(SendMessage(hWnd, EM_CHARFROMPOS, 0, MAKELPARAM(LOWORD(lParam), HIWORD(lParam)))));
-		isDrag = 1;
-		oldpos = GetPos(hWnd);
-		SetCapture(hWnd);
-
-		return 0;
-	case WM_LBUTTONUP:
-		isDrag = 0;
-		ReleaseCapture();
-
-		break;
-	case WM_MOUSEMOVE:
-		MouseMoveProcess(hWnd, lParam, oldpos);
-
-		return 0;
-	case WM_MOUSEWHEEL:
-		MouseWheelProcess(wParam);
-
-		return 0;
-	}
-
-	return CallWindowProc(binaryOldEditProc[1], hWnd, iMessage, wParam, lParam);
+	return CallWindowProc(binaryOldEditProc[chwidth[0] == 5 ? 0 : 1], hWnd, iMessage, wParam, lParam);
 }
 
 LRESULT CALLBACK BinaryNumberingEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)

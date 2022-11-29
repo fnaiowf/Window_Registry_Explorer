@@ -115,6 +115,96 @@ void RemoveSelections(HWND hWnd)
 
 		Numbering(0);
 	}
+
+	isDrag = 0;
+}
+
+void ScrollProcess(int lParam, int wParam)
+{
+	int line = LineCount(GetDlgItem(hDlgModify, IDC_D3_VDATA)), nscroll = 0;
+
+	switch (LOWORD(wParam))
+	{
+	case SB_LINEUP:
+		scrollPos = max(0, scrollPos - 1);
+		nscroll = -1;
+		break;
+	case SB_LINEDOWN:
+		scrollPos = min(line - 11, scrollPos + 1);
+		nscroll = 1;
+		break;
+	case SB_PAGEUP:
+		scrollPos = max(0, scrollPos - 12);
+		nscroll = -12;
+		break;
+	case SB_PAGEDOWN:
+		scrollPos = min(line - 11, scrollPos + 12);
+		nscroll = 12;
+		break;
+	case SB_THUMBTRACK:
+		nscroll = HIWORD(wParam) - scrollPos;
+		scrollPos = HIWORD(wParam);
+		break;
+	}
+	SetScrollPos((HWND)lParam, SB_CTL, scrollPos, TRUE);
+
+	ScrollEdits(nscroll);
+}
+
+void ScrollEdits(int nscroll)
+{
+	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA), EM_LINESCROLL, 0, nscroll);
+	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_ASCII), EM_LINESCROLL, 0, nscroll);
+	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), EM_LINESCROLL, 0, nscroll);
+}
+
+void SetScroll(int lineCount)
+{
+	SCROLLINFO si = {};
+
+	//nPage는 11고정, nMax는 11부터 스크롤 범위가 늘어날 때마다 1씩 더함
+	si.cbSize = sizeof(SCROLLINFO);
+	si.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
+	si.nMin = 0;
+	si.nMax = 11 + lineCount - 12;
+	si.nPage = 11;
+	si.nPos = FirstVisibleLine(GetFocus());
+	scrollPos = si.nPos;
+	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), EM_LINESCROLL, 0, scrollPos - FirstVisibleLine(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING))); //나머지 두 edit은 자동 스크롤
+
+	SetScrollInfo(GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR), SB_CTL, &si, TRUE);
+}
+
+void openBinaryEditorMenu(int x, int y)
+{
+	HMENU menu, hPopup;
+	int id, getSel;
+
+	menu = LoadMenu(g_hInst, MAKEINTRESOURCE(IDR_MENU3));
+	hPopup = GetSubMenu(menu, 0);
+
+	if (nbyte == 0)
+		EnableMenuItem(hPopup, 5, MF_BYPOSITION | MF_DISABLED);
+
+	getSel = SendMessage(GetFocus(), EM_GETSEL, 0, 0);
+	if (LOWORD(getSel) == HIWORD(getSel))
+	{
+		EnableMenuItem(hPopup, 0, MF_BYPOSITION | MF_DISABLED);
+		EnableMenuItem(hPopup, 1, MF_BYPOSITION | MF_DISABLED);
+		EnableMenuItem(hPopup, 3, MF_BYPOSITION | MF_DISABLED);
+	}
+
+	if(clipBoardData.len == 0)
+		EnableMenuItem(hPopup, 2, MF_BYPOSITION | MF_DISABLED);
+
+	id = TrackPopupMenu(hPopup, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWndMain, NULL);
+
+	if (id == ID_MENU3_DELETE)
+		RemoveSelections(GetFocus());
+	else if(id != 0)
+		shortCutHandler(ID_MENU3_CUT - id - 1, GetFocus());
+
+	DestroyMenu(menu);
 }
 
 void KeyDownProcess(int vkey, HWND hWnd, int pos)
@@ -393,7 +483,7 @@ void MouseMoveProcess(HWND hWnd, int lParam, int oldpos)
 		return;
 
 	HWND hWnd2 = GetDlgItem(hDlgModify, IDC_D3_VDATA_ASCII);
-	int rpos[2], newpos, chwidth[2] = {5, 2}, li[2], li2, oldpos2, newpos2, rpos2, lastLineYpos, rMousePos[2];
+	int rpos[2], newpos, chwidth[2] = { 5, 2 }, li[2], li2, oldpos2, newpos2, rpos2, lastLineYpos, rMousePos[2];
 	RECT r;
 	SendMessage(hWnd, EM_GETRECT, 0, (LPARAM)&r);
 
@@ -438,7 +528,7 @@ void MouseMoveProcess(HWND hWnd, int lParam, int oldpos)
 		ScrollEdits(-1);
 		SetScrollPos(GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR), SB_CTL, scrollPos, TRUE);
 	}
-	else if(HIWORD(lParam) < 5000 && HIWORD(SendMessage(hWnd, EM_POSFROMCHAR, SendMessage(hWnd, EM_LINEINDEX, FirstVisibleLine(hWnd) + 11, 0), 0)) < HIWORD(lParam) && FirstVisibleLine(hWnd) + 11 < LineCount(hWnd)) //edit 아래로 마우스가 나갈 때는 마우스 내리는대로 값이 내려감
+	else if (HIWORD(lParam) < 5000 && HIWORD(SendMessage(hWnd, EM_POSFROMCHAR, SendMessage(hWnd, EM_LINEINDEX, FirstVisibleLine(hWnd) + 11, 0), 0)) < HIWORD(lParam) && FirstVisibleLine(hWnd) + 11 < LineCount(hWnd)) //edit 아래로 마우스가 나갈 때는 마우스 내리는대로 값이 내려감
 	{
 		scrollPos++;
 		ScrollEdits(1);
@@ -447,92 +537,4 @@ void MouseMoveProcess(HWND hWnd, int lParam, int oldpos)
 	//HIWORD(lParam) < 5000을 안걸면 edit 위로 마우스가 나갈 때 오버플로우 되기 때문에 조건문이 참이 됨
 
 	return;
-}
-
-void ScrollProcess(int lParam, int wParam)
-{
-	int line = LineCount(GetDlgItem(hDlgModify, IDC_D3_VDATA)), nscroll = 0;
-
-	switch (LOWORD(wParam))
-	{
-	case SB_LINEUP:
-		scrollPos = max(0, scrollPos - 1);
-		nscroll = -1;
-		break;
-	case SB_LINEDOWN:
-		scrollPos = min(line - 11, scrollPos + 1);
-		nscroll = 1;
-		break;
-	case SB_PAGEUP:
-		scrollPos = max(0, scrollPos - 12);
-		nscroll = -12;
-		break;
-	case SB_PAGEDOWN:
-		scrollPos = min(line - 11, scrollPos + 12);
-		nscroll = 12;
-		break;
-	case SB_THUMBTRACK:
-		nscroll = HIWORD(wParam) - scrollPos;
-		scrollPos = HIWORD(wParam);
-		break;
-	}
-	SetScrollPos((HWND)lParam, SB_CTL, scrollPos, TRUE);
-
-	ScrollEdits(nscroll);
-}
-
-void ScrollEdits(int nscroll)
-{
-	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA), EM_LINESCROLL, 0, nscroll);
-	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_ASCII), EM_LINESCROLL, 0, nscroll);
-	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), EM_LINESCROLL, 0, nscroll);
-}
-
-void SetScroll(int lineCount)
-{
-	SCROLLINFO si = {};
-
-	//nPage는 11고정, nMax는 11부터 스크롤 범위가 늘어날 때마다 1씩 더함
-	si.cbSize = sizeof(SCROLLINFO);
-	si.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
-	si.nMin = 0;
-	si.nMax = 11 + lineCount - 12;
-	si.nPage = 11;
-	si.nPos = FirstVisibleLine(GetFocus());
-	scrollPos = si.nPos;
-	SendMessage(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING), EM_LINESCROLL, 0, scrollPos - FirstVisibleLine(GetDlgItem(hDlgModify, IDC_D3_VDATA_NUMBERING))); //나머지 두 edit은 자동 스크롤
-
-	SetScrollInfo(GetDlgItem(hDlgModify, IDC_D3_SCROLLBAR), SB_CTL, &si, TRUE);
-}
-
-void openBinaryEditorMenu(int x, int y)
-{
-	HMENU menu, hPopup;
-	int id, getSel;
-
-	menu = LoadMenu(g_hInst, MAKEINTRESOURCE(IDR_MENU3));
-	hPopup = GetSubMenu(menu, 0);
-
-	if (nbyte == 0)
-		EnableMenuItem(hPopup, 5, MF_BYPOSITION | MF_DISABLED);
-
-	getSel = SendMessage(GetFocus(), EM_GETSEL, 0, 0);
-	if (LOWORD(getSel) == HIWORD(getSel))
-	{
-		EnableMenuItem(hPopup, 0, MF_BYPOSITION | MF_DISABLED);
-		EnableMenuItem(hPopup, 1, MF_BYPOSITION | MF_DISABLED);
-		EnableMenuItem(hPopup, 3, MF_BYPOSITION | MF_DISABLED);
-	}
-
-	if(clipBoardData.len == 0)
-		EnableMenuItem(hPopup, 2, MF_BYPOSITION | MF_DISABLED);
-
-	id = TrackPopupMenu(hPopup, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWndMain, NULL);
-
-	if (id == ID_MENU3_DELETE)
-		RemoveSelections(GetFocus());
-	else if(id != 0)
-		shortCutHandler(ID_MENU3_CUT - id - 1, GetFocus());
-
-	DestroyMenu(menu);
 }

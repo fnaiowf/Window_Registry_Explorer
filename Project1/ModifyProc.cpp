@@ -394,7 +394,7 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 		inputOnce = 0;
 		nbyte = 0;
 		binaryOldEditProc[0] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA), GWLP_WNDPROC, (LONG_PTR)BinaryEditSubProc);
-		binaryOldEditProc[1] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), GWLP_WNDPROC, (LONG_PTR)BinaryAsciiEditSubProc);
+		binaryOldEditProc[1] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), GWLP_WNDPROC, (LONG_PTR)BinaryEditSubProc);
 		binaryOldEditProc[2] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), GWLP_WNDPROC, (LONG_PTR)BinaryNumberingEditSubProc);
 		
  		hf = CreateFont(17, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, L"Raize"); //monospaced 폰트(글자 크기 고정)
