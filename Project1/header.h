@@ -9,7 +9,7 @@
 	찾기 대화상자 tab 키
 	검색 결과 탭에서 삭제, 삭제할 때 데이터 표시 리스트뷰에 그 값 있으면 거기도 삭제
 	검색 결과 탭에서 삭제,수정,바꾸기 할 때 실제로 그 값이 있는지 체크
-	바꾸기 공백도 되게
+	검색 중지
 */
 
 #include<stdio.h>
@@ -134,6 +134,7 @@ int splitMulSz(TCHAR* data, int size, TCHAR*** strings, int alloc); //MULTI_SZ �
 void concatMulSz(TCHAR* strings, int len, TCHAR* ret); //MULTI_SZ 값 NULL문자 공백으로 바꿈
 void cutString(TCHAR* string); //200자 넘으면 문자열 자름
 int is_number(TCHAR* string, int base); //문자열이 숫자인지 체크
+int checkStringOverflow(TCHAR* string, int base, int type); //check string overflow / underflow
 
 void openPopupMenu(int x, int y); //오른쪽 마우스 버튼 누를 때 팝업 메뉴 열기
 void processPopup(int id, int index, void* item); //팝업 메뉴 프로시저

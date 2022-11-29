@@ -430,7 +430,6 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 			{
 				wsprintf(changeData.targetValue, data->targetValue);
 				
-				wsprintf(data->newValue, L""); //찾기만 할 경우에는 바꿀 문자열을 공백으로
 				data->type = IsDlgButtonChecked(hDlg, IDC_D1_STR) ? REG_SZ : (IsDlgButtonChecked(hDlg, IDC_D1_DWORD) ? REG_DWORD : REG_QWORD);
 				data->t_type = FIND;
 
@@ -442,8 +441,20 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 
 				index = -1;
 
-				if (!IsDlgButtonChecked(hDlg, IDC_D1_STR) && is_number(data->targetValue, data->base) == 0)
-					MessageBox(hWndMain, L"찾는 값이 정수가 아닙니다.", L"알림", MB_OK);
+				if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
+				{
+					if(is_number(data->targetValue, data->base) == 0)
+						MessageBox(hWndMain, L"찾는 값이 정수가 아닙니다.", L"알림", MB_OK);
+					else if (checkStringOverflow(data->targetValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD)))
+						MessageBox(hWndMain, L"찾는 값이 범위를 벗어납니다.", L"알림", MB_OK);
+					else
+					{
+						EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
+						EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
+
+						CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
+					}
+				}
 				else
 				{
 					ListView_DeleteAllItems(hresultLV);
@@ -468,7 +479,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
 					data->base = IsDlgButtonChecked(hDlg, IDC_D1_DEC);
 
-				if (wcscmp(data->targetValue, L"") != 0 && wcscmp(data->newValue, L"") != 0)
+				if (wcscmp(data->targetValue, L"") != 0)
 				{
 					if (wcscmp(data->targetValue, changeData.targetValue) == 0 && data->type == changeData.type)
 					{
@@ -476,8 +487,20 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 						{
 							data->t_type = CHANGE;
 
-							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR) && is_number(data->newValue, data->base) == 0)
-								MessageBox(hWndMain, L"바꾸는 값이 정수가 아닙니다.", L"알림", MB_OK);
+							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
+							{
+								if (is_number(data->newValue, data->base) == 0)
+									MessageBox(hWndMain, L"바꾸는 값이 정수가 아닙니다.", L"알림", MB_OK);
+								else if (checkStringOverflow(data->newValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD))) //범위 검사
+									MessageBox(hWndMain, L"바꾸는 값이 범위를 벗어납니다.", L"알림", MB_OK);
+								else
+								{
+									EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
+									EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
+
+									CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
+								}
+							}
 							else
 							{
 								EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
@@ -488,8 +511,20 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 						}
 						else
 						{
-							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR) && is_number(data->newValue, data->base) == 0)
-								MessageBox(hWndMain, L"바꾸는 값이 정수가 아닙니다.", L"알림", MB_OK);
+							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
+							{
+								if (is_number(data->newValue, data->base) == 0)
+									MessageBox(hWndMain, L"바꾸는 값이 정수가 아닙니다.", L"알림", MB_OK);
+								else if (checkStringOverflow(data->newValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD)))
+									MessageBox(hWndMain, L"바꾸는 값이 범위를 벗어납니다.", L"알림", MB_OK);
+								else
+								{
+									EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
+									EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
+
+									CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
+								}
+							}
 							else
 							{
 								wsprintf(changeData.targetValue, data->targetValue);

@@ -470,7 +470,10 @@ void cutString(TCHAR* string)
 
 int is_number(TCHAR* string, int base)
 {
+	if (*string == 0) return 0;
+
 	TCHAR* pos = string;
+
 	while (*pos != NULL)
 	{
 		if (base) //10진수
@@ -807,4 +810,53 @@ void freeMemory()
 		free(lvData.mulstrData);
 	}
 
+}
+
+int checkStringOverflow(TCHAR* string, int base, int type)
+{
+	int len = wcslen(string);
+
+	if (base) //10진수
+	{
+		if (type == 0) //DWORD
+		{
+			if (len < 10)
+				return 0;
+			else if (len == 10 && wcscmp(string, L"2147483647") <= 0) //10진수 int 최대값 길이 10
+				return 0;
+			else
+				return 1;
+		}
+		else //QWORD
+		{
+			if (len < 19)
+				return 0;
+			else if (len == 19 && wcscmp(string, L"9223372036854775807") <= 0) //10진수 llong 최대값 길이 19
+				return 0;
+			else
+				return 1;
+		}
+
+	}
+	else //16진수
+	{
+		if (type == 0) //DWORD
+		{
+			if (len < 8)
+				return 0;
+			else if (len == 8 && wcscmp(string, L"ffffffff") <= 0) //16진수 int 최대값 길이 8
+				return 0;
+			else
+				return 1;
+		}
+		else //QWORD
+		{
+			if (len < 16)
+				return 0;
+			else if (len == 16 && wcscmp(string, L"ffffffffffffffff") <= 0) //16진수 llong 최대값 길이 16
+				return 0;
+			else
+				return 1;
+		}
+	}
 }
