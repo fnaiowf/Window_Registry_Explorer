@@ -88,6 +88,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 	HMENU hmenu;
 	static DATA data;
+	static TCHAR oldName[1000];
 	static TVITEM tvitem;
 
 	switch (iMessage)
@@ -248,8 +249,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				return 0;
 			case TVN_ENDLABELEDIT:
 				{
-					TCHAR oldName[MAX_KEY_LENGTH];
 					HKEY hkey;
+					TCHAR pathtemp[MAX_PATH_LENGTH];
+
+					memset(oldName, 0, sizeof(oldName));
 
 					tvitem = ((LPNMTVDISPINFO)lParam)->item;
 					tvitem.mask = TVIF_TEXT;
@@ -259,6 +262,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					GetWindowText(TreeView_GetEditControl(hTV), temp, sizeof(temp));
 
 					getPathfromItem(TreeView_GetParent(hTV, ((LPNMTVDISPINFO)lParam)->item.hItem), path);
+
+					wsprintf(pathtemp, L"%ws\\%ws", path, temp);
+					if (wcscmp(oldName, temp) != 0 && _RegOpenKeyEx(tvitem.lParam, pathtemp) != NULL) //이름 중복 검사(기본 할당된 이름 말고 다른 이름을 입력했을 때 레지스트리가 열리면 이미 있는 것)
+					{
+						MessageBox(hWnd, L"지정한 이름의 키가 이미 있습니다", L"알림", MB_OK);
+						wsprintf(temp, oldName);
+					}
 
 					if ((hkey = _RegOpenKeyEx(tvitem.lParam, path)) != NULL)
 					{
@@ -283,16 +293,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			case LVN_BEGINLABELEDIT:
 				if (getListViewItem(hLV, LVIF_PARAM, ((LPNMLVDISPINFO)lParam)->item.iItem).lParam != PREV_NEW_VALUE_PARAM) //아이템을 2번 천천히 누르면 labeledit으로 자동으로 들어가는데 이를 막기 위함
 					return 1;
+				else
+					GetWindowText(ListView_GetEditControl(hLV), oldName, sizeof(oldName));
 				break;
 			case LVN_ENDLABELEDIT:
 				{
 					HKEY hkey;
 					TCHAR type[20], ivalue[15] = L"0x00000000 (0)", *data;
-					int index = ((LPNMLVDISPINFO)lParam)->item.iItem, result;
+					int index = ((LPNMLVDISPINFO)lParam)->item.iItem, result, itype;
 
 					GetWindowText(hEdit, path, sizeof(path));
 					ListView_GetItemText(hLV, index, 1, type, sizeof(type));
-					type[19] = getType(type); //변수 하나 선언 하는 대신 안 쓰이는 type[19]에 값을 넣음
+					itype = getType(type);
 
 					if ((hkey = _RegOpenKeyEx(getBasicKey(path), path)) != NULL)
 					{
@@ -300,20 +312,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 						GetWindowText(ListView_GetEditControl(hLV), temp, sizeof(temp));
 
-						if (type[19] >= 2)
+						if (RegQueryValueEx(hkey, temp, NULL, NULL, NULL, NULL) == ERROR_SUCCESS) //이름 중복 검사(값이 가져와지면 이미 있는 것)
+						{
+							MessageBox(hWnd, L"지정한 이름의 값이 이미 있습니다", L"알림", MB_OK);
+							wsprintf(temp, oldName);
+						}
+
+						if (itype >= 2)
 							data = NULL;
 						else
 						{
 							data = (TCHAR*)malloc(sizeof(TCHAR));
 							*data = L'0';
 						}
-						result = _RegSetValueEx(hkey, temp, REG_TYPE[type[19]], (BYTE*)data, -1, 1, 0);
+						result = _RegSetValueEx(hkey, temp, REG_TYPE[itype], (BYTE*)data, -1, 1, 0);
 
 						if (data != NULL) free(data);
 
 						if (result)
 						{
-							addLVitem(hLV, temp, type, type[19] < 2 ? ivalue : NULL, index, NULL, 0);
+							addLVitem(hLV, temp, type, itype < 2 ? ivalue : NULL, index, NULL, 0);
 
 							ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED); //전부 선택 해제
 							ListView_SetItemState(hLV, index, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);

@@ -414,7 +414,7 @@ void enumValue(HKEY hkey, DATA* data)
 			{
 				if (wcslen(name) == 0)
 				{
-					defValueOpt = 0;
+					defValueOpt = 0; //기본값이 처음 추가되는 경우에는 기본값 인덱스 0에 정보가 제대로 추가되는데 나중에 추가되는 경우에는 다른 값이 기본값에 할당될 수 있어서 이 경우에는 기본값을 고려해 1을 더해줘야 함
 					li.mask = LVIF_TEXT;
 					li.iItem = 0;
 					li.iSubItem = 2;

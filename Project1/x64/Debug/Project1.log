@@ -1,9 +1,9 @@
 ﻿  BinaryEditorUtil.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x1816 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x17c2 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(58,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(73,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditor.h(12,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'CLIPBOARD_DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(17,13): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(18,21): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
@@ -43,11 +43,11 @@ C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(508,81): w
 C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(509,81): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(510,19): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   ModifyProc.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x1816 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x17c2 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(58,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(73,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditor.h(12,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'CLIPBOARD_DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\ModifyProc.cpp(8,9): warning C4101: 'pos' :참조되지 않은 지역 변수입니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\ModifyProc.cpp(445,43): warning C4244: 'return': 'INT_PTR'에서 'BOOL'(으)로 변환하면서 데이터가 손실될 수 있습니다.
@@ -55,35 +55,36 @@ C:\Users\jinwoo\Desktop\registryControl\Project1\ModifyProc.cpp(447,24): warning
 C:\Users\jinwoo\Desktop\registryControl\Project1\ModifyProc.cpp(504,25): warning C4244: '인수': 'WPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\ModifyProc.cpp(504,17): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Proc.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x1816 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(263,38): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x17c2 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(58,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(73,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(267,60): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(273,38): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(88,6): warning C4101: 'hdc' :참조되지 않은 지역 변수입니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(87,8): warning C4101: 't' :참조되지 않은 지역 변수입니다.
   RegistryControl.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x1816 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(375,28): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(380,18): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(221,8): warning C4101: 'byte' :참조되지 않은 지역 변수입니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(499,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(501,48): warning C4244: '인수': 'LPARAM'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(559,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(573,31): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(611,9): warning C4101: 'li' :참조되지 않은 지역 변수입니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(607,7): warning C4101: 'hkey' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x17c2 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(58,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(73,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(378,28): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(383,18): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(224,8): warning C4101: 'byte' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(502,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(504,48): warning C4244: '인수': 'LPARAM'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(562,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(576,31): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(614,9): warning C4101: 'li' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(610,7): warning C4101: 'hkey' :참조되지 않은 지역 변수입니다.
   SubProc.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x1816 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x17c2 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(58,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(73,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditor.h(12,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'CLIPBOARD_DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\SubProc.cpp(93,16): warning C4244: '인수': 'WPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\SubProc.cpp(103,14): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
@@ -95,19 +96,19 @@ C:\Users\jinwoo\Desktop\registryControl\Project1\SubProc.cpp(227,26): warning C4
 C:\Users\jinwoo\Desktop\registryControl\Project1\SubProc.cpp(230,21): warning C4244: '인수': 'WPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\SubProc.cpp(243,22): warning C4244: '=': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Util.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x1816 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x17c2 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(58,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(73,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\Util.cpp(396,27): warning C4244: '=': 'LONG_PTR'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\Util.cpp(403,27): warning C4244: '=': 'LONG_PTR'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   main.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x1816 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x17c2 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(58,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(73,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
   코드를 생성하고 있습니다...
 C:\Users\jinwoo\Desktop\registryControl\Project1\SubProc.cpp(69): warning C4715: 'DlgEditSubProc': 모든 제어 경로에서 값을 반환하지는 않습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\BinaryEditorUtil.cpp(422): warning C4715: 'shortCutHandler': 모든 제어 경로에서 값을 반환하지는 않습니다.

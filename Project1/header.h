@@ -6,8 +6,6 @@
 
 /*
 	찾기 대화상자 tab 키
-	값 생성 이름 중복 체크
-	값 수정할 때 외부에서 이미 삭제한 상태면 값이 생성되버림
 */
 
 #include<stdio.h>
@@ -95,7 +93,7 @@ extern SPLIT nSplit;
 
 //RegistryControl.cpp
 HKEY _RegOpenKeyEx(int bKeyIndex, TCHAR* path); //레지스트리 오픈 함수 래퍼
-int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int size, int base, int ismodify); //SetVlaue 래퍼
+int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int size, int base, int ismodify); //SetValue 래퍼
 void enumRegistry(DATA* data); //기본키 enum
 void enumKeys(HKEY hkey, HTREEITEM parent, TCHAR* subkeystr, DATA* data, int bkey); //기본키의 서브키 enum
 void enumValue(HKEY hkey, DATA* data); //값 enum

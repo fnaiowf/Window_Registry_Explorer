@@ -660,6 +660,7 @@ void processPopup(int id, int index, void* item)
 
 					TreeView_EnsureVisible(hTV, citem);
 
+					TreeView_SelectItem(hTV, citem);
 					TreeView_EditLabel(hTV, citem);
 				}
 				RegCloseKey(hkey);
