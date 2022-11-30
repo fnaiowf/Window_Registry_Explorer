@@ -94,7 +94,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
 			{
 				itype = getType(type);
-				if (_RegSetValueEx(hkey, name[0], REG_TYPE[itype], (BYTE*)text, -1, IsDlgButtonChecked(hDlg, IDC_D2_DEC)))
+				if (_RegSetValueEx(hkey, name[0], REG_TYPE[itype], (BYTE*)text, -1, IsDlgButtonChecked(hDlg, IDC_D2_DEC), 1))
 				{
 					if (itype == 0) //DWORD
 					{
@@ -316,7 +316,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
 			{
-				if (_RegSetValueEx(hkey, name[0], REG_MULTI_SZ, (BYTE*)temp, idx * sizeof(TCHAR), -1))
+				if (_RegSetValueEx(hkey, name[0], REG_MULTI_SZ, (BYTE*)temp, idx * sizeof(TCHAR), -1, 1))
 				{
 					concatMulSz(temp, idx - 2, text); //맨 뒤에 널 2개 있어서 idx-2
 					cutString(temp);
@@ -452,7 +452,7 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 		case IDC_D3_MODIFY_OK:
 			if ((hkey = _RegOpenKeyEx(getBasicKey(path), path)) != NULL)
 			{
-				if (_RegSetValueEx(hkey, name, REG_BINARY, bytes, nbyte, -1))
+				if (_RegSetValueEx(hkey, name, REG_BINARY, bytes, nbyte, -1, 1))
 				{
 					if (nbyte == 0)
 					{

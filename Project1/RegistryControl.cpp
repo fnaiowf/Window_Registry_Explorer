@@ -20,10 +20,16 @@ HKEY _RegOpenKeyEx(int bKeyIndex, TCHAR* path)
 		return NULL;
 }
 
-int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int base)
+int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int base, int ismodify)
 {
 	int dword, res;
 	long long qword;
+
+	if (ismodify && RegQueryValueEx(key, name, NULL, NULL, NULL, NULL) != ERROR_SUCCESS)
+	{
+		MessageBox(hWndMain, L"해당 값이 존재하지 않습니다(새로고침 필요)", L"알림", MB_OK);
+		return 0;
+	}
 
 	if (type == REG_DWORD)
 	{
@@ -451,7 +457,7 @@ int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 
 	fwprintf(fp, L" -> %ws\n", temp);
 
-	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->type == REG_MULTI_SZ ? len : -1, data->base))
+	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->type == REG_MULTI_SZ ? len : -1, data->base, 1))
 	{
 		if (data->type == REG_MULTI_SZ)
 		{

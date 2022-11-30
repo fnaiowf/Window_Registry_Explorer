@@ -307,7 +307,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 							data = (TCHAR*)malloc(sizeof(TCHAR));
 							*data = L'0';
 						}
-						result = _RegSetValueEx(hkey, temp, REG_TYPE[type[19]], (BYTE*)data, -1, 1);
+						result = _RegSetValueEx(hkey, temp, REG_TYPE[type[19]], (BYTE*)data, -1, 1, 0);
 
 						if (data != NULL) free(data);
 
