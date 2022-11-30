@@ -699,15 +699,46 @@ void processPopup(int id, int index, void* item)
 				{
 					if (RegDeleteValue(hkey, L"") == ERROR_SUCCESS)
 					{
+						if (ListView_GetItemCount(hresultLV) != 0) //resultLV에서도 삭제
+						{
+							for (int i = 0; i < ListView_GetItemCount(hresultLV); i++)
+							{
+								if (getListViewItem(hresultLV, LVIF_PARAM, i).lParam < 0) //기본값인 경우
+								{
+									TCHAR path[MAX_PATH_LENGTH];
+									ListView_GetItemText(hresultLV, i, 0, path, sizeof(path));
+									if (wcscmp(temp, path) == 0)
+										ListView_DeleteItem(hresultLV, i);
+								}
+							}
+						}
+
 						TCHAR t[11] = L"(값 설정 안 됨)";
 						ListView_SetItemText(hLV, 0, 2, t);
 					}
 				}
 				else
 				{
-					ListView_GetItemText(hLV, litem, 0, temp, sizeof(temp));
-					if (RegDeleteValue(hkey, temp) == ERROR_SUCCESS)
+					ListView_GetItemText(hLV, litem, 0, tstr, sizeof(tstr));
+					if (RegDeleteValue(hkey, tstr) == ERROR_SUCCESS)
+					{
+						if (ListView_GetItemCount(hresultLV) != 0) //resultLV에서도 삭제
+						{
+							TCHAR tp[3000];
+							for (int i = 0; i < ListView_GetItemCount(hresultLV); i++)
+							{
+								ListView_GetItemText(hresultLV, i, 1, tp, sizeof(tp)); //name
+								if (wcscmp(tstr, tp) == 0)
+								{
+									ListView_GetItemText(hresultLV, i, 0, tp, sizeof(tp)); //path
+									if (wcscmp(temp, tp) == 0)
+										ListView_DeleteItem(hresultLV, i);
+								}
+							}
+						}
+
 						ListView_DeleteItem(hLV, litem);
+					}
 				}
 
 				RegCloseKey(hkey);

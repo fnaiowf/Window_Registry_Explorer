@@ -9,7 +9,7 @@ SPLIT nSplit = SP_NONE;
 
 DWORD WINAPI ThreadFunc(LPVOID temp)
 {
-	funcState = 1;
+	funcState = FINDING;
 
 	if (temp != NULL && ((DATA*)temp)->t_type == REFRESH) //F5 눌렀을 때 기존에 추가되어 있던 것들 전부 삭제
 	{
@@ -69,6 +69,7 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 		}
 	}
 
+	funcState = DEFAULT;
 	setMarquee(0); //프로그레스바 OFF
 
 	return 0;
@@ -400,7 +401,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 		SendMessage(GetDlgItem(hDlg, IDC_D1_DEC), BM_SETCHECK, BST_CHECKED, 1);
 
 		startChange = 0;
-		funcState = 0;
+		funcState = DEFAULT;
 		index = -1; //초기값 음수로 설정
 		return 0;
 	case WM_COMMAND:
@@ -425,8 +426,8 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 			}
 			break;
 		case IDC_BUTTON_FIND:
-			if (funcState) {
-				funcState = 0;
+			if (funcState == FINDING) { //찾는 중에 중지 버튼
+				funcState = SUSPEND;
 				break;
 			}
 
@@ -465,7 +466,6 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				}
 
 				ListView_DeleteAllItems(hresultLV);
-				//EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_FIND), FALSE);
 				SetWindowText(GetDlgItem(hDlg, IDC_BUTTON_FIND), L"중지");
 				EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_CHANGE), FALSE);
 
@@ -574,15 +574,17 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				index = ListView_GetSelectionMark(hresultLV);
 				if (getListViewItem(hresultLV, LVIF_GROUPID, index).iGroupId == 1)
 				{
-					changeValue(index, &changeData);
-					li.mask = LVIF_GROUPID;
-					li.iItem = index;
-					li.iGroupId = 2;
-					ListView_SetItem(hresultLV, &li);
+					if(changeValue(index, &changeData))
+					{
+						li.mask = LVIF_GROUPID;
+						li.iItem = index;
+						li.iGroupId = 2;
+						ListView_SetItem(hresultLV, &li);
 
-					nchanged++;
+						nchanged++;
 
-					ListView_DeSelectAll(hresultLV);
+						ListView_DeSelectAll(hresultLV);
+					}
 				}
 
 				if (nchanged != (lg.cItems + lg2.cItems))

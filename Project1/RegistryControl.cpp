@@ -90,7 +90,7 @@ void enumRegistry(DATA* data)
 		i = 0;
 		while (RegEnumKeyEx(BASIC_KEY_HANDLE[k], i, key, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
 		{
-			if (funcState == 0) {
+			if (funcState == SUSPEND) {
 				free(key);
 				return;
 			}
@@ -155,7 +155,7 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 
 	while (RegEnumKeyEx(hkey, i, key, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
 	{
-		if (funcState == 0) return;
+		if (funcState == SUSPEND) return;
 
 		len = MAX_KEY_LENGTH;
 		wsprintf(path, TEXT("%ws\\%ws"), path, key);
@@ -197,7 +197,7 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 	if (data != NULL && data->t_type != REFRESH)
 		enumValue(hkey, data);
 
-	if (funcState == 0) return;
+	if (funcState == SUSPEND) return;
 
 	for (int j = lstrlen(path) - 1;; j--)
 	{
@@ -221,7 +221,7 @@ void enumValue(HKEY hkey, DATA* data)
 
 	while (RegEnumValue(hkey, i, name, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
 	{
-		if (funcState == 0) return;
+		if (funcState == SUSPEND) return;
 
 		len = MAX_KEY_LENGTH;
 
@@ -425,7 +425,7 @@ void enumValue(HKEY hkey, DATA* data)
 	}
 }
 
-void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
+int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 {
 	TCHAR temp[MAX_VALUE_LENGTH]={};
 	DWORD len, tlen = wcslen(data->targetValue), nlen = wcslen(data->newValue);
@@ -460,10 +460,14 @@ void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 		}
 		else
 			wsprintf(value, temp);
+
+		return 1;
 	}
+
+	return 0;
 }
 
-void changeValue(int n, DATA* tarData)
+int changeValue(int n, DATA* tarData)
 {
 	HTREEITEM item;
 	HKEY hkey;
@@ -491,29 +495,34 @@ void changeValue(int n, DATA* tarData)
 
 	if ((hkey = _RegOpenKeyEx(ti.lParam, path)) != NULL)
 	{
-		changeValue(hkey, name, value, tarData, li.lParam);
-		
-		if (tarData->type == REG_MULTI_SZ)
-			cutString(value);
+		if(changeValue(hkey, name, value, tarData, li.lParam))
+		{
+			if (tarData->type == REG_MULTI_SZ)
+				cutString(value);
 
-		if (tarData->type == REG_DWORD)
-		{
-			toi = wcstol(value, NULL, tarData->base ? 10 : 16);
-			wsprintf(value, L"0x%08x (%d)", toi, toi);
-		}
-		else if (tarData->type == REG_QWORD)
-		{
-			toi64 = wcstoll(value, NULL, tarData->base ? 10 : 16);
-			wsprintf(value, L"0x%08I64x (%I64d)", toi64, toi64);
-		}
+			if (tarData->type == REG_DWORD)
+			{
+				toi = wcstol(value, NULL, tarData->base ? 10 : 16);
+				wsprintf(value, L"0x%08x (%d)", toi, toi);
+			}
+			else if (tarData->type == REG_QWORD)
+			{
+				toi64 = wcstoll(value, NULL, tarData->base ? 10 : 16);
+				wsprintf(value, L"0x%08I64x (%I64d)", toi64, toi64);
+			}
 
-		ListView_SetItemText(hresultLV, n, 3, value);
-		if (TreeView_GetSelection(hTV) == item)
-		{
-			TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
-			TreeView_SelectItem(hTV, item);
+			ListView_SetItemText(hresultLV, n, 3, value);
+			if (TreeView_GetSelection(hTV) == item)
+			{
+				TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
+				TreeView_SelectItem(hTV, item);
+			}
+
+			return 1;
 		}
 	}
+
+	return 0;
 }
 
 void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)

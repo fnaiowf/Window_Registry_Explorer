@@ -7,6 +7,8 @@
 /*
 	찾기 대화상자 tab 키
 	검색 결과 탭에서 삭제,수정,바꾸기 할 때 실제로 그 값이 있는지 체크
+	값 생성 이름 중복 체크
+	값 수정할 때 외부에서 이미 삭제한 상태면 값이 생성되버림
 */
 
 #include<stdio.h>
@@ -47,6 +49,7 @@
 #define ListView_DeSelectAll(handle) {LVITEM li; li.mask = LVIF_STATE; li.stateMask = LVIS_SELECTED; SendMessage(handle, LVM_SETITEMSTATE, (WPARAM)-1, (LPARAM)&li); }
 enum SPLIT { SP_NONE, SP_VERT, SP_HORZ}; //창 분할 정보
 enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD, DATA_LOAD}; //DATA_LOAD : 기존 리스트뷰 추가 되어 있는 것들 건드리지 않고 데이터만 가져올 때
+enum FUNCSTATE{DEFAULT, FINDING, SUSPEND};
 
 typedef struct DATA { //쓰레드 매개변수
 	THREAD_TYPE t_type;;
@@ -97,8 +100,8 @@ int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int size, int 
 void enumRegistry(DATA* data); //기본키 enum
 void enumKeys(HKEY hkey, HTREEITEM parent, TCHAR* subkeystr, DATA* data, int bkey); //기본키의 서브키 enum
 void enumValue(HKEY hkey, DATA* data); //값 enum
-void changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos); //값 변경
-void changeValue(int iItem, DATA *data); //하나씩 바꾸기
+int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos); //값 변경
+int changeValue(int iItem, DATA *data); //하나씩 바꾸기
 void loadValue(TCHAR* path, HKEY basickey, int isDataLoad); //listview에 값 로드
 void deleteAllSubkey(TCHAR* path, HTREEITEM item); //서브키 모두 삭제
 void deleteAllSubkey(HKEY hkey, HTREEITEM item); //서브키 모두 삭제
