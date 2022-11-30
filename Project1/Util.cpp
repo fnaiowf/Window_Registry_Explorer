@@ -748,9 +748,36 @@ void processPopup(int id, int index, void* item)
 
 			if ((hkey = _RegOpenKeyEx(getBasicKey(temp), temp)) != NULL)
 			{
-				ListView_GetItemText(hresultLV, litem, 1, temp, sizeof(temp));
-				RegDeleteValue(hkey, temp);
-				ListView_DeleteItem(hresultLV, litem);
+				if (getListViewItem(hresultLV, LVIF_PARAM, litem).lParam < 0) //기본값 체크
+					*temp = 0;
+				else
+					ListView_GetItemText(hresultLV, litem, 1, temp, sizeof(temp));
+
+				if (RegDeleteValue(hkey, temp) == ERROR_SUCCESS)
+				{
+					TCHAR tp[2][MAX_PATH_LENGTH];
+					GetWindowText(hEdit, tp[0], 3000);
+					ListView_GetItemText(hresultLV, litem, 0, tp[1], MAX_PATH_LENGTH);
+					if (wcscmp(tp[0], tp[1]) == 0) //현재 선택되어 있는 path와 검색된 경로 비교해서 동일하면 hLV에서도 항목 삭제
+					{
+						if (*temp == 0) //기본값 체크
+						{
+							TCHAR t[11] = L"(값 설정 안 됨)";
+							ListView_SetItemText(hLV, 0, 2, t);
+						}
+						else
+						{
+							for (int i = 1; i < ListView_GetItemCount(hLV); i++) //검색된 아이템 이름과 동일한 아이템 찾기
+							{
+								ListView_GetItemText(hLV, i, 0, tp[0], sizeof(tp[0]));
+								if (wcscmp(tp[0], temp) == 0)
+									ListView_DeleteItem(hLV, i);
+							}
+						}
+					}
+
+					ListView_DeleteItem(hresultLV, litem);
+				}
 
 				RegCloseKey(hkey);
 			}
