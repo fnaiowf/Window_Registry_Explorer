@@ -208,9 +208,6 @@ void initWindow()
 
 	CheckMenuItem(GetMenu(hWndMain), ID_MENU_RESULT_TAB, MF_UNCHECKED);
 
-	RegisterHotKey(hWndMain, 0, MOD_NOREPEAT, VK_F5);
-	RegisterHotKey(hWndMain, 1, MOD_NOREPEAT | MOD_CONTROL, 'F');
-
 	SetFocus(hTV);
 }
 
@@ -839,11 +836,11 @@ void openModifyDlg(int type)
 {
 	if (!IsWindow(hDlgModify))
 	{
-		if (type == 5) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
-		else if (type == 4) hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
-		else hDlgModify = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
+		if (type == 5) DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
+		else if (type == 4) DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
+		else DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
 
-		ShowWindow(hDlgModify, SW_SHOW);
+		ShowWindow(hDlgModify, TRUE);
 	}
 }
 
@@ -917,5 +914,42 @@ int checkStringOverflow(TCHAR* string, int base, int type)
 			else
 				return 1;
 		}
+	}
+}
+
+void AcceleratorProcess(HWND hWnd, int id)
+{
+	static char tabOrder[8] = {};
+
+	switch (id)
+	{
+	case ID_ACCELERATOR_F5: //F5
+	{
+		if (funcState == FINDING) //검색 중이면 X
+			break;
+
+		DATA* d = (DATA*)malloc(sizeof(DATA));
+		d->t_type = REFRESH;
+		GetWindowText(hEdit, d->path, MAX_PATH_LENGTH);
+
+		CreateThread(NULL, 0, ThreadFunc, d, NULL, NULL);
+		break;
+	}
+	case ID_ACCELERATOR_CTRL_F: //Ctrl + F
+		if (!IsWindow(hDlgFind))
+		{
+			hDlgFind = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWndMain, (DLGPROC)FindDlgProc);
+			ShowWindow(hDlgFind, SW_SHOW);
+		}
+		break;
+	case ID_ACCELERATOR_ESC:
+		if(IsWindow(hDlgFind))
+			SendMessage(hDlgFind, WM_CLOSE, 0, 0);
+		else if (IsWindow(hDlgModify))
+			SendMessage(hDlgModify, WM_CLOSE, 0, 0);
+		break;
+	case ID_ACCELERATOR_TAB:
+		printf("!");
+		break;
 	}
 }

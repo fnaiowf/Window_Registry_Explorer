@@ -13,6 +13,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
+		hDlgModify = hDlg;
 		if (GetFocus() == hresultLV)
 		{
 			nh = hresultLV;
@@ -157,10 +158,6 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 			SetDlgItemText(hDlg, IDC_D2_VDATA, text);
 			prevBase = IsDlgButtonChecked(hDlg, IDC_D2_DEC);
-
-			SetFocus(GetDlgItem(hDlg, IDC_D2_VDATA));
-			SendMessage(GetDlgItem(hDlg, IDC_D2_VDATA), EM_SETSEL, (WPARAM)0, (LPARAM)-1);
-
 			break;
 		case IDC_D2_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
@@ -190,6 +187,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
+		hDlgModify = hDlg;
 		if (GetFocus() == hresultLV)
 		{
 			nh = hresultLV;
@@ -219,7 +217,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 			t.itemNew = b;
 			t.hdr.code = TVN_SELCHANGED;
-			SendMessageW(hWndMain, WM_NOTIFY, ID_TV, (LPARAM)&t);
+			SendMessage(hWndMain, WM_NOTIFY, ID_TV, (LPARAM)&t);
 
 			for (int i = 0; i < lvData.nMul; i++)
 			{
@@ -271,6 +269,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 		}
 
 		SetFocus(GetDlgItem(hDlg, IDC_D4_VDATA));
+		
 		return 0;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
@@ -491,10 +490,7 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 			return 1;
 		case IDC_D3_MODIFY_NO:
 			SendMessage(hDlg, WM_CLOSE, 0, 0);
-			return 1;
-		case IDCANCEL:
-			SendMessage(hDlg, WM_CLOSE, 0, 0);
-			return 1;
+			return 0;
 		}
 	break;
 	case WM_VSCROLL:

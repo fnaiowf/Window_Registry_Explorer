@@ -6,6 +6,10 @@
 
 /*
 	찾기 대화상자 tab 키
+	로딩 중 찾기 사용안함
+	multi_sz 수정 할 때 데이터 수정 안됨
+	multi_sz 수정 시 오류
+	멀티라인 ESC 종료
 */
 
 #include<stdio.h>
@@ -136,6 +140,7 @@ int checkStringOverflow(TCHAR* string, int base, int type); //check string overf
 void openPopupMenu(int x, int y); //오른쪽 마우스 버튼 누를 때 팝업 메뉴 열기
 void processPopup(int id, int index, void* item); //팝업 메뉴 프로시저
 void openModifyDlg(int type);
+void AcceleratorProcess(HWND hWnd, int id);
 
 void initWindow(); //컨트롤 생성
 SPLIT getSplitter(POINT pt); //창 분할 정보

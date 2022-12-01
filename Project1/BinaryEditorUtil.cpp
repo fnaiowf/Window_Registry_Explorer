@@ -1,7 +1,7 @@
 #include"header.h"
 #include"BinaryEditor.h"
 
-WNDPROC binaryOldEditProc[3];
+WNDPROC binaryOldEditProc[3], binaryRadioSubProc;
 int nbyte, inputOnce, scrollPos, isDrag;;
 BYTE bytes[5000];
 CLIPBOARD_DATA clipBoardData = { 0 };

@@ -200,13 +200,32 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 
 		return 0;
 	case WM_KEYDOWN:
-		if (!shortCutHandler(wParam, hWnd)) //ctrl + a 같은 단축키를 먼저 처리
+		if (wParam == VK_TAB) //tab 처리
+		{
+			CallWindowProc(binaryOldEditProc[chwidth[0] == 5 ? 0 : 1], hWnd, iMessage, wParam, lParam);
+
+			pos = GetPos(hWnd);
+			rpos = pos - SendMessage(hWnd, EM_LINEINDEX, -1, 0); //줄의 첫번째를 0으로 한 위치
+			nline = SendMessage(hWnd, EM_LINEFROMCHAR, pos, 0); //현재 커서 줄
+			pos2 = nline * (chwidth[1] * 8 + 2) + rpos / chwidth[0] * chwidth[1]; //ASCII edit의 커서 위치
+
+			SetSel(hWnd2, pos2);
+		}
+		else if (!shortCutHandler(wParam, hWnd)) //ctrl + a 같은 단축키를 먼저 처리
 		{
 			pos = GetPos(hWnd);
 			KeyDownProcess(wParam, hWnd, pos);
 		}
 
 		return 0;
+	case WM_SETFOCUS: //IDC_D3_VNAME에서 Tab으로 이동할 때 edit의 모든 내용이 선택되는데 이를 해결하기 위해 ASCII edit 커서 위치로 커서 위치 설정
+		pos = GetPos(hWnd2);
+		rpos = pos - SendMessage(hWnd2, EM_LINEINDEX, -1, 0);
+		nline = SendMessage(hWnd2, EM_LINEFROMCHAR, pos, 0);
+		pos2 = nline * (chwidth[0] * 8 + 2) + rpos / chwidth[1] * chwidth[0];
+		SetSel(hWnd, pos2);
+
+		break;
 	case WM_CONTEXTMENU: //오른쪽 마우스 눌렀을 때 메뉴
 		openBinaryEditorMenu(LOWORD(lParam), HIWORD(lParam));
 

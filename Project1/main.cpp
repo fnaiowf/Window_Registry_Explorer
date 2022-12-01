@@ -24,6 +24,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	HWND hWnd;
 	MSG Message;
 	WNDCLASS WndClass;
+	HACCEL hAccel;
 
 	g_hInst = hInstance;
 	WndClass.cbClsExtra = 0;
@@ -41,10 +42,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	hWnd = CreateWindow(lpszClass, lpszClass, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, 50, 50, 1325, 750, NULL, NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 
+	hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
+
 	while (GetMessage(&Message, NULL, NULL, NULL))
 	{
-		TranslateMessage(&Message);
-		DispatchMessage(&Message); //메세지를 프로시저로 보냄
+		if (!TranslateAccelerator(hWnd, hAccel, &Message))
+		{
+			TranslateMessage(&Message);
+			DispatchMessage(&Message); //메세지를 프로시저로 보냄
+		}
 	}
 
 	return (int)(Message.wParam);

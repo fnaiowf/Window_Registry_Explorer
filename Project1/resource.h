@@ -9,6 +9,7 @@
 #define IDD_DIALOG2                     105
 #define IDD_DIALOG3                     106
 #define IDD_DIALOG4                     107
+#define IDR_ACCELERATOR1                108
 #define IDC_BUTTON_FIND                 1001
 #define IDC_BUTTON_CHANGE               1002
 #define IDC_EDIT_FIND                   1003
@@ -54,17 +55,21 @@
 #define ID_MENU2_DELETE                 40013
 #define ID_MENU3_CUT                    40014
 #define ID_MENU3_COPY                   40015
-#define ID_MENU3_PASTE					40016
+#define ID_MENU3_PASTE                  40016
 #define ID_MENU3_DELETE                 40017
 #define ID_MENU3_SELECTALL              40018
+#define ID_ACCELERATOR_ESC              40019
+#define ID_ACCELERATOR_TAB              40021
+#define ID_ACCELERATOR_F5               40023
+#define ID_ACCELERATOR_CTRL_F           40024
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        108
-#define _APS_NEXT_COMMAND_VALUE         40019
-#define _APS_NEXT_CONTROL_VALUE         1031
+#define _APS_NEXT_RESOURCE_VALUE        113
+#define _APS_NEXT_COMMAND_VALUE         40029
+#define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

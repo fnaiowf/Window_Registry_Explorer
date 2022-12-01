@@ -19,6 +19,10 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 		TreeView_DeleteAllItems(hTV);
 	}
 
+	if(temp == NULL || ((DATA*)temp)->t_type == REFRESH)
+		if (IsWindow(hDlgFind))
+			EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_FIND), FALSE);
+
 	setMarquee(1); //프로그레스바 ON
 	if (temp != NULL && ((DATA*)temp)->t_type == CHANGE) //전부 바꾸기 체크한 경우
 	{
@@ -33,6 +37,7 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 				ListView_SetItem(hresultLV, &li);
 			}
 
+		MessageBox(hWndMain, L"변경 완료", L"알림", MB_OK);
 		EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_FIND), TRUE);
 		EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE), FALSE);
 	}
@@ -67,6 +72,9 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 				break;
 			}
 		}
+
+		if (IsWindow(hDlgFind))
+			EnableWindow(GetDlgItem(hDlgFind, IDC_BUTTON_FIND), TRUE);
 	}
 
 	funcState = DEFAULT;
@@ -105,28 +113,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		
 		CreateThread(NULL, 0, ThreadFunc, NULL, NULL, NULL); //맨 처음 레지스트리 키 로드
 		return 0;
-
-	case WM_HOTKEY:
-		switch(wParam)
-		{
-		case 0: //F5
-			{
-				DATA* d = (DATA*)malloc(sizeof(DATA));
-				d->t_type = REFRESH;
-				GetWindowText(hEdit, d->path, MAX_PATH_LENGTH);
-
-				CreateThread(NULL, 0, ThreadFunc, d, NULL, NULL);
-				break;
-			}
-		case 1: //Ctrl + F
-			if (!IsWindow(hDlgFind))
-			{
-				hDlgFind = CreateDialog(g_hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWndMain, (DLGPROC)FindDlgProc);
-				ShowWindow(hDlgFind, SW_SHOW);
-			}
-			break;
-		}
-		break;
 	case WM_SIZE:
 		if (wParam != SIZE_MINIMIZED) //프로그램 크기에 맞춰 자동 조절
 		{
@@ -188,6 +174,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		ReleaseCapture();
 		return 0;
 	case WM_COMMAND:
+		if (HIWORD(wParam) == 1)
+		{
+			AcceleratorProcess(hWnd, LOWORD(wParam));
+			break;
+		}
 		switch (LOWORD(wParam))
 		{
 		case ID_MENU_FIND:
