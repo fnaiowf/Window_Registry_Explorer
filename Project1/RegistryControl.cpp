@@ -25,7 +25,7 @@ int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int b
 	int dword, res;
 	long long qword;
 
-	if (ismodify && RegQueryValueEx(key, name, NULL, NULL, NULL, NULL) != ERROR_SUCCESS)
+	if (ismodify && (*name != 0 && RegQueryValueEx(key, name, NULL, NULL, NULL, NULL) != ERROR_SUCCESS))
 	{
 		MessageBox(hWndMain, L"해당 값이 존재하지 않습니다(새로고침 필요)", L"알림", MB_OK);
 		return 0;
