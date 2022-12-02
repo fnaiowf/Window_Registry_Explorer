@@ -1,7 +1,7 @@
 ﻿#include"header.h"
 
 HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
-WNDPROC oldDlgEditProc[3];
+WNDPROC oldDlgEditProc[4];
 TCHAR temp[MAX_PATH_LENGTH];
 
 int treeWidth, resultHeight, nchanged, isDataLoad, funcState; //funcState : enumRegistry함수에서 값이 0이면 함수를 빠져나옴(검색 중지시킬때)

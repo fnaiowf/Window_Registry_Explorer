@@ -188,6 +188,8 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 	{
 	case WM_INITDIALOG:
 		hDlgModify = hDlg;
+		oldDlgEditProc[3] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D4_VDATA), GWLP_WNDPROC, (LONG_PTR)MultiSzEditSubProc);
+
 		if (GetFocus() == hresultLV)
 		{
 			nh = hresultLV;

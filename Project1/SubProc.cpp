@@ -68,6 +68,14 @@ LRESULT CALLBACK DlgEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM 
 		return CallWindowProc(oldDlgEditProc[2], hWnd, iMessage, wParam, lParam);
 }
 
+LRESULT CALLBACK MultiSzEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+	if (iMessage == WM_KEYDOWN && LOWORD(wParam) == VK_ESCAPE) //multiline edit에서 esc 누르면 WM_CLOSE 메세지 전달되는 것을 막음
+		return 0;
+
+	return CallWindowProc(oldDlgEditProc[3], hWnd, iMessage, wParam, lParam);
+}
+
 LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	int pos, rpos, nline, pos2, prevpos[2], ascii, chwidth[2] = { 5, 2 }; //chwidth: 문자 폭, edit 종류마다 다름

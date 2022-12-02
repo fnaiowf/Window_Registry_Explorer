@@ -9,7 +9,7 @@
 	로딩 중 찾기 사용안함
 	multi_sz 수정 할 때 데이터 수정 안됨
 	multi_sz 수정 시 오류
-	멀티라인 ESC 종료
+	다이얼로그 단축키 
 */
 
 #include<stdio.h>
@@ -88,7 +88,7 @@ extern const unsigned int REG_TYPE[6];
 extern FILE* fp;
 extern HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
 extern HINSTANCE g_hInst;
-extern WNDPROC oldEditProc, oldDlgEditProc[3];
+extern WNDPROC oldEditProc, oldDlgEditProc[4];
 extern LV_DATA_MANAGE lvData;
 
 extern int treeWidth, resultHeight, nchanged, isDataLoad, funcState;
@@ -123,6 +123,7 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND, UINT, WPARAM, LPARAM);
 //SubProc.cpp
 LRESULT CALLBACK MainEditSubProc(HWND, UINT, WPARAM, LPARAM); //메인 윈도우 EDIT 서브클래싱
 LRESULT CALLBACK DlgEditSubProc(HWND, UINT, WPARAM, LPARAM); //다이얼로그 EDIT 서브클래싱
+LRESULT CALLBACK MultiSzEditSubProc(HWND, UINT, WPARAM, LPARAM); //MULTI_SZ EDIT 서브클래싱
 
 //Util.cpp
 const TCHAR* getBasicKey(int idx); //기본키 이름 리턴

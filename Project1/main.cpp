@@ -46,10 +46,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	while (GetMessage(&Message, NULL, NULL, NULL))
 	{
-		if (!TranslateAccelerator(hWnd, hAccel, &Message))
+		if (!IsDialogMessage(hDlgFind, &Message))
 		{
-			TranslateMessage(&Message);
-			DispatchMessage(&Message); //메세지를 프로시저로 보냄
+			if (!TranslateAccelerator(hWnd, hAccel, &Message))
+			{
+				TranslateMessage(&Message);
+				DispatchMessage(&Message); //메세지를 프로시저로 보냄
+			}
 		}
 	}
 
