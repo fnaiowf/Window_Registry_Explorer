@@ -99,8 +99,6 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 			if (isdefault)
 				wsprintf(name[0], L"");
 
-			wprintf(L"%ws", name[0]);
-
 			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
 			{
 				itype = getType(type);
@@ -528,10 +526,6 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 
 					lvData.byteData[i].size = nbyte;
 				}
-
-				for (int j = 0; j < nbyte; j++)
-					printf("%02X%c", lvData.byteData[i].bytes[j], (j + 1) % 8 == 0 ? '\n' : ' ');
-				printf("\n\n");
 
 				RegCloseKey(hkey);
 				SendMessage(hDlg, WM_CLOSE, 0, 0);

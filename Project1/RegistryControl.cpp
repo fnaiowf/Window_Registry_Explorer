@@ -546,6 +546,8 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 	{
 		enumValue(hkey, isDataLoad ? &data : NULL);
 		RegCloseKey(hkey);
+
+		ListView_SortItemsEx(hLV, LVCompareFunc, 0);
 	}
 }
 

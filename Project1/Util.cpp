@@ -762,7 +762,7 @@ void processPopup(int id, int index, void* item)
 			li.iGroupId = li.iGroupId ? 0 : 1;
 			ListView_SetItem(hresultLV, &li);
 
-			ListView_SortItemsEx(hresultLV, CompareFunc, 0); //아이템 그룹을 바꾸면 바꾼 아이템은 무조건 제일 아래로 가기 때문에 원래 순서대로 정렬
+			ListView_SortItemsEx(hresultLV, resultLVCompareFunc, 0); //아이템 그룹을 바꾸면 바꾼 아이템은 무조건 제일 아래로 가기 때문에 원래 순서대로 정렬
 			break;
 		case ID_MENU2_MODIFY:
 			ListView_GetItemText(hresultLV, litem, 2, temp, sizeof(temp));

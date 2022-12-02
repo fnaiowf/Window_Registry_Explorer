@@ -106,7 +106,8 @@ void createValue(int type, HTREEITEM hitem); //값 추가
 
 //Proc.cpp
 DWORD WINAPI ThreadFunc(LPVOID); // 쓰레드 함수
-int CALLBACK CompareFunc(LPARAM, LPARAM, LPARAM); //검색 결과 리스트뷰 정렬 함수
+int CALLBACK LVCompareFunc(LPARAM, LPARAM, LPARAM); //데이터 리스트뷰 오름차순 정렬
+int CALLBACK resultLVCompareFunc(LPARAM, LPARAM, LPARAM); //검색 결과 리스트뷰 항목 ID 순 정렬
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); //메인 윈도우 프로시저
 BOOL CALLBACK FindDlgProc(HWND, UINT, WPARAM, LPARAM); //찾기&바꾸기 다이얼로그 프로시저
 

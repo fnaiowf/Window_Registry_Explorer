@@ -83,9 +83,24 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 	return 0;
 }
 
-int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+int CALLBACK resultLVCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	return lParam1 < lParam2 ? -1 : 1; //lParam1, lParam2 : 리스트뷰 인덱스 lParamSort : SortItemsEx 호출할 때 넘겨주는 파라미터
+}
+
+int CALLBACK LVCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	TCHAR t[2][1000];
+
+	ListView_GetItemText(hLV, lParam1, 0, t[0], sizeof(t[0]));
+	ListView_GetItemText(hLV, lParam2, 0, t[1], sizeof(t[0]));
+
+	if (lParam1 == 0) //기본값은 제일 위에 있어야 함
+		return -1;
+	else if (lParam2 == 0)
+		return 1;
+	else
+		return wcscmp(t[0], t[1]); //오름차순
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
