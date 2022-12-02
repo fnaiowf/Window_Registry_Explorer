@@ -9,7 +9,6 @@
 	로딩 중 찾기 사용안함
 	multi_sz 수정 할 때 데이터 수정 안됨
 	multi_sz 수정 시 오류
-	다이얼로그 단축키 
 */
 
 #include<stdio.h>

@@ -51,9 +51,9 @@ LRESULT CALLBACK DlgEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM 
 	case WM_KEYUP:
 		if (wParam == VK_RETURN)
 		{
-			if (hWnd == GetDlgItem(hDlgFind, IDC_EDIT_FIND))
+			if (hWnd == GetDlgItem(hDlgFind, IDC_EDIT_FIND) && IsWindowEnabled(GetDlgItem(hDlgFind, IDC_BUTTON_FIND)))
 				SendMessage(hDlgFind, WM_COMMAND, MAKEWPARAM(IDC_BUTTON_FIND, BN_CLICKED), (LPARAM)GetDlgItem(hDlgFind, IDC_BUTTON_FIND));
-			else if (hWnd == GetDlgItem(hDlgFind, IDC_EDIT_CHANGE)) 
+			else if (hWnd == GetDlgItem(hDlgFind, IDC_EDIT_CHANGE) && IsWindowEnabled(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE)))
 				SendMessage(hDlgFind, WM_COMMAND, MAKEWPARAM(IDC_BUTTON_CHANGE, BN_CLICKED), (LPARAM)GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE));
 			else if (hWnd == GetDlgItem(hDlgModify, IDC_D2_VDATA))
 				SendMessage(hDlgModify, WM_COMMAND, MAKEWPARAM(IDC_D2_MODIFY_OK, BN_CLICKED), (LPARAM)GetDlgItem(hDlgModify, IDC_D2_MODIFY_OK));
@@ -200,7 +200,9 @@ LRESULT CALLBACK BinaryEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPAR
 
 		return 0;
 	case WM_KEYDOWN:
-		if (wParam == VK_TAB) //tab 贸府
+		if (wParam == VK_ESCAPE)
+			SendMessage(hDlgModify, WM_CLOSE, 0, 0);
+		else if (wParam == VK_TAB) //tab 贸府
 		{
 			CallWindowProc(binaryOldEditProc[chwidth[0] == 5 ? 0 : 1], hWnd, iMessage, wParam, lParam);
 
