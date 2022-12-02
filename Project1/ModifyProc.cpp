@@ -8,12 +8,13 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 	TCHAR* pos, tempvalue[MAX_VALUE_LENGTH];
 	int t = 0, itype;
 	static HWND nh = 0;
-	static int tindex = -1, isdefault = 0, prevBase;
+	static int tindex = -1, isdefault, prevBase;
 
 	switch (iMessage)
 	{
 	case WM_INITDIALOG:
 		hDlgModify = hDlg;
+		isdefault = 0;
 		if (GetFocus() == hresultLV)
 		{
 			nh = hresultLV;
@@ -97,6 +98,8 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 			if (isdefault)
 				wsprintf(name[0], L"");
+
+			wprintf(L"%ws", name[0]);
 
 			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
 			{
