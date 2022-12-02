@@ -315,7 +315,6 @@ void enumValue(HKEY hkey, DATA* data)
 						lvData.byteData[lvData.nByte].index = i + 1;
 						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
 					}
-
 					value = (TCHAR*)malloc(13 * sizeof(TCHAR));
 					wsprintf(value, L"(길이가 0인 이진값)");
 				}
@@ -385,7 +384,7 @@ void enumValue(HKEY hkey, DATA* data)
 							if (wcslen(name) == 0)
 							{
 								wsprintf(name, L"(기본값)");
-								param = param != 0 ? -param : -1;
+								param = param != 0 ? -param : INT_MIN; //기본값인데 위치가 0이면 기본값을 표시하기 위해 임의로 INT_MIN 넣음
 							}
 
 							if(data->t_type == FIND)
@@ -498,10 +497,11 @@ int changeValue(int n, DATA* tarData)
 	ListView_GetItem(hresultLV, &li); //파라미터 값이 문자열에서 찾은 위치
 	
 	tarData->type = REG_TYPE[getType(type)];
+	if (li.lParam < 0) name[0] = 0; //기본값인 경우 값 이름이 ""
 
 	if ((hkey = _RegOpenKeyEx(ti.lParam, path)) != NULL)
 	{
-		if(changeValue(hkey, name, value, tarData, li.lParam))
+		if(changeValue(hkey, name, value, tarData, li.lParam < 0 ? (li.lParam == INT_MIN ? 0 : -li.lParam) : li.lParam)) //기본값인 경우 원래 pos로 변환
 		{
 			if (tarData->type == REG_MULTI_SZ)
 				cutString(value);

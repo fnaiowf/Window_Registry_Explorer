@@ -942,14 +942,5 @@ void AcceleratorProcess(HWND hWnd, int id)
 			ShowWindow(hDlgFind, SW_SHOW);
 		}
 		break;
-	case ID_ACCELERATOR_ESC:
-		if(IsWindow(hDlgFind))
-			SendMessage(hDlgFind, WM_CLOSE, 0, 0);
-		else if (IsWindow(hDlgModify))
-			SendMessage(hDlgModify, WM_CLOSE, 0, 0);
-		break;
-	case ID_ACCELERATOR_TAB:
-		printf("!");
-		break;
 	}
 }

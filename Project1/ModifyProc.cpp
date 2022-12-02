@@ -73,6 +73,12 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 		oldDlgEditProc[2] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D2_VDATA), GWLP_WNDPROC, (LONG_PTR)DlgEditSubProc);
 		return 0;
 	case WM_COMMAND:
+		if (wParam == 2) //esc 누를 때 전달되는 메세지(왜인지 모름)
+		{
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			break;
+		}
+
 		switch (LOWORD(wParam))
 		{
 		case IDC_D2_MODIFY_OK:
@@ -188,7 +194,6 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 	{
 	case WM_INITDIALOG:
 		hDlgModify = hDlg;
-		oldDlgEditProc[3] = (WNDPROC)SetWindowLongPtr(GetDlgItem(hDlg, IDC_D4_VDATA), GWLP_WNDPROC, (LONG_PTR)MultiSzEditSubProc);
 
 		if (GetFocus() == hresultLV)
 		{
@@ -274,6 +279,12 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 		
 		return 0;
 	case WM_COMMAND:
+		if (wParam == 2) //esc 누를 때 전달되는 메세지(왜인지 모름)
+		{
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			break;
+		}
+
 		switch (LOWORD(wParam))
 		{
 		case IDC_D4_MODIFY_OK:
@@ -448,6 +459,12 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 			return DefWindowProc(hDlg, iMessage, wParam, lParam);
 		break;
 	case WM_COMMAND :
+		if (wParam == 2) //esc 누를 때 전달되는 메세지(왜인지 모름)
+		{
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			break;
+		}
+
 		switch (LOWORD(wParam))
 		{
 		case IDC_D3_MODIFY_OK:

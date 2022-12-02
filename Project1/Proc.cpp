@@ -1,7 +1,7 @@
 ﻿#include"header.h"
 
 HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
-WNDPROC oldDlgEditProc[4];
+WNDPROC oldDlgEditProc[3];
 TCHAR temp[MAX_PATH_LENGTH];
 
 int treeWidth, resultHeight, nchanged, isDataLoad, funcState; //funcState : enumRegistry함수에서 값이 0이면 함수를 빠져나옴(검색 중지시킬때)
@@ -414,6 +414,12 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 		index = -1; //초기값 음수로 설정
 		return 0;
 	case WM_COMMAND:
+		if (wParam == 2) //esc 누를 때 전달되는 메세지(왜인지 모름)
+		{
+			SendMessage(hDlg, WM_CLOSE, 0, 0);
+			break;
+		}
+
 		switch (LOWORD(wParam))
 		{
 		case IDC_CHECK_CHANGE:

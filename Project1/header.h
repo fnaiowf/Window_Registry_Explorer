@@ -88,7 +88,7 @@ extern const unsigned int REG_TYPE[6];
 extern FILE* fp;
 extern HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
 extern HINSTANCE g_hInst;
-extern WNDPROC oldEditProc, oldDlgEditProc[4];
+extern WNDPROC oldEditProc, oldDlgEditProc[3];
 extern LV_DATA_MANAGE lvData;
 
 extern int treeWidth, resultHeight, nchanged, isDataLoad, funcState;
