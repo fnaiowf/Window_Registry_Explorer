@@ -5,10 +5,7 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 /*
-	찾기 대화상자 tab 키
-	로딩 중 찾기 사용안함
-	multi_sz 수정 할 때 데이터 수정 안됨
-	multi_sz 수정 시 오류
+	qword 수정할 때 기본값이 바뀜
 */
 
 #include<stdio.h>

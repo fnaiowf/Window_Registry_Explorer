@@ -188,7 +188,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 	HKEY hkey;
 	TCHAR text[MAX_VALUE_LENGTH], * pos;
-	int i, len, idx, sublen;
+	int i, len, idx, sublen, count;
 
 	switch (iMessage)
 	{
@@ -225,15 +225,6 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 			t.itemNew = b;
 			t.hdr.code = TVN_SELCHANGED;
 			SendMessage(hWndMain, WM_NOTIFY, ID_TV, (LPARAM)&t);
-
-			for (int i = 0; i < lvData.nMul; i++)
-			{
-				if (wcscmp(lvData.mulstrData[i].name, name[0]) == 0)
-				{
-					tarindex = i;
-					break;
-				}
-			}
 		}
 		else
 			GetWindowText(hEdit, path[0], sizeof(path[0]));
@@ -242,6 +233,15 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 		if (tindex)
 		{
+			for (int i = 0; i < lvData.nMul; i++) //선택한 항목에 해당하는 데이터 배열 인덱스 찾기
+			{
+				if (wcscmp(lvData.mulstrData[i].name, name[0]) == 0)
+				{
+					tarindex = i;
+					break;
+				}
+			}
+
 			memset(text, 0, sizeof(text));
 			for (int j = 0; j < lvData.mulstrData[tarindex].nString; j++)
 			{
@@ -259,6 +259,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 			{
 				if (lvData.mulstrData[i].index == ListView_GetSelectionMark(nh)) //hLV에서는 인덱스만 비교하는 것이 연산이 더 적음
 				{
+					tarindex = i;
 					memset(text, 0, sizeof(text));
 					for (int j = 0; j < lvData.mulstrData[i].nString; j++)
 					{
@@ -292,6 +293,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 			pos = text;
 			len = wcslen(text);
 			idx = 0;
+			count = 0;
 			memset(temp, 0, sizeof(temp));
 
 			for (i = 0; i < len; i++)
@@ -307,9 +309,19 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 						continue;
 					}
+
+					count++;
 					text[i] = 0; //문자열 자르기 위해 NULL로 바꿈
 
 					sublen = wcslen(pos);
+
+					if (lvData.mulstrData[tarindex].nString < count) //기존 문자열 개수보다 많아지면 메모리 추가 할당
+					{
+						lvData.mulstrData[tarindex].strings = (TCHAR**)realloc(lvData.mulstrData[tarindex].strings, sizeof(TCHAR*) * count); //문자열들 담는 변수 크기 재할당
+						lvData.mulstrData[tarindex].strings[count - 1] = (TCHAR*)malloc(sizeof(TCHAR) * (sublen + 1)); //문자열 길이만큼 할당
+					}
+
+					wsprintf(lvData.mulstrData[tarindex].strings[count - 1], pos); //수정된 데이터 입력
 
 					wcscpy(temp + idx, pos);
 					idx += sublen + 1;
@@ -322,16 +334,39 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 			}
 
 			if (i == len && i != 0) //문자열의 끝이 \r\n이 아닌 경우에는 i+1==len이 만족하지 않아 마지막 문자열은 안 들어감, 따로 처리 / idx++ 해주는 이유는 문자열 끝에 NULL 추가
+			{
+				sublen = wcslen(pos);
 				wcscpy(temp + idx++, pos);
+				count++;
+
+				if (lvData.mulstrData[tarindex].nString < count)
+				{
+					lvData.mulstrData[tarindex].strings = (TCHAR**)realloc(lvData.mulstrData[tarindex].strings, sizeof(TCHAR*) * count);
+					lvData.mulstrData[tarindex].strings[count - 1] = (TCHAR*)malloc(sizeof(TCHAR) * (sublen + 1));
+				}
+
+				wsprintf(lvData.mulstrData[tarindex].strings[count - 1], pos);
+			}
 
 			idx += wcslen(pos) + 1; //+1 해주는 이유는 MULTI_SZ는 끝에 널 문자 하나 더 추가되어 있기 때문
+
+			if (lvData.mulstrData[tarindex].nString > count) //원래 문자열 개수보다 적은 경우 그만큼 free
+			{
+				for (int k = count; k < lvData.mulstrData[tarindex].nString; k++)
+					free(lvData.mulstrData[tarindex].strings[k]);
+
+				lvData.mulstrData[tarindex].strings = (TCHAR**)realloc(lvData.mulstrData[tarindex].strings, sizeof(TCHAR*) * count);
+			}
+
+			lvData.mulstrData[tarindex].nString = count;
+			lvData.mulstrData[tarindex].size = idx * sizeof(TCHAR);
 
 			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
 			{
 				if (_RegSetValueEx(hkey, name[0], REG_MULTI_SZ, (BYTE*)temp, idx * sizeof(TCHAR), -1, 1))
 				{
 					concatMulSz(temp, idx - 2, text); //맨 뒤에 널 2개 있어서 idx-2
-					cutString(temp);
+					cutString(text);
 
 					ListView_SetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, text);
 
@@ -340,15 +375,10 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 						GetWindowText(hEdit, path[1], sizeof(path[0]));
 
 						if (wcscmp(path[0], path[1]) == 0)
-						{
 							ListView_SetItemText(hLV, lvData.mulstrData[tarindex].index, 2, text);
-							splitMulSz(temp, idx * sizeof(TCHAR), &(lvData.mulstrData[tarindex].strings), 0); //할당 안하고 데이터 넣기만
-						}
 					}
 					else
 					{
-						splitMulSz(temp, idx * sizeof(TCHAR), &(lvData.mulstrData[tarindex].strings), 0);
-
 						int t = 0;
 						while (t != ListView_GetItemCount(hresultLV))
 						{

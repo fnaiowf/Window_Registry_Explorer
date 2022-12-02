@@ -275,7 +275,7 @@ void enumValue(HKEY hkey, DATA* data)
 						lvData.mulstrData[lvData.nMul].size = len2;
 						lvData.mulstrData[lvData.nMul].nString = 0;
 
-						lvData.mulstrData[lvData.nMul].index = i + 1;
+						lvData.mulstrData[lvData.nMul].index = i + defValueOpt;
 						lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
 					}
 
@@ -294,7 +294,7 @@ void enumValue(HKEY hkey, DATA* data)
 						lvData.mulstrData[lvData.nMul].nString = c;
 						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
 
-						lvData.mulstrData[lvData.nMul].index = i + 1;
+						lvData.mulstrData[lvData.nMul].index = i + defValueOpt;
 						lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
 					}
 				}
@@ -312,7 +312,7 @@ void enumValue(HKEY hkey, DATA* data)
 						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE));
 						lvData.byteData[lvData.nByte].size = len2;
 
-						lvData.byteData[lvData.nByte].index = i + 1;
+						lvData.byteData[lvData.nByte].index = i + defValueOpt;
 						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
 					}
 					value = (TCHAR*)malloc(13 * sizeof(TCHAR));
@@ -327,7 +327,7 @@ void enumValue(HKEY hkey, DATA* data)
 
 						RegQueryValueEx(hkey, name, NULL, NULL, lvData.byteData[lvData.nByte].bytes, &len2);
 
-						lvData.byteData[lvData.nByte].index = i + 1;
+						lvData.byteData[lvData.nByte].index = i + defValueOpt;
 						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
 					}
 				}

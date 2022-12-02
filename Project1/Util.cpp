@@ -857,7 +857,7 @@ void freeMemory()
 	{
 		for (int i = 0; i < lvData.nMul; i++)
 		{
-			for (int j = 0; j < lvData.mulstrData[j].nString; j++)
+			for (int j = 0; j < lvData.mulstrData[i].nString; j++)
 				free((lvData.mulstrData[i]).strings[j]);
 
 			free((lvData.mulstrData[i]).strings);
