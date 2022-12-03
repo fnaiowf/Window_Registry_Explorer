@@ -13,10 +13,8 @@
 #include"resource.h"
 
 /*
-	추가할 때 이름 대소문자 구분 x
 	multi_sz 수정할 때 앞쪽에 추가하면 오류
 	multi_sz 바꾸기 잘 안됨
-	loadvalue에서 정렬할 때 오류 가끔
 */
 
 #ifdef UNICODE

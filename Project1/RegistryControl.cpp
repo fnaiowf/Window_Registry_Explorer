@@ -559,7 +559,7 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 
 			if (t > 0)
 				lvData.mulstrData[t - 1].index = i;
-			else
+			else if(t < 0)
 				lvData.byteData[-t - 1].index = i;
 		}
 	}
