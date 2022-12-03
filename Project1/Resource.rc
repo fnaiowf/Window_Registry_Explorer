@@ -73,6 +73,7 @@ BEGIN
             MENUITEM "키",                           ID_MENU2_KEY
             MENUITEM SEPARATOR
             MENUITEM "문자열",                         ID_MENU2_STR
+            MENUITEM "이진값",                         ID_MENU2_BINARY
             MENUITEM "DWORD",                       ID_MENU2_DWORD
             MENUITEM "QWORD",                       ID_MENU2_QWORD
             MENUITEM "확장 가능한 문자열",                  ID_MENU_EXSTR

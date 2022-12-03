@@ -4,10 +4,6 @@
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-/*
-	다중 문자열 만드는 거 안됨
-*/
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<windows.h>

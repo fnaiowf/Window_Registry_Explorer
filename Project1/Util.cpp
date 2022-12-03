@@ -261,7 +261,9 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 	it = getType(type);
 	if (it == 5) //REG_BINARY
 	{
-		if (lvData.byteData[lvData.nByte - 1].size != 0)
+		if (value == NULL) //BINARY 값을 만들 경우 NULL로 구분
+			item.pszText = NULL;
+		else if (lvData.byteData[lvData.nByte - 1].size != 0)
 		{
 			b = (TCHAR*)calloc(lvData.byteData[lvData.nByte - 1].size * 3, sizeof(TCHAR));
 			byteToString(lvData.byteData[lvData.nByte - 1].bytes, lvData.byteData[lvData.nByte - 1].size, b);
@@ -277,7 +279,9 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 	{
 		if (hlv == hLV)
 		{
-			if (lvData.mulstrData[lvData.nMul - 1].size > 2)
+			if (value == NULL) //MULTI_SZ 값을 만들 경우 value에 NULL 줘서 구분
+				item.pszText = NULL;
+			else if (lvData.mulstrData[lvData.nMul - 1].size > 2)
 			{
 				b = (TCHAR*)calloc(lvData.mulstrData[lvData.nMul - 1].size, sizeof(TCHAR));
 				wsprintf(b, L"%ws", lvData.mulstrData[lvData.nMul - 1].strings[0]);
@@ -292,7 +296,7 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 			else
 				item.pszText = value;
 		}
-		else //검색 결과 탭에 추가할 때는 value에 multi_sz가 연결된 상태로 전달됨
+		else //검색 결과 탭에 추가할 때는 value에 multi_sz가 NULL문자로 연결된 상태로 전달됨
 		{
 			cutString(value);
 			item.pszText = value;
@@ -522,7 +526,7 @@ void openPopupMenu(int x, int y)
 	menu = LoadMenu(g_hInst, MAKEINTRESOURCE(IDR_MENU2));
 	hPopup = GetSubMenu(menu, 0);
 
-	if (tvinfo.hItem != NULL)
+	if (tvinfo.hItem != NULL) //TreeView
 	{
 		TreeView_SelectItem(hTV, tvinfo.hItem);
 		DeleteMenu(hPopup, 0, MF_BYPOSITION);
@@ -544,7 +548,7 @@ void openPopupMenu(int x, int y)
 		index = 0;
 		id = TrackPopupMenu(hPopup, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWndMain, NULL); //TPM_RETURNCMD : 선택하면 값을 바로 리턴, 원래는 WM_COMMAND로 결과를 전달함
 	}
-	else if (lvinfo.iItem != -1)
+	else if (lvinfo.iItem != -1) //ListView1
 	{
 		DeleteMenu(hPopup, 0, MF_BYPOSITION);
 		DeleteMenu(hPopup, 0, MF_BYPOSITION);
@@ -574,7 +578,7 @@ void openPopupMenu(int x, int y)
 
 		id = TrackPopupMenu(hPopup, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWndMain, NULL);
 	}
-	else if (lvinfo2.iItem != -1)
+	else if (lvinfo2.iItem != -1) //ListView2
 	{
 		if (getListViewItem(hresultLV, LVIF_GROUPID, lvinfo2.iItem).iGroupId == 2)
 			return;
@@ -664,6 +668,7 @@ void processPopup(int id, int index, void* item)
 			}
 			break;
 		case ID_MENU2_STR:
+		case ID_MENU2_BINARY:
 		case ID_MENU2_DWORD:
 		case ID_MENU2_QWORD:
 		case ID_MENU_EXSTR:
@@ -820,6 +825,7 @@ void processPopup(int id, int index, void* item)
 		switch (id)
 		{
 		case ID_MENU2_STR:
+		case ID_MENU2_BINARY:
 		case ID_MENU2_DWORD:
 		case ID_MENU2_QWORD:
 		case ID_MENU_EXSTR:

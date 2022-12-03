@@ -90,10 +90,12 @@ int CALLBACK resultLVCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSo
 
 int CALLBACK LVCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	TCHAR t[2][1000];
+	TCHAR t[2][1000], type[2][20];
 
 	ListView_GetItemText(hLV, lParam1, 0, t[0], sizeof(t[0]));
 	ListView_GetItemText(hLV, lParam2, 0, t[1], sizeof(t[0]));
+	ListView_GetItemText(hLV, lParam2, 1, type[0], sizeof(type[0]));
+	ListView_GetItemText(hLV, lParam2, 1, type[1], sizeof(type[0]));
 
 	if (lParam1 == 0) //기본값은 제일 위에 있어야 함
 		return -1;
@@ -305,7 +307,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			case LVN_ENDLABELEDIT:
 				{
 					HKEY hkey;
-					TCHAR type[20], ivalue[15] = L"0x00000000 (0)", *data;
+					TCHAR type[20], ivalue[15] = L"0x00000000 (0)", data[2];
 					int index = ((LPNMLVDISPINFO)lParam)->item.iItem, result, itype;
 
 					GetWindowText(hEdit, path, sizeof(path));
@@ -325,15 +327,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						}
 
 						if (itype >= 2)
-							data = NULL;
+							*data = 0;
 						else
-						{
-							data = (TCHAR*)malloc(sizeof(TCHAR));
 							*data = L'0';
-						}
-						result = _RegSetValueEx(hkey, temp, REG_TYPE[itype], (BYTE*)data, -1, 1, 0);
 
-						if (data != NULL) free(data);
+						result = _RegSetValueEx(hkey, temp, REG_TYPE[itype], (BYTE*)data, itype >= 4 ? 0 : -1, 1, 0);
 
 						if (result)
 						{
@@ -341,6 +339,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 							ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED); //전부 선택 해제
 							ListView_SetItemState(hLV, index, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
+
+							if (itype == 4)
+							{
+								lvData.mulstrData[lvData.nMul].strings = 0;
+								lvData.mulstrData[lvData.nMul].index = index;
+								lvData.mulstrData[lvData.nMul].nString = 0;
+								wsprintf(lvData.mulstrData[lvData.nMul].name, temp);
+								lvData.mulstrData[lvData.nMul].size = 0;
+								lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
+							}
+							else if (itype == 5)
+							{
+								lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(1);
+								lvData.byteData[lvData.nByte].index = index;
+								wsprintf(lvData.byteData[lvData.nByte].name, temp);
+								lvData.byteData[lvData.nByte].size = 0;
+
+								lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
+							}
 						}
 
 						RegCloseKey(hkey);

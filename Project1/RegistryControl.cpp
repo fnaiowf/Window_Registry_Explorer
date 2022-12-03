@@ -273,6 +273,7 @@ void enumValue(HKEY hkey, DATA* data)
 					{
 						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
 						lvData.mulstrData[lvData.nMul].size = len2;
+						lvData.mulstrData[lvData.nMul].strings = 0;
 						lvData.mulstrData[lvData.nMul].nString = 0;
 
 						lvData.mulstrData[lvData.nMul].index = i + defValueOpt;
@@ -305,6 +306,7 @@ void enumValue(HKEY hkey, DATA* data)
 				wsprintf(value, L"(길이가 0인 이진값)");
 				break;
 			case REG_BINARY:
+				value = (TCHAR*)malloc(13 * sizeof(TCHAR));
 				if (len2 == 0)
 				{
 					if (data == NULL || data->t_type == DATA_LOAD)
@@ -315,7 +317,6 @@ void enumValue(HKEY hkey, DATA* data)
 						lvData.byteData[lvData.nByte].index = i + defValueOpt;
 						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
 					}
-					value = (TCHAR*)malloc(13 * sizeof(TCHAR));
 					wsprintf(value, L"(길이가 0인 이진값)");
 				}
 				else
@@ -547,7 +548,7 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 		enumValue(hkey, isDataLoad ? &data : NULL);
 		RegCloseKey(hkey);
 
-		ListView_SortItemsEx(hLV, LVCompareFunc, 0);
+		//ListView_SortItemsEx(hLV, LVCompareFunc, 0);
 	}
 }
 

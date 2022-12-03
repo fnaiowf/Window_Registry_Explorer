@@ -278,7 +278,6 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 		}
 
 		SetFocus(GetDlgItem(hDlg, IDC_D4_VDATA));
-		
 		return 0;
 	case WM_COMMAND:
 		if (wParam == 2) //esc 누를 때 전달되는 메세지(왜인지 모름)
@@ -318,7 +317,11 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 					if (lvData.mulstrData[tarindex].nString < count) //기존 문자열 개수보다 많아지면 메모리 추가 할당
 					{
-						lvData.mulstrData[tarindex].strings = (TCHAR**)realloc(lvData.mulstrData[tarindex].strings, sizeof(TCHAR*) * count); //문자열들 담는 변수 크기 재할당
+						if (count == 1)
+							lvData.mulstrData[tarindex].strings = (TCHAR**)malloc(sizeof(TCHAR*)); //count가 1인 경우에는 strings에 할당이 안되어있음
+						else
+							lvData.mulstrData[tarindex].strings = (TCHAR**)realloc(lvData.mulstrData[tarindex].strings, sizeof(TCHAR*) * count); //문자열들 담는 변수 크기 재할당
+
 						lvData.mulstrData[tarindex].strings[count - 1] = (TCHAR*)malloc(sizeof(TCHAR) * (sublen + 1)); //문자열 길이만큼 할당
 					}
 
@@ -342,7 +345,11 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 				if (lvData.mulstrData[tarindex].nString < count)
 				{
-					lvData.mulstrData[tarindex].strings = (TCHAR**)realloc(lvData.mulstrData[tarindex].strings, sizeof(TCHAR*) * count);
+					if (count == 1)
+						lvData.mulstrData[tarindex].strings = (TCHAR**)malloc(sizeof(TCHAR*));
+					else
+						lvData.mulstrData[tarindex].strings = (TCHAR**)realloc(lvData.mulstrData[tarindex].strings, sizeof(TCHAR*) * count);
+
 					lvData.mulstrData[tarindex].strings[count - 1] = (TCHAR*)malloc(sizeof(TCHAR) * (sublen + 1));
 				}
 

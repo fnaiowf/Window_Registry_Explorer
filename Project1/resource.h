@@ -52,21 +52,22 @@
 #define ID_MENU2_STR                    40010
 #define ID_MENU_EXSTR                   40011
 #define ID_MENU2_MULSTR                 40012
-#define ID_MENU2_DELETE                 40013
-#define ID_MENU3_CUT                    40014
-#define ID_MENU3_COPY                   40015
-#define ID_MENU3_PASTE                  40016
-#define ID_MENU3_DELETE                 40017
-#define ID_MENU3_SELECTALL              40018
-#define ID_ACCELERATOR_F5               40019
-#define ID_ACCELERATOR_CTRL_F           40020
+#define ID_MENU2_BINARY                 40013
+#define ID_MENU2_DELETE                 40014
+#define ID_MENU3_CUT                    40015
+#define ID_MENU3_COPY                   40016
+#define ID_MENU3_PASTE                  40017
+#define ID_MENU3_DELETE                 40018
+#define ID_MENU3_SELECTALL              40019
+#define ID_ACCELERATOR_F5               40020
+#define ID_ACCELERATOR_CTRL_F           40021
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        109
-#define _APS_NEXT_COMMAND_VALUE         40021
+#define _APS_NEXT_COMMAND_VALUE         40022
 #define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
