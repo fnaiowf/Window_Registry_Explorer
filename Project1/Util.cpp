@@ -268,8 +268,6 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 			b = (TCHAR*)calloc(lvData.byteData[lvData.nByte - 1].size * 3, sizeof(TCHAR));
 			byteToString(lvData.byteData[lvData.nByte - 1].bytes, lvData.byteData[lvData.nByte - 1].size, b);
 
-			cutString(b); //문자열 길면 자름
-
 			item.pszText = b;
 		}
 		else
@@ -289,18 +287,13 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 				for (int i = 1; i < lvData.mulstrData[lvData.nMul - 1].nString; i++)
 					wsprintf(b, L"%ws %ws", b, (lvData.mulstrData[lvData.nMul - 1].strings)[i]);
 
-				cutString(b);
-
 				item.pszText = b;
 			}
 			else
 				item.pszText = value;
 		}
 		else //검색 결과 탭에 추가할 때는 value에 multi_sz가 NULL문자로 연결된 상태로 전달됨
-		{
-			cutString(value);
 			item.pszText = value;
-		}
 	}
 	else
 		item.pszText = value;
@@ -457,15 +450,6 @@ void concatMulSz(TCHAR* strings, int len, TCHAR* ret)
 	{
 		if (strings[i] == 0) ret[i] = ' ';
 		else ret[i] = strings[i];
-	}
-}
-
-void cutString(TCHAR* string)
-{
-	if (wcslen(string) >= 200)
-	{
-		string[191] = 0; //레지스트리 탐색기에서 보여주는 최대 길이
-		wsprintf(string, L"%ws...", string);
 	}
 }
 

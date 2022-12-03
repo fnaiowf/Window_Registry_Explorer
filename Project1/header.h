@@ -12,6 +12,13 @@
 #include<commctrl.h>
 #include"resource.h"
 
+/*
+	추가할 때 이름 대소문자 구분 x
+	multi_sz 수정할 때 앞쪽에 추가하면 오류
+	multi_sz 바꾸기 잘 안됨
+	loadvalue에서 정렬할 때 오류 가끔
+*/
+
 #ifdef UNICODE
 #define LPNMLVDISPINFO          LPNMLVDISPINFOW
 #else
@@ -54,18 +61,18 @@ typedef struct DATA { //쓰레드 매개변수
 };
 
 typedef struct BYTE_DATA { //키 선택할 때 REG_BINARY타입은 데이터 따로 저장
+	int index;
 	BYTE* bytes;
 	TCHAR name[MAX_KEY_LENGTH];
 	int size;
-	int index;
 };
 
 typedef struct MULSZ_DATA {//키 선택할 때 REG_MULTI_SZ 타입은 데이터 따로 저장
+	int index;
 	TCHAR** strings;
 	TCHAR name[MAX_KEY_LENGTH];
 	int size;
 	int nString;
-	int index;
 };
 
 typedef struct LV_DATA_MANAGE {
@@ -127,7 +134,6 @@ int getType(TCHAR* type); //레지스트리 타입 문자열 -> 정의된 값
 void byteToString(BYTE* bytes, int size, TCHAR* dest); //Byte -> String
 int splitMulSz(TCHAR* data, int size, TCHAR*** strings, int alloc); //MULTI_SZ 값 처리
 void concatMulSz(TCHAR* strings, int len, TCHAR* ret); //MULTI_SZ 값 NULL문자 공백으로 바꿈
-void cutString(TCHAR* string); //200자 넘으면 문자열 자름
 int is_number(TCHAR* string, int base); //문자열이 숫자인지 체크
 int checkStringOverflow(TCHAR* string, int base, int type); //check string overflow / underflow
 

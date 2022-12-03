@@ -374,7 +374,6 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 				if (_RegSetValueEx(hkey, name[0], REG_MULTI_SZ, (BYTE*)temp, idx * sizeof(TCHAR), -1, 1))
 				{
 					concatMulSz(temp, idx - 2, text); //맨 뒤에 널 2개 있어서 idx-2
-					cutString(text);
 
 					ListView_SetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, text);
 
@@ -523,7 +522,6 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 						TCHAR* b = (TCHAR*)calloc(nbyte * 3, sizeof(TCHAR));
 						byteToString(bytes, nbyte, b);
 
-						cutString(b);
 						ListView_SetItemText(hLV, ListView_GetSelectionMark(hLV), 2, b);
 
 						memset(lvData.byteData[i].bytes, 0, sizeof(BYTE) * lvData.byteData[i].size);

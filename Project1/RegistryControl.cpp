@@ -223,6 +223,7 @@ void enumValue(HKEY hkey, DATA* data)
 	TCHAR name[MAX_VALUE_LENGTH], * value = NULL, * adr, stype[30];
 	BYTE* byte;
 	int targetLen, defValueOpt = 1;
+	LPARAM lparam;
 	LVITEM li;
 
 	while (RegEnumValue(hkey, i, name, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
@@ -230,6 +231,7 @@ void enumValue(HKEY hkey, DATA* data)
 		if (funcState == SUSPEND) return;
 
 		len = MAX_KEY_LENGTH;
+		lparam = 0;
 
 		if (RegQueryValueEx(hkey, name, NULL, &type, NULL, &len2) == ERROR_SUCCESS)
 		{
@@ -275,9 +277,10 @@ void enumValue(HKEY hkey, DATA* data)
 						lvData.mulstrData[lvData.nMul].size = len2;
 						lvData.mulstrData[lvData.nMul].strings = 0;
 						lvData.mulstrData[lvData.nMul].nString = 0;
-
 						lvData.mulstrData[lvData.nMul].index = i + defValueOpt;
+
 						lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
+						lparam = lvData.nMul; //리스트뷰 사전순 정렬 후에 데이터 배열 인덱스 수정하기 위해 현재 아이템이 데이터 배열의 몇번째 인덱스에 연결되어 있는지 저장
 					}
 
 					value[0] = 0;
@@ -294,12 +297,12 @@ void enumValue(HKEY hkey, DATA* data)
 						lvData.mulstrData[lvData.nMul].size = len2;
 						lvData.mulstrData[lvData.nMul].nString = c;
 						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
-
 						lvData.mulstrData[lvData.nMul].index = i + defValueOpt;
+						
 						lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
+						lparam = lvData.nMul;
 					}
 				}
-
 				break;
 			case REG_NONE:
 				value = (TCHAR*)malloc(sizeof(TCHAR) * 13);
@@ -313,9 +316,10 @@ void enumValue(HKEY hkey, DATA* data)
 					{
 						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE));
 						lvData.byteData[lvData.nByte].size = len2;
-
 						lvData.byteData[lvData.nByte].index = i + defValueOpt;
+
 						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
+						lparam = -lvData.nByte; //binary와 multi_sz 구분하기 위해 음수로 표현
 					}
 					wsprintf(value, L"(길이가 0인 이진값)");
 				}
@@ -325,11 +329,13 @@ void enumValue(HKEY hkey, DATA* data)
 					{
 						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE) * len2);
 						lvData.byteData[lvData.nByte].size = len2;
-
+						
 						RegQueryValueEx(hkey, name, NULL, NULL, lvData.byteData[lvData.nByte].bytes, &len2);
 
 						lvData.byteData[lvData.nByte].index = i + defValueOpt;
+
 						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
+						lparam = -lvData.nByte;
 					}
 				}
 				break;
@@ -422,7 +428,7 @@ void enumValue(HKEY hkey, DATA* data)
 					ListView_SetItem(hLV, &li);
 				}
 				else
-					addLVitem(hLV, name, stype, value, i + defValueOpt, NULL, 0);
+					addLVitem(hLV, name, stype, value, i + defValueOpt, NULL, lparam); //multi_sz, binary 외에 lparam은 0
 			}
 
 			if(!value) free(value);
@@ -504,9 +510,6 @@ int changeValue(int n, DATA* tarData)
 	{
 		if(changeValue(hkey, name, value, tarData, li.lParam < 0 ? (li.lParam == INT_MIN ? 0 : -li.lParam) : li.lParam)) //기본값인 경우 원래 pos로 변환
 		{
-			if (tarData->type == REG_MULTI_SZ)
-				cutString(value);
-
 			if (tarData->type == REG_DWORD)
 			{
 				toi = wcstol(value, NULL, tarData->base ? 10 : 16);
@@ -537,6 +540,7 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 	HKEY hkey;
 	TCHAR temp[3][10] = { L"(기본값)", L"REG_SZ", L"(값 설정 안됨)" };
 	DATA data;
+	int t;
 
 	if (isDataLoad)
 		data.t_type = DATA_LOAD;
@@ -548,7 +552,16 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 		enumValue(hkey, isDataLoad ? &data : NULL);
 		RegCloseKey(hkey);
 
-		//ListView_SortItemsEx(hLV, LVCompareFunc, 0);
+		ListView_SortItemsEx(hLV, LVCompareFunc, 0);
+		for (int i = 1; i < ListView_GetItemCount(hLV); i++) //정렬하면 multi_sz와 byte 데이터 따로 저장해놓은 배열에는 인덱스가 예전 걸로 되어 있어서 따로 바꿔줘야 함
+		{
+			t = getListViewItem(hLV, LVIF_PARAM, i).lParam;
+
+			if (t > 0)
+				lvData.mulstrData[t - 1].index = i;
+			else
+				lvData.byteData[-t - 1].index = i;
+		}
 	}
 }
 

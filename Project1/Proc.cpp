@@ -94,15 +94,13 @@ int CALLBACK LVCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 	ListView_GetItemText(hLV, lParam1, 0, t[0], sizeof(t[0]));
 	ListView_GetItemText(hLV, lParam2, 0, t[1], sizeof(t[0]));
-	ListView_GetItemText(hLV, lParam2, 1, type[0], sizeof(type[0]));
-	ListView_GetItemText(hLV, lParam2, 1, type[1], sizeof(type[0]));
 
 	if (lParam1 == 0) //기본값은 제일 위에 있어야 함
 		return -1;
 	else if (lParam2 == 0)
 		return 1;
 	else
-		return wcscmp(t[0], t[1]); //오름차순
+		return _wcsicmp(t[0], t[1]); //대소문자 구분 없이 오름차순
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -340,7 +338,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 							ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED); //전부 선택 해제
 							ListView_SetItemState(hLV, index, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
 
-							if (itype == 4)
+							if (itype == 4) //데이터 배열 추가 multi_sz
 							{
 								lvData.mulstrData[lvData.nMul].strings = 0;
 								lvData.mulstrData[lvData.nMul].index = index;
@@ -349,7 +347,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 								lvData.mulstrData[lvData.nMul].size = 0;
 								lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
 							}
-							else if (itype == 5)
+							else if (itype == 5) //binary
 							{
 								lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(1);
 								lvData.byteData[lvData.nByte].index = index;
