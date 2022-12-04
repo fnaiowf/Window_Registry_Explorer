@@ -360,23 +360,24 @@ void enumValue(HKEY hkey, DATA* data)
 
 						free(concat);
 
-						for (int i = 0, aclen = 0; i < c; i++) //aclen : multi_sz를 공백으로 합친 문자열에서 찾은 위치
+						for (int j = 0, aclen = 0; j < c; j++) //aclen : multi_sz를 공백으로 합친 문자열에서 찾은 위치
 						{
-							if(wcslen(temp[i]) >= targetLen)
+							if(wcslen(temp[j]) >= targetLen)
 							{
-								adr = wcsstr(temp[i], data->targetValue);
+								adr = wcsstr(temp[j], data->targetValue);
 								if (adr != NULL)
 								{
+									printf("%d %d\n", aclen, (int)(adr - temp[j]));
 									if (data->t_type == FIND)
-										addLVitem(hresultLV, name, stype, value, fcount++, path, aclen + (int)(adr - temp[i]));
+										addLVitem(hresultLV, name, stype, value, fcount++, path, aclen + (int)(adr - temp[j]));
 
 									wsprintf(msg, L"%d finding...", fcount);
 									SetWindowText(hStatic, msg);
 
 									break;
 								}
-								aclen += wcslen(temp[i]) + 1;
 							}
+							aclen += wcslen(temp[j]) + 1;
 						}
 
 						free(temp);

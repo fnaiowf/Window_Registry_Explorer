@@ -13,8 +13,8 @@
 #include"resource.h"
 
 /*
-	multi_sz 수정할 때 앞쪽에 추가하면 오류
-	multi_sz 바꾸기 잘 안됨
+	binary 삭제 안됨
+	키로 검색
 */
 
 #ifdef UNICODE
