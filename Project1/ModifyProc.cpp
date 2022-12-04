@@ -324,6 +324,8 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 						lvData.mulstrData[tarindex].strings[count - 1] = (TCHAR*)malloc(sizeof(TCHAR) * (sublen + 1)); //문자열 길이만큼 할당
 					}
+					else
+						lvData.mulstrData[tarindex].strings[count - 1] = (TCHAR*)realloc(lvData.mulstrData[tarindex].strings[count - 1], sizeof(TCHAR) * (sublen + 1));
 
 					wsprintf(lvData.mulstrData[tarindex].strings[count - 1], pos); //수정된 데이터 입력
 
@@ -352,6 +354,8 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 					lvData.mulstrData[tarindex].strings[count - 1] = (TCHAR*)malloc(sizeof(TCHAR) * (sublen + 1));
 				}
+				else
+					lvData.mulstrData[tarindex].strings[count - 1] = (TCHAR*)realloc(lvData.mulstrData[tarindex].strings[count - 1], sizeof(TCHAR) * (sublen + 1));
 
 				wsprintf(lvData.mulstrData[tarindex].strings[count - 1], pos);
 			}
