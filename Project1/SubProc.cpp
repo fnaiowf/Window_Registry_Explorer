@@ -51,18 +51,18 @@ LRESULT CALLBACK DlgEditSubProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM 
 	case WM_KEYUP:
 		if (wParam == VK_RETURN)
 		{
-			if (hWnd == GetDlgItem(hDlgFind, IDC_EDIT_FIND) && IsWindowEnabled(GetDlgItem(hDlgFind, IDC_BUTTON_FIND)))
-				SendMessage(hDlgFind, WM_COMMAND, MAKEWPARAM(IDC_BUTTON_FIND, BN_CLICKED), (LPARAM)GetDlgItem(hDlgFind, IDC_BUTTON_FIND));
-			else if (hWnd == GetDlgItem(hDlgFind, IDC_EDIT_CHANGE) && IsWindowEnabled(GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE)))
-				SendMessage(hDlgFind, WM_COMMAND, MAKEWPARAM(IDC_BUTTON_CHANGE, BN_CLICKED), (LPARAM)GetDlgItem(hDlgFind, IDC_BUTTON_CHANGE));
+			if (hWnd == GetDlgItem(hDlgFind, IDC_D1_EDIT_FIND) && IsWindowEnabled(GetDlgItem(hDlgFind, IDC_D1_FIND)))
+				SendMessage(hDlgFind, WM_COMMAND, MAKEWPARAM(IDC_D1_FIND, BN_CLICKED), (LPARAM)GetDlgItem(hDlgFind, IDC_D1_FIND));
+			else if (hWnd == GetDlgItem(hDlgFind, IDC_D1_EDIT_CHANGE) && IsWindowEnabled(GetDlgItem(hDlgFind, IDC_D1_CHANGE)))
+				SendMessage(hDlgFind, WM_COMMAND, MAKEWPARAM(IDC_D1_CHANGE, BN_CLICKED), (LPARAM)GetDlgItem(hDlgFind, IDC_D1_CHANGE));
 			else if (hWnd == GetDlgItem(hDlgModify, IDC_D2_VDATA))
 				SendMessage(hDlgModify, WM_COMMAND, MAKEWPARAM(IDC_D2_MODIFY_OK, BN_CLICKED), (LPARAM)GetDlgItem(hDlgModify, IDC_D2_MODIFY_OK));
 		}
 		break;
 	}
-	if (hWnd == GetDlgItem(hDlgFind, IDC_EDIT_FIND))
+	if (hWnd == GetDlgItem(hDlgFind, IDC_D1_EDIT_FIND))
 		return CallWindowProc(oldDlgEditProc[0], hWnd, iMessage, wParam, lParam);
-	else if(hWnd == GetDlgItem(hDlgFind, IDC_EDIT_CHANGE))
+	else if(hWnd == GetDlgItem(hDlgFind, IDC_D1_EDIT_CHANGE))
 		return CallWindowProc(oldDlgEditProc[1], hWnd, iMessage, wParam, lParam);
 	else if (hWnd == GetDlgItem(hDlgModify, IDC_D2_VDATA))
 		return CallWindowProc(oldDlgEditProc[2], hWnd, iMessage, wParam, lParam);
