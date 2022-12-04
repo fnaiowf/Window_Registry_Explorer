@@ -541,7 +541,11 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 	HKEY hkey;
 	TCHAR temp[3][10] = { L"(기본값)", L"REG_SZ", L"(값 설정 안됨)" };
 	DATA data;
+	LVITEM li;
 	int t;
+	
+	li.mask = LVIF_PARAM;
+	li.lParam = 0;
 
 	if (isDataLoad)
 		data.t_type = DATA_LOAD;
@@ -558,10 +562,16 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 		{
 			t = getListViewItem(hLV, LVIF_PARAM, i).lParam;
 
-			if (t > 0)
-				lvData.mulstrData[t - 1].index = i;
-			else if(t < 0)
-				lvData.byteData[-t - 1].index = i;
+			if (t != 0)
+			{
+				if (t > 0)
+					lvData.mulstrData[t - 1].index = i;
+				else if (t < 0)
+					lvData.byteData[-t - 1].index = i;
+
+				li.iItem = i; //바꾼 다음에는 lParam 값 0으로
+				ListView_SetItem(hLV, &li);
+			}
 		}
 	}
 }

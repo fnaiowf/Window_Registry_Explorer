@@ -682,7 +682,7 @@ void processPopup(int id, int index, void* item)
 
 			if ((hkey = _RegOpenKeyEx(getBasicKey(temp), temp)) != NULL)
 			{
-				if (getListViewItem(hLV, LVIF_PARAM, litem).lParam == -1) //기본값인 경우
+				if (litem == 0) //기본값인 경우
 				{
 					if (RegDeleteValue(hkey, L"") == ERROR_SUCCESS)
 					{

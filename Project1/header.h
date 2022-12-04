@@ -13,7 +13,6 @@
 #include"resource.h"
 
 /*
-	binary 삭제 안됨
 	키로 검색
 */
 
