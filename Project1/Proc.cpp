@@ -6,12 +6,13 @@ TCHAR temp[MAX_PATH_LENGTH];
 
 int treeWidth, resultHeight, nchanged, isDataLoad, funcState; //funcState : enumRegistry함수에서 값이 0이면 함수를 빠져나옴(검색 중지시킬때)
 SPLIT nSplit = SP_NONE;
+FIND_TYPE nowFindType = NONE;
 
 DWORD WINAPI ThreadFunc(LPVOID temp)
 {
 	funcState = FINDING;
 
-	if (temp != NULL && ((DATA*)temp)->t_type == REFRESH) //F5 눌렀을 때 기존에 추가되어 있던 것들 전부 삭제
+	if (temp != NULL && ((THREAD_DATA*)temp)->threadType == REFRESH) //F5 눌렀을 때 기존에 추가되어 있던 것들 전부 삭제
 	{
 		ListView_DeleteAllItems(hLV);
 		ListView_DeleteAllItems(hresultLV);
@@ -19,18 +20,18 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 		TreeView_DeleteAllItems(hTV);
 	}
 
-	if(temp == NULL || ((DATA*)temp)->t_type == REFRESH)
+	if(temp == NULL || ((THREAD_DATA*)temp)->threadType == REFRESH)
 		if (IsWindow(hDlgFind))
 			EnableWindow(GetDlgItem(hDlgFind, IDC_D1_FIND), FALSE);
 
 	setMarquee(1); //프로그레스바 ON
-	if (temp != NULL && ((DATA*)temp)->t_type == CHANGE) //전부 바꾸기 체크한 경우
+	if (temp != NULL && ((THREAD_DATA*)temp)->threadType == CHANGE) //전부 바꾸기 체크한 경우
 	{
 		for (int i = 0; i < ListView_GetItemCount(hresultLV); i++)
 			if (getListViewItem(hresultLV, LVIF_GROUPID, i).iGroupId == 1)
 			{
 				LVITEM li;
-				changeValue(i, (DATA*)temp);
+				changeValue(i, (THREAD_DATA*)temp);
 				li.mask = LVIF_GROUPID;
 				li.iItem = i;
 				li.iGroupId = 2;
@@ -43,7 +44,7 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 	}
 	else
 	{
-		enumRegistry((DATA*)temp);
+		enumRegistry((THREAD_DATA*)temp);
 		
 		if(temp == NULL)
 			TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
@@ -51,24 +52,26 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 		{
 			HTREEITEM item;
 
-			switch (((DATA*)temp)->t_type)
+			switch (((THREAD_DATA*)temp)->threadType)
 			{
 			case REFRESH:
-				item = getItemfromPath(((DATA*)temp)->path); //새로고침 하기 전의 경로로 이동
+				item = getItemfromPath(((THREAD_DATA*)temp)->path); //새로고침 하기 전의 경로로 이동
 				TreeView_SelectItem(hTV, item);
 				TreeView_EnsureVisible(hTV, item);
-				SetWindowText(hEdit, ((DATA*)temp)->path);
+				SetWindowText(hEdit, ((THREAD_DATA*)temp)->path);
 				break;
 			case FIND:
 				SetWindowText(GetDlgItem(hDlgFind, IDC_D1_FIND), L"찾기");
-				if (ListView_GetItemCount(hresultLV) != 0 && IsDlgButtonChecked(hDlgFind, IDC_D1_CHECK_CHANGE))
+				if (((THREAD_DATA*)temp)->findType == DATA && ListView_GetItemCount(hresultLV) != 0 && IsDlgButtonChecked(hDlgFind, IDC_D1_CHECK_CHANGE))
 					EnableWindow(GetDlgItem(hDlgFind, IDC_D1_CHANGE), TRUE);
+				else
+					EnableWindow(GetDlgItem(hDlgFind, IDC_D1_CHANGE), FALSE);
 
 				SetFocus(hresultLV);
 				ListView_DeSelectAll(hresultLV);
 				ListView_SetSelectionMark(hresultLV, 0);
 				ListView_SetItemState(hresultLV, 0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-				free((DATA*)temp);
+				free((THREAD_DATA*)temp);
 				break;
 			}
 		}
@@ -90,7 +93,7 @@ int CALLBACK resultLVCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSo
 
 int CALLBACK LVCompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	TCHAR t[2][1000], type[2][20];
+	TCHAR t[2][1000];
 
 	ListView_GetItemText(hLV, lParam1, 0, t[0], sizeof(t[0]));
 	ListView_GetItemText(hLV, lParam2, 0, t[1], sizeof(t[0]));
@@ -110,7 +113,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	DWORD t;
 	HDC hdc;
 	HMENU hmenu;
-	static DATA data;
+	static THREAD_DATA data;
 	static TCHAR oldName[1000];
 	static TVITEM tvitem;
 
@@ -380,17 +383,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						TreeView_SelectItem(hTV, item);
 
 						ListView_GetItemText(hresultLV, iteminfo->iItem, 1, temp, sizeof(temp));
+						ListView_GetItemText(hresultLV, iteminfo->iItem, 2, n, sizeof(n));
 
-						if (getListViewItem(hresultLV, LVIF_PARAM, iteminfo->iItem).lParam < 0)
+						if (getListViewItem(hresultLV, LVIF_PARAM, iteminfo->iItem).lParam < 0 || *n == 0)
 							selitem = 0;
-
-						for (int i = 1; i < ListView_GetItemCount(hLV); i++)
+						else
 						{
-							ListView_GetItemText(hLV, i, 0, n, sizeof(n));
-							if (wcscmp(n, temp) == 0)
+							for (int i = 1; i < ListView_GetItemCount(hLV); i++)
 							{
-								selitem = i;
-								break;
+								ListView_GetItemText(hLV, i, 0, n, sizeof(n));
+								if (wcscmp(n, temp) == 0)
+								{
+									selitem = i;
+									break;
+								}
 							}
 						}
 
@@ -423,9 +429,9 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 {
 	RECT rt, rt2;
 	TCHAR temp[100];
-	DATA* data;
+	THREAD_DATA* data;
 	static int startChange, index;
-	static DATA changeData; //하나씩 바꾸는 경우에는 입력했던 데이터를 저장해 놔야 됨
+	static THREAD_DATA changeData; //하나씩 바꾸는 경우에는 입력했던 데이터를 저장해 놔야 됨
 	LVITEM li;
 
 	switch (iMessage)
@@ -480,34 +486,38 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 			if (GetMenuState(GetMenu(hWndMain), ID_MENU_RESULT_TAB, MF_BYCOMMAND) == MF_UNCHECKED)
 				SendMessage(hWndMain, WM_COMMAND, MAKEWPARAM(ID_MENU_RESULT_TAB, 0), 0);
 
-			data = (DATA*)malloc(sizeof(DATA));
+			data = (THREAD_DATA*)malloc(sizeof(THREAD_DATA));
 			GetWindowText(GetDlgItem(hDlg, IDC_D1_EDIT_FIND), data->targetValue, sizeof(data->targetValue));
 			if (wcscmp(data->targetValue, L"") != 0)
 			{
 				wsprintf(changeData.targetValue, data->targetValue);
-				
-				data->type = IsDlgButtonChecked(hDlg, IDC_D1_STR) ? REG_SZ : (IsDlgButtonChecked(hDlg, IDC_D1_DWORD) ? REG_DWORD : REG_QWORD);
-				data->t_type = FIND;
+				data->threadType = FIND;
+				data->findType = IsDlgButtonChecked(hDlg, IDC_D1_KEY) ? KEY : (IsDlgButtonChecked(hDlg, IDC_D1_VALUE) ? VALUE : DATA);
 
-				if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
-					data->base = IsDlgButtonChecked(hDlg, IDC_D1_DEC);
-
-				changeData.type = data->type;
-				changeData.base = data->base;
-
-				index = -1;
-
-				if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
+				if (data->findType == DATA)
 				{
-					if(is_number(data->targetValue, data->base) == 0)
+					data->type = IsDlgButtonChecked(hDlg, IDC_D1_STR) ? REG_SZ : (IsDlgButtonChecked(hDlg, IDC_D1_DWORD) ? REG_DWORD : REG_QWORD);
+
+					if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
+						data->base = IsDlgButtonChecked(hDlg, IDC_D1_DEC);
+
+					changeData.type = data->type;
+					changeData.base = data->base;
+
+					index = -1;
+
+					if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
 					{
-						MessageBox(hWndMain, L"찾는 값이 정수가 아닙니다.", L"알림", MB_OK);
-						break;
-					}
-					else if (checkStringOverflow(data->targetValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD)))
-					{
-						MessageBox(hWndMain, L"찾는 값이 범위를 벗어납니다.", L"알림", MB_OK);
-						break;
+						if (is_number(data->targetValue, data->base) == 0)
+						{
+							MessageBox(hWndMain, L"찾는 값이 정수가 아닙니다.", L"알림", MB_OK);
+							break;
+						}
+						else if (checkStringOverflow(data->targetValue, data->base, IsDlgButtonChecked(hDlg, IDC_D1_QWORD)))
+						{
+							MessageBox(hWndMain, L"찾는 값이 범위를 벗어납니다.", L"알림", MB_OK);
+							break;
+						}
 					}
 				}
 
@@ -516,6 +526,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHANGE), FALSE);
 
 				CreateThread(NULL, 0, ThreadFunc, data, NULL, NULL);
+				nowFindType = data->findType;
 			}
 			break;
 		case IDC_D1_CHANGE:
@@ -524,7 +535,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 
 			if (startChange == 0) //아직 바꾸기 한 번도 누르지 않은 경우
 			{
-				data = (DATA*)malloc(sizeof(DATA));
+				data = (THREAD_DATA*)malloc(sizeof(THREAD_DATA));
 				GetWindowText(GetDlgItem(hDlg, IDC_D1_EDIT_FIND), data->targetValue, sizeof(data->targetValue));
 				GetWindowText(GetDlgItem(hDlg, IDC_D1_EDIT_CHANGE), data->newValue, sizeof(data->newValue));
 				data->type = IsDlgButtonChecked(hDlg, IDC_D1_STR) ? REG_SZ : (IsDlgButtonChecked(hDlg, IDC_D1_DWORD) ? REG_DWORD : REG_QWORD);
@@ -538,7 +549,7 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 					{
 						if (SendMessage(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), BM_GETCHECK, 0, 0) == BST_CHECKED)
 						{
-							data->t_type = CHANGE;
+							data->threadType = CHANGE;
 
 							if (!IsDlgButtonChecked(hDlg, IDC_D1_STR))
 							{
@@ -686,11 +697,11 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				}
 				break;
 			case IDC_D1_VALUE:
-				if (!IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_STR)))
+				if (IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_STR)))
 				{
-					EnableWindow(GetDlgItem(hDlg, IDC_D1_STR), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_D1_DWORD), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_D1_QWORD), TRUE);
+					EnableWindow(GetDlgItem(hDlg, IDC_D1_STR), FALSE);
+					EnableWindow(GetDlgItem(hDlg, IDC_D1_DWORD), FALSE);
+					EnableWindow(GetDlgItem(hDlg, IDC_D1_QWORD), FALSE);
 				}
 				if (IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_DEC)))
 				{

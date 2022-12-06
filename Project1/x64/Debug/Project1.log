@@ -1,12 +1,9 @@
-﻿  Proc.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x1869 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(58,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(73,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(93,20): warning C4101: 'type' :참조되지 않은 지역 변수입니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(273,60): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(279,38): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(111,6): warning C4101: 'hdc' :참조되지 않은 지역 변수입니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Proc.cpp(110,8): warning C4101: 't' :참조되지 않은 지역 변수입니다.
+﻿  Util.cpp
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x18ca 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'THREAD_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\Util.cpp(380,27): warning C4244: '=': 'LONG_PTR'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\Util.cpp(387,27): warning C4244: '=': 'LONG_PTR'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Project1.vcxproj -> C:\Users\jinwoo\Desktop\registryControl\x64\Debug\Project1.exe

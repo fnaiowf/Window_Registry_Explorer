@@ -47,13 +47,15 @@
 enum SPLIT { SP_NONE, SP_VERT, SP_HORZ}; //창 분할 정보
 enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD, DATA_LOAD}; //DATA_LOAD : 기존 리스트뷰 추가 되어 있는 것들 건드리지 않고 데이터만 가져올 때
 enum FUNCSTATE{DEFAULT, FINDING, SUSPEND};
+enum FIND_TYPE {NONE, KEY, VALUE, DATA};
 
-typedef struct DATA { //쓰레드 매개변수
-	THREAD_TYPE t_type;;
+typedef struct THREAD_DATA { //쓰레드 매개변수
 	TCHAR path[MAX_PATH_LENGTH];
 	TCHAR targetValue[100];
 	TCHAR newValue[100];
-	BYTE type : 4; //비트 필드 1바이트(8비트)를 4비트 / 1비트로 나눠 사용
+	THREAD_TYPE threadType; //비트 필드
+	FIND_TYPE findType;
+	BYTE type : 4; 
 	BYTE base : 1;
 };
 
@@ -90,15 +92,16 @@ extern LV_DATA_MANAGE lvData;
 extern int treeWidth, resultHeight, nchanged, isDataLoad, funcState;
 extern TCHAR path[MAX_PATH_LENGTH], * msg, temp[MAX_PATH_LENGTH];
 extern SPLIT nSplit;
+extern FIND_TYPE nowFindType;
 
 //RegistryControl.cpp
 HKEY _RegOpenKeyEx(int bKeyIndex, TCHAR* path); //레지스트리 오픈 함수 래퍼
 int _RegSetValueEx(HKEY hkey, TCHAR* name, int type, BYTE* value, int size, int base, int ismodify); //SetValue 래퍼
-void enumRegistry(DATA* data); //기본키 enum
-void enumKeys(HKEY hkey, HTREEITEM parent, TCHAR* subkeystr, DATA* data, int bkey); //기본키의 서브키 enum
-void enumValue(HKEY hkey, DATA* data); //값 enum
-int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos); //값 변경
-int changeValue(int iItem, DATA *data); //하나씩 바꾸기
+void enumRegistry(THREAD_DATA* data); //기본키 enum
+void enumKeys(HKEY hkey, HTREEITEM parent, TCHAR* subkeystr, THREAD_DATA* data, int bkey); //기본키의 서브키 enum
+void enumValue(HKEY hkey, THREAD_DATA* data); //값 enum
+int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, THREAD_DATA data, DWORD pos); //값 변경
+int changeValue(int iItem, THREAD_DATA *data); //하나씩 바꾸기
 void loadValue(TCHAR* path, HKEY basickey, int isDataLoad); //listview에 값 로드
 void deleteAllSubkey(TCHAR* path, HTREEITEM item); //서브키 모두 삭제
 void deleteAllSubkey(HKEY hkey, HTREEITEM item); //서브키 모두 삭제

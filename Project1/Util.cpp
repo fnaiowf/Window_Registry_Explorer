@@ -84,6 +84,9 @@ int getBasicKey(TCHAR* path)
 
 int getType(TCHAR* type)
 {
+	if (type == NULL)
+		return  -1;
+
 	if (wcscmp(type, L"REG_DWORD") == 0)
 		return 0;
 	else if (wcscmp(type, L"REG_QWORD") == 0)
@@ -262,12 +265,9 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 	if (it == 5) //REG_BINARY
 	{
 		if (value == NULL) //BINARY 값을 만들 경우 NULL로 구분
-			item.pszText = NULL;
-		else if (lvData.byteData[lvData.nByte - 1].size != 0)
 		{
-			b = (TCHAR*)calloc(lvData.byteData[lvData.nByte - 1].size * 3, sizeof(TCHAR));
-			byteToString(lvData.byteData[lvData.nByte - 1].bytes, lvData.byteData[lvData.nByte - 1].size, b);
-
+			b = (TCHAR*)malloc(sizeof(TCHAR) * 13);
+			wsprintf(b, L"(길이가 0인 이진값)");
 			item.pszText = b;
 		}
 		else
@@ -279,16 +279,6 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 		{
 			if (value == NULL) //MULTI_SZ 값을 만들 경우 value에 NULL 줘서 구분
 				item.pszText = NULL;
-			else if (lvData.mulstrData[lvData.nMul - 1].size > 2)
-			{
-				b = (TCHAR*)calloc(lvData.mulstrData[lvData.nMul - 1].size, sizeof(TCHAR));
-				wsprintf(b, L"%ws", lvData.mulstrData[lvData.nMul - 1].strings[0]);
-
-				for (int i = 1; i < lvData.mulstrData[lvData.nMul - 1].nString; i++)
-					wsprintf(b, L"%ws %ws", b, (lvData.mulstrData[lvData.nMul - 1].strings)[i]);
-
-				item.pszText = b;
-			}
 			else
 				item.pszText = value;
 		}
@@ -567,20 +557,38 @@ void openPopupMenu(int x, int y)
 		if (getListViewItem(hresultLV, LVIF_GROUPID, lvinfo2.iItem).iGroupId == 2)
 			return;
 
-		DeleteMenu(hPopup, 3, MF_BYPOSITION);
-		DeleteMenu(hPopup, 3, MF_BYPOSITION);
 		item = (void*)&(lvinfo2.iItem);
 		index = 2;
 
-		LVITEM li;
-		li.mask = LVIF_GROUPID;
-		li.iItem = lvinfo2.iItem;
-		ListView_GetItem(hresultLV, &li);
-
-		if (li.iGroupId == 0)
-			ModifyMenu(hPopup, 0, MF_BYPOSITION | MF_STRING, ID_MENU2_EXCEPT, L"해제");
+		if (nowFindType == KEY)
+		{
+			DeleteMenu(hPopup, 0, MF_BYPOSITION);
+			DeleteMenu(hPopup, 0, MF_BYPOSITION);
+			DeleteMenu(hPopup, 0, MF_BYPOSITION);
+			DeleteMenu(hPopup, 1, MF_BYPOSITION);
+		}
+		else if (nowFindType == VALUE)
+		{
+			DeleteMenu(hPopup, 3, MF_BYPOSITION);
+			DeleteMenu(hPopup, 3, MF_BYPOSITION);
+			DeleteMenu(hPopup, 0, MF_BYPOSITION);
+			DeleteMenu(hPopup, 0, MF_BYPOSITION);
+		}
 		else
-			ModifyMenu(hPopup, 0, MF_BYPOSITION | MF_STRING, ID_MENU2_EXCEPT, L"제외");
+		{
+			DeleteMenu(hPopup, 3, MF_BYPOSITION);
+			DeleteMenu(hPopup, 3, MF_BYPOSITION);
+
+			LVITEM li;
+			li.mask = LVIF_GROUPID;
+			li.iItem = lvinfo2.iItem;
+			ListView_GetItem(hresultLV, &li);
+
+			if (li.iGroupId == 0)
+				ModifyMenu(hPopup, 0, MF_BYPOSITION | MF_STRING, ID_MENU2_EXCEPT, L"해제");
+			else
+				ModifyMenu(hPopup, 0, MF_BYPOSITION | MF_STRING, ID_MENU2_EXCEPT, L"제외");
+		}
 
 		id = TrackPopupMenu(hPopup, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, x, y, 0, hWndMain, NULL);
 	}
@@ -918,8 +926,8 @@ void AcceleratorProcess(HWND hWnd, int id)
 		if (funcState == FINDING) //검색 중이면 X
 			break;
 
-		DATA* d = (DATA*)malloc(sizeof(DATA));
-		d->t_type = REFRESH;
+		THREAD_DATA* d = (THREAD_DATA*)malloc(sizeof(THREAD_DATA));
+		d->threadType = REFRESH;
 		GetWindowText(hEdit, d->path, MAX_PATH_LENGTH);
 
 		CreateThread(NULL, 0, ThreadFunc, d, NULL, NULL);

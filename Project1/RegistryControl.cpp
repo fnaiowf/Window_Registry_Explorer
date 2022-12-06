@@ -57,7 +57,7 @@ int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int b
 		return 0;
 }
 
-void enumRegistry(DATA* data)
+void enumRegistry(THREAD_DATA* data)
 {
 	HKEY hkey;
 	TCHAR* key = (TCHAR*)malloc(sizeof(TCHAR) * MAX_KEY_LENGTH);
@@ -69,11 +69,11 @@ void enumRegistry(DATA* data)
 	}
 	DWORD i = 0, len = MAX_KEY_LENGTH;
 	HTREEITEM root = 0, item = 0;
-	DATA* dt;
+	THREAD_DATA* dt;
 	kcount = fcount = 0;
 
 	if (data == NULL) dt = NULL;
-	else if (data->t_type == REFRESH) dt = NULL;
+	else if (data->threadType == REFRESH) dt = NULL;
 	else dt = data;
 
 	if(dt == NULL)
@@ -148,7 +148,7 @@ void enumRegistry(DATA* data)
 	SetWindowText(hStatic, msg);
 }
 
-void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
+void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, THREAD_DATA* data, int bkey)
 {
 	HKEY hkey2;
 	DWORD i = 0, len = MAX_KEY_LENGTH;
@@ -180,7 +180,20 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 				enumKeys(hkey2, addTVitem(key, parent, bkey), key, data, bkey);
 			}
 			else
+			{
+				if (data->findType == KEY)
+				{
+					if (wcsstr(key, data->targetValue) != 0)
+					{
+						addLVitem(hresultLV, key, NULL, NULL, fcount++, path, 0);
+
+						wsprintf(msg, L"%d key found...", fcount);
+						SetWindowText(hStatic, msg);
+					}
+				}
+
 				enumKeys(hkey2, NULL, key, data, bkey);
+			}
 				
 			RegCloseKey(hkey2);
 		}
@@ -200,7 +213,7 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 	}
 
 	free(key);
-	if (data != NULL && data->t_type != REFRESH)
+	if (data != NULL && data->threadType != REFRESH && data->findType != KEY)
 		enumValue(hkey, data);
 
 	if (funcState == SUSPEND) return;
@@ -216,12 +229,13 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, DATA* data, int bkey)
 	}
 }
 
-void enumValue(HKEY hkey, DATA* data)
+void enumValue(HKEY hkey, THREAD_DATA* data)
 {
 	DWORD i = 0, len = MAX_KEY_LENGTH, len2 = MAX_VALUE_LENGTH, type, dvalue;
 	long long dvalue64;
-	TCHAR name[MAX_VALUE_LENGTH], * value = NULL, * adr, stype[30];
-	BYTE* byte;
+	TCHAR name[MAX_VALUE_LENGTH], stype[30];
+	TCHAR *adr = 0, *value = 0, *multiSzConcat = 0;
+	BYTE *bytes = 0;
 	int targetLen, defValueOpt = 1;
 	LPARAM lparam;
 	LVITEM li;
@@ -271,7 +285,8 @@ void enumValue(HKEY hkey, DATA* data)
 				value = (TCHAR*)calloc(len2, 1);
 				if (len2 <= 2)
 				{
-					if (data == NULL || data->t_type == DATA_LOAD)
+					multiSzConcat = (TCHAR*)calloc(1, sizeof(TCHAR));
+					if (data == NULL || data->threadType == DATA_LOAD)
 					{
 						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
 						lvData.mulstrData[lvData.nMul].size = len2;
@@ -288,9 +303,12 @@ void enumValue(HKEY hkey, DATA* data)
 				else
 				{
 					RegQueryValueEx(hkey, name, NULL, NULL, (LPBYTE)value, &len2);
+					multiSzConcat = (TCHAR*)calloc(len2, 1);
 					
-					if (data == NULL || data->t_type == DATA_LOAD)
+					if (data == NULL || data->threadType == DATA_LOAD)
 					{
+						concatMulSz(value, (len2 - 2) / 2, multiSzConcat);
+
 						lvData.mulstrData[lvData.nMul].strings = (TCHAR**)calloc(sizeof(TCHAR*), 1);
 
 						int c = splitMulSz(value, len2, &(lvData.mulstrData[lvData.nMul].strings), 1);
@@ -309,10 +327,10 @@ void enumValue(HKEY hkey, DATA* data)
 				wsprintf(value, L"(길이가 0인 이진값)");
 				break;
 			case REG_BINARY:
-				value = (TCHAR*)malloc(13 * sizeof(TCHAR));
 				if (len2 == 0)
 				{
-					if (data == NULL || data->t_type == DATA_LOAD)
+					value = (TCHAR*)malloc(13 * sizeof(TCHAR));
+					if (data == NULL || data->threadType == DATA_LOAD)
 					{
 						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE));
 						lvData.byteData[lvData.nByte].size = len2;
@@ -325,12 +343,17 @@ void enumValue(HKEY hkey, DATA* data)
 				}
 				else
 				{
-					if (data == NULL || data->t_type == DATA_LOAD)
+					bytes = (BYTE*)malloc(len2);
+					value = (TCHAR*)calloc(len2 * 3, sizeof(TCHAR));
+					RegQueryValueEx(hkey, name, NULL, NULL, bytes, &len2);
+
+					if (data == NULL || data->threadType == DATA_LOAD)
 					{
-						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE) * len2);
+						byteToString(bytes, len2, value);
+
+						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(len2);
 						lvData.byteData[lvData.nByte].size = len2;
-						
-						RegQueryValueEx(hkey, name, NULL, NULL, lvData.byteData[lvData.nByte].bytes, &len2);
+						memcpy(lvData.byteData[lvData.nByte].bytes, bytes, len2);
 
 						lvData.byteData[lvData.nByte].index = i + defValueOpt;
 
@@ -343,9 +366,24 @@ void enumValue(HKEY hkey, DATA* data)
 				break;
 			}
 
-			if (data!=NULL && data->t_type == FIND)
+			if (data!=NULL && data->threadType == FIND)
 			{
-				if ((type == REG_EXPAND_SZ || type == REG_MULTI_SZ || type == REG_SZ) && data->type == REG_SZ)
+				if (data->findType == VALUE)
+				{
+					if (wcsstr(name, data->targetValue) != NULL)
+					{
+						if (type == REG_BINARY)
+							byteToString(bytes, len2, value);
+						else if(type == REG_MULTI_SZ)
+							concatMulSz(value, (len2 - 2) / 2, multiSzConcat);
+
+						addLVitem(hresultLV, name, stype, type == REG_MULTI_SZ ? multiSzConcat : value, fcount++, path, 0);
+
+						wsprintf(msg, L"%d value found...", fcount);
+						SetWindowText(hStatic, msg);
+					}
+				}
+				else if ((type == REG_EXPAND_SZ || type == REG_MULTI_SZ || type == REG_SZ) && data->type == REG_SZ)
 				{
 					targetLen = wcslen(data->targetValue);
 
@@ -354,11 +392,7 @@ void enumValue(HKEY hkey, DATA* data)
 						TCHAR** temp = (TCHAR**)malloc(sizeof(TCHAR*)); //문자열 분리해서 검색
 						int c = splitMulSz(value, len2, &temp, 1);
 
-						TCHAR* concat = (TCHAR*)calloc(len2, 1); //리스트뷰에 출력하는 값은 공백으로 붙여서
-						concatMulSz(value, (len2 - 2) / 2, concat);
-						wsprintf(value, concat);
-
-						free(concat);
+						concatMulSz(value, (len2 - 2) / 2, multiSzConcat); //리스트뷰에 출력하는 값은 공백으로 붙여서
 
 						for (int j = 0, aclen = 0; j < c; j++) //aclen : multi_sz를 공백으로 합친 문자열에서 찾은 위치
 						{
@@ -367,9 +401,7 @@ void enumValue(HKEY hkey, DATA* data)
 								adr = wcsstr(temp[j], data->targetValue);
 								if (adr != NULL)
 								{
-									printf("%d %d\n", aclen, (int)(adr - temp[j]));
-									if (data->t_type == FIND)
-										addLVitem(hresultLV, name, stype, value, fcount++, path, aclen + (int)(adr - temp[j]));
+									addLVitem(hresultLV, name, stype, multiSzConcat, fcount++, path, aclen + (int)(adr - temp[j]));
 
 									wsprintf(msg, L"%d finding...", fcount);
 									SetWindowText(hStatic, msg);
@@ -395,8 +427,7 @@ void enumValue(HKEY hkey, DATA* data)
 								param = param != 0 ? -param : INT_MIN; //기본값인데 위치가 0이면 기본값을 표시하기 위해 임의로 INT_MIN 넣음
 							}
 
-							if(data->t_type == FIND)
-								addLVitem(hresultLV, name, stype, value, fcount++, path, param);
+							addLVitem(hresultLV, name, stype, value, fcount++, path, param);
 
 							wsprintf(msg, L"%d finding...", fcount);
 							SetWindowText(hStatic, msg);
@@ -409,15 +440,14 @@ void enumValue(HKEY hkey, DATA* data)
 					
 					if (is_number(data->targetValue, data->base) && cmp)
 					{
-						if(data->t_type == FIND)
-							addLVitem(hresultLV, name, stype, value, fcount++, path, 0);
+						addLVitem(hresultLV, name, stype, value, fcount++, path, 0);
 
 						wsprintf(msg, L"%d finding...", fcount);
 						SetWindowText(hStatic, msg);
 					}
 				}
 			}
-			else if (!(data != NULL && data->t_type == DATA_LOAD)) //DATA_LOAD 아닌 경우 리스트뷰 추가 X
+			else if (!(data != NULL && data->threadType == DATA_LOAD)) //DATA_LOAD 아닌 경우 리스트뷰 추가 X
 			{
 				if (wcslen(name) == 0)
 				{
@@ -429,16 +459,18 @@ void enumValue(HKEY hkey, DATA* data)
 					ListView_SetItem(hLV, &li);
 				}
 				else
-					addLVitem(hLV, name, stype, value, i + defValueOpt, NULL, lparam); //multi_sz, binary 외에 lparam은 0
+					addLVitem(hLV, name, stype, type == REG_MULTI_SZ ? multiSzConcat : value, i + defValueOpt, NULL, lparam); //multi_sz, binary 외에 lparam은 0
 			}
 
 			if(!value) free(value);
+			if (!bytes) free(bytes);
+			if (!multiSzConcat) free(multiSzConcat);
 		}
 		i++;
 	}
 }
 
-int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
+int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, THREAD_DATA* data, DWORD pos)
 {
 	TCHAR temp[MAX_VALUE_LENGTH]={};
 	DWORD len, tlen = wcslen(data->targetValue), nlen = wcslen(data->newValue);
@@ -480,7 +512,7 @@ int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, DATA* data, DWORD pos)
 	return 0;
 }
 
-int changeValue(int n, DATA* tarData)
+int changeValue(int n, THREAD_DATA* tarData)
 {
 	HTREEITEM item;
 	HKEY hkey;
@@ -540,7 +572,7 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 {
 	HKEY hkey;
 	TCHAR temp[3][10] = { L"(기본값)", L"REG_SZ", L"(값 설정 안됨)" };
-	DATA data;
+	THREAD_DATA data;
 	LVITEM li;
 	int t;
 	
@@ -548,7 +580,7 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 	li.lParam = 0;
 
 	if (isDataLoad)
-		data.t_type = DATA_LOAD;
+		data.threadType = DATA_LOAD;
 	else
 		addLVitem(hLV, temp[0], temp[1], temp[2], 0, NULL, DEFAULT_VALUE_PARAM);
 
