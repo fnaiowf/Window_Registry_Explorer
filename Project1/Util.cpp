@@ -79,7 +79,8 @@ int getType(TCHAR* type)
 		return 4;
 	else if (wcscmp(type, L"REG_BINARY") == 0)
 		return 5;
-
+	else if (wcscmp(type, L"REG_NONE") == 0)
+		return 6;
 	else return -1;
 }
 
@@ -104,8 +105,7 @@ const TCHAR* getTypeName(int type)
 	case REG_QWORD:
 		return L"REG_QWORD";
 	default:
-		wprintf(L"%d", type);
-		return L"";
+		return L"지원하지 않는 형식";
 	}
 }
 

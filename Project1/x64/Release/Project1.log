@@ -1,0 +1,21 @@
+﻿  RegistryControl.cpp
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(65,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'THREAD_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(72,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(80,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(87,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(420,28): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(425,18): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(500,43): warning C4244: '=': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(518,48): warning C4101: 'multiSzConcat' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(592,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(594,56): warning C4244: '인수': 'LPARAM'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(631,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(645,31): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(683,9): warning C4101: 'li' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(679,7): warning C4101: 'hkey' :참조되지 않은 지역 변수입니다.
+  코드를 생성하고 있습니다.
+  1 of 69 functions ( 1.4%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    7 functions had inline decision re-evaluated but remain unchanged
+  코드를 생성했습니다.
+  Project1.vcxproj -> C:\Users\jinwoo\Desktop\registryControl\x64\Release\Project1.exe

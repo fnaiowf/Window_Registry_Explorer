@@ -643,7 +643,7 @@ void openModifyDlg(int type)
 {
 	if (!IsWindow(hDlgModify))
 	{
-		if (type == 5) DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
+		if (type >= 5) DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG3), hWndMain, (DLGPROC)ModifyBinaryDlgProc);
 		else if (type == 4) DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG4), hWndMain, (DLGPROC)ModifyMultiSzDlgProc);
 		else DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG2), hWndMain, (DLGPROC)ModifySzNumDlgProc);
 
@@ -676,5 +676,13 @@ void AcceleratorProcess(HWND hWnd, int id)
 			ShowWindow(hDlgFind, SW_SHOW);
 		}
 		break;
+	case ID_ACCELERATOR_F7:
+	{
+		HKEY hkey;
+		RegOpenKeyEx(HKEY_USERS, L"S-1-5-21-784107973-3724358277-514594677-1001\\»õ Å° #1", 0, KEY_READ | KEY_WRITE, &hkey);
+
+		RegSetValueEx(hkey, L"TEST", 0, REG_NONE, 0, 0);
+		RegCloseKey(hkey);
+	}
 	}
 }

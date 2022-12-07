@@ -1,8 +1,14 @@
 #pragma once
 #pragma warning(disable : 6387)
 #pragma warning(disable : 4267)
+#pragma warning(disable : 4996)
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
+/*
+	삭제할 때 MULTI_SZ, BINARY 데이터 삭제
+	f5 오류
+*/
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -46,7 +52,7 @@ enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD, DATA_LOAD}; //DATA_LOAD : 기존 리�
 enum FUNCSTATE{DEFAULT, FINDING, SUSPEND};
 enum FIND_TYPE {NONE, KEY, VALUE, DATA};
 
-const unsigned int REG_TYPE[6] = { REG_DWORD, REG_QWORD, REG_SZ, REG_EXPAND_SZ, REG_MULTI_SZ, REG_BINARY };
+const unsigned int REG_TYPE[7] = { REG_DWORD, REG_QWORD, REG_SZ, REG_EXPAND_SZ, REG_MULTI_SZ, REG_BINARY, REG_NONE};
 const HKEY BASIC_KEY_HANDLE[5] = { HKEY_CLASSES_ROOT, HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, HKEY_USERS, HKEY_CURRENT_CONFIG };
 
 typedef struct THREAD_DATA { //쓰레드 매개변수

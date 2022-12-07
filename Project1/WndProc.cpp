@@ -76,6 +76,9 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 			EnableWindow(GetDlgItem(hDlgFind, IDC_D1_FIND), TRUE);
 	}
 
+	if (temp != NULL)
+		free(temp);
+
 	funcState = DEFAULT;
 	setMarquee(0); //프로그레스바 OFF
 

@@ -40,7 +40,19 @@ int _RegSetValueEx(HKEY key, TCHAR* name, int type, BYTE* value, int size, int b
 		res = RegSetValueEx(key, name, 0, type, (BYTE*)&qword, sizeof(qword));
 	}
 	else if (type == REG_BINARY)
+	{
+		if (ismodify) //REG_NONE 처리
+		{
+			DWORD t;
+			if (RegQueryValueEx(key, name, NULL, &t, NULL, NULL) == ERROR_SUCCESS)
+			{
+				if (t == REG_NONE)
+					type = REG_NONE;
+			}
+		}
+
 		res = RegSetValueEx(key, name, 0, type, value, size);
+	}
 	else
 	{
 		if (type != REG_MULTI_SZ)
@@ -317,9 +329,6 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 				}
 				break;
 			case REG_NONE:
-				value = (TCHAR*)malloc(sizeof(TCHAR) * 13);
-				wsprintf(value, L"(길이가 0인 이진값)");
-				break;
 			case REG_BINARY:
 				if (len2 == 0)
 				{
@@ -366,7 +375,7 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 				{
 					if (wcsstr(name, data->targetValue) != NULL)
 					{
-						if (type == REG_BINARY)
+						if (type == REG_BINARY || type == REG_NONE)
 							byteToString(bytes, len2, value);
 						else if(type == REG_MULTI_SZ)
 							concatMulSz(value, (len2 - 2) / 2, multiSzConcat);
