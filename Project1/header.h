@@ -10,6 +10,7 @@
 #include<conio.h>
 #include<locale.h>
 #include<commctrl.h>
+#include<time.h>
 #include"resource.h"
 
 #ifdef UNICODE
@@ -45,8 +46,11 @@ enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD, DATA_LOAD}; //DATA_LOAD : 기존 리�
 enum FUNCSTATE{DEFAULT, FINDING, SUSPEND};
 enum FIND_TYPE {NONE, KEY, VALUE, DATA};
 
+const unsigned int REG_TYPE[6] = { REG_DWORD, REG_QWORD, REG_SZ, REG_EXPAND_SZ, REG_MULTI_SZ, REG_BINARY };
+const HKEY BASIC_KEY_HANDLE[5] = { HKEY_CLASSES_ROOT, HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, HKEY_USERS, HKEY_CURRENT_CONFIG };
+
 typedef struct THREAD_DATA { //쓰레드 매개변수
-	TCHAR path[MAX_PATH_LENGTH];
+	TCHAR *path;
 	TCHAR targetValue[100];
 	TCHAR newValue[100];
 	THREAD_TYPE threadType; //비트 필드
@@ -77,15 +81,12 @@ typedef struct LV_DATA_MANAGE {
 	int nMul;
 };
 
-extern const HKEY BASIC_KEY_HANDLE[5];
-extern const unsigned int REG_TYPE[6];
-extern FILE* fp;
 extern HWND hWndMain, hTV, hLV, hEdit, hStatic, hresultLV, hProgress, hDlgFind, hDlgModify;
 extern HINSTANCE g_hInst;
 extern WNDPROC oldEditProc, oldDlgEditProc[3];
 extern LV_DATA_MANAGE lvData;
 
-extern int treeWidth, resultHeight, nchanged, isDataLoad, funcState;
+extern int treeWidth, resultHeight, isDataLoad, funcState;
 extern TCHAR path[MAX_PATH_LENGTH], * msg, temp[MAX_PATH_LENGTH];
 extern SPLIT nSplit;
 extern FIND_TYPE nowFindType;
@@ -103,13 +104,12 @@ void deleteAllSubkey(TCHAR* path, HTREEITEM item); //서브키 모두 삭제
 void deleteAllSubkey(HKEY hkey, HTREEITEM item); //서브키 모두 삭제
 void createValue(int type, HTREEITEM hitem); //값 추가
 
-//Proc.cpp
+//WndProc.cpp
 DWORD WINAPI ThreadFunc(LPVOID); // 쓰레드 함수
-int CALLBACK LVCompareFunc(LPARAM, LPARAM, LPARAM); //데이터 리스트뷰 오름차순 정렬
-int CALLBACK resultLVCompareFunc(LPARAM, LPARAM, LPARAM); //검색 결과 리스트뷰 항목 ID 순 정렬
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); //메인 윈도우 프로시저
-BOOL CALLBACK FindDlgProc(HWND, UINT, WPARAM, LPARAM); //찾기&바꾸기 다이얼로그 프로시저
 
+//FindProc.cpp
+BOOL CALLBACK FindDlgProc(HWND, UINT, WPARAM, LPARAM); //찾기&바꾸기 다이얼로그 프로시저
 
 //ModifyProc.cpp
 BOOL CALLBACK ModifySzNumDlgProc(HWND, UINT, WPARAM, LPARAM); //값 수정 다이얼로그 프로시저
@@ -132,19 +132,21 @@ int splitMulSz(TCHAR* data, int size, TCHAR*** strings, int alloc); //MULTI_SZ �
 void concatMulSz(TCHAR* strings, int len, TCHAR* ret); //MULTI_SZ 값 NULL문자 공백으로 바꿈
 int is_number(TCHAR* string, int base); //문자열이 숫자인지 체크
 int checkStringOverflow(TCHAR* string, int base, int type); //check string overflow / underflow
-
-void openPopupMenu(int x, int y); //오른쪽 마우스 버튼 누를 때 팝업 메뉴 열기
-void processPopup(int id, int index, void* item); //팝업 메뉴 프로시저
-void openModifyDlg(int type);
-void AcceleratorProcess(HWND hWnd, int id);
-
-void initWindow(); //컨트롤 생성
-SPLIT getSplitter(POINT pt); //창 분할 정보
+void getTime(TCHAR* ret);
 void freeMemory(); //모든 할당 메모리 해제
 
+//WinControlUtil.cpp
+int CALLBACK LVCompareFunc(LPARAM, LPARAM, LPARAM); //데이터 리스트뷰 오름차순 정렬
+int CALLBACK resultLVCompareFunc(LPARAM, LPARAM, LPARAM); //검색 결과 리스트뷰 항목 ID 순 정렬
+void initWindow(); //컨트롤 생성
+SPLIT getSplitter(POINT pt); //창 분할 정보
 HTREEITEM addTVitem(const TCHAR* text, HTREEITEM parent, int basicKey); //트리뷰 아이템 추가
 void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHAR* path, LPARAM lParam); //리스트뷰 아이템 추가
+LVITEM getListViewItem(HWND handle, UINT mask, UINT index); //리스트뷰 아이템 속성 값 리턴
 void getPathfromItem(HTREEITEM item, TCHAR* retpath); //트리뷰 아이템 -> 경로
 HTREEITEM getItemfromPath(const TCHAR* path); //경로 -> 트리뷰 아이템
-LVITEM getListViewItem(HWND handle, UINT mask, UINT index); //리스트뷰 아이템 속성 값 리턴
 void setMarquee(int opt); //프로그레스바 Marquee 설정
+void openPopupMenu(int x, int y); //오른쪽 마우스 버튼 누를 때 팝업 메뉴 열기
+void processPopup(int id, int index, void* item); //팝업 메뉴 프로시저
+void AcceleratorProcess(HWND hWnd, int id);
+void openModifyDlg(int type);

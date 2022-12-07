@@ -24,7 +24,7 @@
     <ClCompile Include="Util.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Proc.cpp">
+    <ClCompile Include="WndProc.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ModifyProc.cpp">
@@ -34,6 +34,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="BinaryEditorUtil.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WndControlUtil.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="FindProc.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

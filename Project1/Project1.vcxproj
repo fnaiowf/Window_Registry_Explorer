@@ -129,12 +129,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BinaryEditorUtil.cpp" />
+    <ClCompile Include="FindProc.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModifyProc.cpp" />
-    <ClCompile Include="Proc.cpp" />
+    <ClCompile Include="WndProc.cpp" />
     <ClCompile Include="RegistryControl.cpp" />
     <ClCompile Include="SubProc.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="WndControlUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BinaryEditor.h" />

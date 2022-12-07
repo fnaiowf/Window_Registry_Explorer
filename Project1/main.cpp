@@ -2,24 +2,12 @@
 
 LPCTSTR lpszClass = TEXT("RegistryChange");
 HINSTANCE g_hInst;
-TCHAR* msg;
+TCHAR* msg, temp[MAX_PATH_LENGTH];
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpszCmdParam, _In_ int nCmdShow)
 {
 	setlocale(LC_ALL, "");
-	fp = fopen("Log.txt", "w");
-	if (fp == NULL)
-	{
-		printf("File Pointer Error");
-		return 0;
-	}
 	msg = (TCHAR*)malloc(sizeof(TCHAR) * MAX_PATH_LENGTH);
-	if (msg == NULL)
-	{
-		fwprintf(fp, TEXT("In main : variable \"msg\" memory alloction failed\n"));
-		fclose(fp);
-		return 0;
-	}
 
 	HWND hWnd;
 	MSG Message;

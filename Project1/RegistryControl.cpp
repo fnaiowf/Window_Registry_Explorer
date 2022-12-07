@@ -1,10 +1,8 @@
 ﻿#include"header.h"
 
-LONG kcount, fcount;
+DWORD kcount, fcount;
 FILE* fp;
 TCHAR path[MAX_PATH_LENGTH] = TEXT("");
-const HKEY BASIC_KEY_HANDLE[5] = { HKEY_CLASSES_ROOT, HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, HKEY_USERS, HKEY_CURRENT_CONFIG };
-const unsigned int REG_TYPE[6] = { REG_DWORD, REG_QWORD, REG_SZ, REG_EXPAND_SZ, REG_MULTI_SZ, REG_BINARY };
 LV_DATA_MANAGE lvData;
 
 HKEY _RegOpenKeyEx(int bKeyIndex, TCHAR* path)
@@ -61,12 +59,6 @@ void enumRegistry(THREAD_DATA* data)
 {
 	HKEY hkey;
 	TCHAR* key = (TCHAR*)malloc(sizeof(TCHAR) * MAX_KEY_LENGTH);
-	if (key == NULL)
-	{
-		fwprintf(fp, TEXT("In main : variable \"key1\" memory alloction failed.\n"));
-		fclose(fp);
-		return;
-	}
 	DWORD i = 0, len = MAX_KEY_LENGTH;
 	HTREEITEM root = 0, item = 0;
 	THREAD_DATA* dt;
@@ -153,11 +145,6 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, THREAD_DATA* data, int 
 	HKEY hkey2;
 	DWORD i = 0, len = MAX_KEY_LENGTH;
 	TCHAR* key = (TCHAR*)malloc(sizeof(TCHAR) * MAX_KEY_LENGTH);
-	if (key == NULL)
-	{
-		fwprintf(fp, TEXT("In func : variable \"key1\" memory alloction failed.\n"));
-		return;
-	}
 
 	while (RegEnumKeyEx(hkey, i, key, &len, NULL, NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
 	{
@@ -477,12 +464,60 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 	}
 }
 
+void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
+{
+	HKEY hkey;
+	TCHAR temp[3][10] = { L"(기본값)", L"REG_SZ", L"(값 설정 안됨)" };
+	THREAD_DATA data;
+	LVITEM li;
+	int t;
+
+	li.mask = LVIF_PARAM;
+	li.lParam = 0;
+
+	if (isDataLoad)
+		data.threadType = DATA_LOAD;
+	else
+		addLVitem(hLV, temp[0], temp[1], temp[2], 0, NULL, DEFAULT_VALUE_PARAM);
+
+	if (RegOpenKeyEx(bkeyH, mpath, 0, KEY_READ | KEY_WRITE, &hkey) == ERROR_SUCCESS)
+	{
+		enumValue(hkey, isDataLoad ? &data : NULL);
+		RegCloseKey(hkey);
+
+		ListView_SortItemsEx(hLV, LVCompareFunc, 0);
+		for (int i = 1; i < ListView_GetItemCount(hLV); i++) //정렬하면 multi_sz와 byte 데이터 따로 저장해놓은 배열에는 인덱스가 예전 걸로 되어 있어서 따로 바꿔줘야 함
+		{
+			t = getListViewItem(hLV, LVIF_PARAM, i).lParam;
+
+			if (t != 0)
+			{
+				if (t > 0)
+					lvData.mulstrData[t - 1].index = i;
+				else if (t < 0)
+					lvData.byteData[-t - 1].index = i;
+
+				li.iItem = i; //바꾼 다음에는 lParam 값 0으로
+				ListView_SetItem(hLV, &li);
+			}
+		}
+	}
+}
+
 int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, THREAD_DATA* data, DWORD pos)
 {
-	TCHAR temp[MAX_VALUE_LENGTH]={};
-	DWORD len, tlen = wcslen(data->targetValue), nlen = wcslen(data->newValue);
-	fwprintf(fp, L"%ws   %ws:%ws", path, name, value);
+	TCHAR temp[MAX_VALUE_LENGTH]={}, strTime[50], multiSzConcat[MAX_VALUE_LENGTH];
+	DWORD len = 0, tlen = wcslen(data->targetValue), nlen = wcslen(data->newValue);
 
+	if (fp = fopen("Log.txt", "w"))
+	{
+		getTime(strTime);
+		if (data->type == REG_DWORD || data->type == REG_QWORD)
+			wsprintf(value, L"%I64d", wcstoll(value + 12, 0, 10));
+
+		fwprintf(fp, L"%ws%ws : %ws     %ws -> ", strTime, data->path, name, value);
+	}
+	
 	if (data->type == REG_DWORD || data->type == REG_QWORD)
 		wsprintf(temp, data->newValue);
 	else if (data->type == REG_MULTI_SZ)
@@ -494,6 +529,8 @@ int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, THREAD_DATA* data, DWORD p
 		memcpy(temp + pos, data->newValue, nlen * sizeof(TCHAR));
 		memcpy(temp + pos + nlen, value + pos + tlen, (len / 2 - (pos + tlen)) * 2);
 		len = len + (nlen - tlen);
+
+		concatMulSz(temp, len, value);
 	}
 	else
 	{
@@ -501,16 +538,12 @@ int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, THREAD_DATA* data, DWORD p
 		wsprintf(temp, L"%ws%ws%ws", value, data->newValue, value + (pos + tlen));
 	}
 
-	fwprintf(fp, L" -> %ws\n", temp);
+	fwprintf(fp, L"%ws\n", data->type == REG_MULTI_SZ ? value : temp);
+	fclose(fp);
 
 	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->type == REG_MULTI_SZ ? len : -1, data->base, 1))
 	{
-		if (data->type == REG_MULTI_SZ)
-		{
-			memcpy(value, temp, len);
-			concatMulSz(temp, len, value);
-		}
-		else
+		if (data->type != REG_MULTI_SZ)
 			wsprintf(value, temp);
 
 		return 1;
@@ -544,6 +577,7 @@ int changeValue(int n, THREAD_DATA* tarData)
 	ListView_GetItem(hresultLV, &li); //파라미터 값이 문자열에서 찾은 위치
 	
 	tarData->type = REG_TYPE[getType(type)];
+	tarData->path = path;
 	if (li.lParam < 0) name[0] = 0; //기본값인 경우 값 이름이 ""
 
 	if ((hkey = _RegOpenKeyEx(ti.lParam, path)) != NULL)
@@ -573,46 +607,6 @@ int changeValue(int n, THREAD_DATA* tarData)
 	}
 
 	return 0;
-}
-
-void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
-{
-	HKEY hkey;
-	TCHAR temp[3][10] = { L"(기본값)", L"REG_SZ", L"(값 설정 안됨)" };
-	THREAD_DATA data;
-	LVITEM li;
-	int t;
-	
-	li.mask = LVIF_PARAM;
-	li.lParam = 0;
-
-	if (isDataLoad)
-		data.threadType = DATA_LOAD;
-	else
-		addLVitem(hLV, temp[0], temp[1], temp[2], 0, NULL, DEFAULT_VALUE_PARAM);
-
-	if (RegOpenKeyEx(bkeyH, mpath, 0, KEY_READ | KEY_WRITE, &hkey) == ERROR_SUCCESS)
-	{
-		enumValue(hkey, isDataLoad ? &data : NULL);
-		RegCloseKey(hkey);
-
-		ListView_SortItemsEx(hLV, LVCompareFunc, 0);
-		for (int i = 1; i < ListView_GetItemCount(hLV); i++) //정렬하면 multi_sz와 byte 데이터 따로 저장해놓은 배열에는 인덱스가 예전 걸로 되어 있어서 따로 바꿔줘야 함
-		{
-			t = getListViewItem(hLV, LVIF_PARAM, i).lParam;
-
-			if (t != 0)
-			{
-				if (t > 0)
-					lvData.mulstrData[t - 1].index = i;
-				else if (t < 0)
-					lvData.byteData[-t - 1].index = i;
-
-				li.iItem = i; //바꾼 다음에는 lParam 값 0으로
-				ListView_SetItem(hLV, &li);
-			}
-		}
-	}
 }
 
 void deleteAllSubkey(TCHAR* path, HTREEITEM item) //처음 호출하는 함수 -> 재귀함수는 다른 함수 호출

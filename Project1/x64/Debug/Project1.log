@@ -1,10 +1,16 @@
-﻿  Util.cpp
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(1,1): warning C4828: 파일에 0x18b4 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 949).
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(56,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'THREAD_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(63,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(71,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(78,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Util.cpp(234,13): warning C4101: 'it' :참조되지 않은 지역 변수입니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Util.cpp(355,27): warning C4244: '=': 'LONG_PTR'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\Util.cpp(362,27): warning C4244: '=': 'LONG_PTR'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+﻿  RegistryControl.cpp
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(60,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'THREAD_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(67,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(75,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(82,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(411,28): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(416,18): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(491,43): warning C4244: '=': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(509,48): warning C4101: 'multiSzConcat' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(588,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(590,56): warning C4244: '인수': 'LPARAM'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(627,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(641,31): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(679,9): warning C4101: 'li' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(675,7): warning C4101: 'hkey' :참조되지 않은 지역 변수입니다.
   Project1.vcxproj -> C:\Users\jinwoo\Desktop\registryControl\x64\Debug\Project1.exe
