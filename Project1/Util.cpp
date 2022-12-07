@@ -261,32 +261,7 @@ void addLVitem(HWND hlv, TCHAR* name, TCHAR* type, TCHAR* value, int index, TCHA
 	item.pszText = type;
 	ListView_SetItem(hlv, &item);
 
-	it = getType(type);
-	if (it == 5) //REG_BINARY
-	{
-		if (value == NULL) //BINARY 값을 만들 경우 NULL로 구분
-		{
-			b = (TCHAR*)malloc(sizeof(TCHAR) * 13);
-			wsprintf(b, L"(길이가 0인 이진값)");
-			item.pszText = b;
-		}
-		else
-			item.pszText = value;
-	}
-	else if (it == 4) //REG_MULTI_SZ
-	{
-		if (hlv == hLV)
-		{
-			if (value == NULL) //MULTI_SZ 값을 만들 경우 value에 NULL 줘서 구분
-				item.pszText = NULL;
-			else
-				item.pszText = value;
-		}
-		else //검색 결과 탭에 추가할 때는 value에 multi_sz가 NULL문자로 연결된 상태로 전달됨
-			item.pszText = value;
-	}
-	else
-		item.pszText = value;
+	item.pszText = value;
 
 	item.iSubItem = t;
 	ListView_SetItem(hlv, &item);
@@ -561,12 +536,7 @@ void openPopupMenu(int x, int y)
 		index = 2;
 
 		if (nowFindType == KEY)
-		{
-			DeleteMenu(hPopup, 0, MF_BYPOSITION);
-			DeleteMenu(hPopup, 0, MF_BYPOSITION);
-			DeleteMenu(hPopup, 0, MF_BYPOSITION);
-			DeleteMenu(hPopup, 1, MF_BYPOSITION);
-		}
+			return;
 		else if (nowFindType == VALUE)
 		{
 			DeleteMenu(hPopup, 3, MF_BYPOSITION);

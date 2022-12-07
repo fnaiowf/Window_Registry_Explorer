@@ -181,11 +181,18 @@ void enumKeys(HKEY hkey, HTREEITEM parent,TCHAR* keystr, THREAD_DATA* data, int 
 			}
 			else
 			{
-				if (data->findType == KEY)
+				if (data->findType == KEY) //키 검색한 경우
 				{
 					if (wcsstr(key, data->targetValue) != 0)
 					{
-						addLVitem(hresultLV, key, NULL, NULL, fcount++, path, 0);
+						for(int j = wcslen(path) - 1;;j--) //키를 찾는 경우 찾는 키 이름은 경로에 포함되면 안됨
+							if (path[j] == '\\')
+							{
+								path[j] = 0;
+								addLVitem(hresultLV, key, NULL, NULL, fcount++, path, 0);
+								path[j] = '\\';
+								break;
+							}
 
 						wsprintf(msg, L"%d key found...", fcount);
 						SetWindowText(hStatic, msg);
@@ -330,6 +337,7 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 				if (len2 == 0)
 				{
 					value = (TCHAR*)malloc(13 * sizeof(TCHAR));
+					wsprintf(value, L"(길이가 0인 이진값)");
 					if (data == NULL || data->threadType == DATA_LOAD)
 					{
 						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE));
@@ -339,7 +347,6 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 						lvData.byteData = (BYTE_DATA*)realloc(lvData.byteData, sizeof(BYTE_DATA) * (++lvData.nByte + 1));
 						lparam = -lvData.nByte; //binary와 multi_sz 구분하기 위해 음수로 표현
 					}
-					wsprintf(value, L"(길이가 0인 이진값)");
 				}
 				else
 				{
@@ -668,16 +675,16 @@ void createValue(int type, HTREEITEM hitem)
 {
 	HKEY hkey;
 	int index = 0;
-	TCHAR tstr[100] = L"새 값 #1", typeName[20], ivalue[15] = L"0x00000000 (0)";
+	TCHAR tstr[100] = L"새 값 #1", typeName[20], ivalue[15] = L"0x00000000 (0)", bvalue[13] = L"(길이가 0인 이진값)";
 	LVFINDINFO lfi;
 	LVITEM li;
 
-	lfi.flags = LVFI_STRING | LVFI_WRAP;
+	lfi.flags = LVFI_STRING | LVFI_WRAP; //LVFI_WRAP : 끝까지 찾으면 다시 처음부터 찾음
 	lfi.psz = tstr;
 
 	while(1)
 	{
-		if (ListView_FindItem(hLV, index++, &lfi) != -1)
+		if (ListView_FindItem(hLV, index++, &lfi) != -1) //리스트뷰에서 subitem 상관없이 해당하는 값 찾음
 			wsprintf(tstr, L"새 값 #%d", index + 1);
 		else
 			break;
@@ -687,7 +694,7 @@ void createValue(int type, HTREEITEM hitem)
 
 	wsprintf(typeName, L"%ws", getTypeName(REG_TYPE[type]));
 
-	addLVitem(hLV, tstr, typeName, type < 2 ? ivalue : NULL, ListView_GetItemCount(hLV), NULL, PREV_NEW_VALUE_PARAM);
+	addLVitem(hLV, tstr, typeName, type < 2 ? ivalue : (type == 5 ? bvalue : NULL), ListView_GetItemCount(hLV), NULL, PREV_NEW_VALUE_PARAM);
 
 	SetFocus(hLV);
 	ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED);

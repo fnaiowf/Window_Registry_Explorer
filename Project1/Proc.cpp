@@ -308,7 +308,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			case LVN_ENDLABELEDIT:
 				{
 					HKEY hkey;
-					TCHAR type[20], ivalue[15] = L"0x00000000 (0)", data[2];
+					TCHAR type[20], ivalue[15] = L"0x00000000 (0)", bvalue[13] = L"(길이가 0인 이진값)", data[2];
 					int index = ((LPNMLVDISPINFO)lParam)->item.iItem, result, itype;
 
 					GetWindowText(hEdit, path, sizeof(path));
@@ -336,7 +336,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 						if (result)
 						{
-							addLVitem(hLV, temp, type, itype < 2 ? ivalue : NULL, index, NULL, 0);
+							addLVitem(hLV, temp, type, itype < 2 ? ivalue : (itype == 5 ? bvalue : NULL), index, NULL, 0);
 
 							ListView_SetItemState(hLV, -1, LVIF_STATE, LVIS_SELECTED); //전부 선택 해제
 							ListView_SetItemState(hLV, index, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);

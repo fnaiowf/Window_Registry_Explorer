@@ -12,10 +12,6 @@
 #include<commctrl.h>
 #include"resource.h"
 
-/*
-	키로 검색
-*/
-
 #ifdef UNICODE
 #define LPNMLVDISPINFO          LPNMLVDISPINFOW
 #else
