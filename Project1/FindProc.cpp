@@ -46,7 +46,6 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_EDIT_CHANGE), TRUE);
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), TRUE);
 				SetWindowText(GetDlgItem(hDlg, IDC_D1_EDIT_CHANGE), 0);
-				SendMessage(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), BM_SETCHECK, BST_UNCHECKED, 0);
 			}
 			else
 			{
@@ -54,9 +53,11 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_EDIT_CHANGE), FALSE);
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), FALSE);
 			}
+			if(SendMessage(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), BM_GETCHECK, 0, 0) == BST_CHECKED)
+				SendMessage(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), BM_SETCHECK, BST_UNCHECKED, 0);
 			break;
 		case IDC_D1_FIND:
-			if (funcState == FINDING) { //찾는 중에 중지 버튼
+			if (funcState == ING) { //찾는 중에 중지 버튼
 				funcState = SUSPEND;
 				break;
 			}
@@ -273,6 +274,15 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_DEC), FALSE);
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_HEX), FALSE);
 			}
+			if (IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE)))
+			{
+				if (SendMessage(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE), BM_GETCHECK, 0, 0) == BST_CHECKED)
+					EnableWindow(GetDlgItem(hDlg, IDC_D1_EDIT_CHANGE), FALSE);
+				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE), FALSE);
+				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), FALSE);
+			}
+			if(IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_CHANGE)))
+				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHANGE), FALSE);
 			break;
 		case IDC_D1_VALUE:
 			if (IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_STR)))
@@ -286,6 +296,15 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_DEC), FALSE);
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_HEX), FALSE);
 			}
+			if (IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE)))
+			{
+				if (SendMessage(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE), BM_GETCHECK, 0, 0) == BST_CHECKED)
+					EnableWindow(GetDlgItem(hDlg, IDC_D1_EDIT_CHANGE), FALSE);
+				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE), FALSE);
+				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), FALSE);
+			}
+			if (IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_CHANGE)))
+				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHANGE), FALSE);
 			break;
 		case IDC_D1_DATA:
 			if (!IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_STR)))
@@ -299,6 +318,16 @@ BOOL CALLBACK FindDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_DEC), TRUE);
 				EnableWindow(GetDlgItem(hDlg, IDC_D1_HEX), TRUE);
 			}
+			if (!IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE)))
+			{
+				if (SendMessage(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE), BM_GETCHECK, 0, 0) == BST_CHECKED)
+					EnableWindow(GetDlgItem(hDlg, IDC_D1_EDIT_CHANGE), TRUE);
+				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE), TRUE);
+				if(SendMessage(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE), BM_GETCHECK, 0, 0) == BST_CHECKED)
+					EnableWindow(GetDlgItem(hDlg, IDC_D1_CHECK_ALL), TRUE);
+			}
+			if (IsWindowEnabled(GetDlgItem(hDlg, IDC_D1_CHECK_CHANGE)) && nowFindType == DATA && ListView_GetItemCount(hresultLV) != 0)
+				EnableWindow(GetDlgItem(hDlg, IDC_D1_CHANGE), TRUE);
 			break;
 		}
 		break;

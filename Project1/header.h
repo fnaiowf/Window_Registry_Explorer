@@ -7,7 +7,6 @@
 
 /*
 	삭제할 때 MULTI_SZ, BINARY 데이터 삭제
-	f5 오류
 */
 
 #include<stdio.h>
@@ -49,14 +48,14 @@
 #define ListView_DeSelectAll(handle) {LVITEM li; li.mask = LVIF_STATE; li.stateMask = LVIS_SELECTED; SendMessage(handle, LVM_SETITEMSTATE, (WPARAM)-1, (LPARAM)&li); }
 enum SPLIT { SP_NONE, SP_VERT, SP_HORZ}; //창 분할 정보
 enum THREAD_TYPE{REFRESH, FIND, CHANGE, LOAD, DATA_LOAD}; //DATA_LOAD : 기존 리스트뷰 추가 되어 있는 것들 건드리지 않고 데이터만 가져올 때
-enum FUNCSTATE{DEFAULT, FINDING, SUSPEND};
+enum FUNCSTATE{DEFAULT, ING, SUSPEND};
 enum FIND_TYPE {NONE, KEY, VALUE, DATA};
 
 const unsigned int REG_TYPE[7] = { REG_DWORD, REG_QWORD, REG_SZ, REG_EXPAND_SZ, REG_MULTI_SZ, REG_BINARY, REG_NONE};
 const HKEY BASIC_KEY_HANDLE[5] = { HKEY_CLASSES_ROOT, HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, HKEY_USERS, HKEY_CURRENT_CONFIG };
 
 typedef struct THREAD_DATA { //쓰레드 매개변수
-	TCHAR *path;
+	TCHAR path[MAX_PATH_LENGTH];
 	TCHAR targetValue[100];
 	TCHAR newValue[100];
 	THREAD_TYPE threadType; //비트 필드

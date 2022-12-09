@@ -547,11 +547,11 @@ int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, THREAD_DATA* data, DWORD p
 		wsprintf(temp, L"%ws%ws%ws", value, data->newValue, value + (pos + tlen));
 	}
 
-	fwprintf(fp, L"%ws\n", data->type == REG_MULTI_SZ ? value : temp);
-	fclose(fp);
-
 	if (_RegSetValueEx(hkey, name, data->type, (LPBYTE)temp, data->type == REG_MULTI_SZ ? len : -1, data->base, 1))
 	{
+		fwprintf(fp, L"%ws\n", data->type == REG_MULTI_SZ ? value : temp);
+		fclose(fp);
+
 		if (data->type != REG_MULTI_SZ)
 			wsprintf(value, temp);
 
@@ -586,7 +586,7 @@ int changeValue(int n, THREAD_DATA* tarData)
 	ListView_GetItem(hresultLV, &li); //파라미터 값이 문자열에서 찾은 위치
 	
 	tarData->type = REG_TYPE[getType(type)];
-	tarData->path = path;
+	wsprintf(tarData->path, path);
 	if (li.lParam < 0) name[0] = 0; //기본값인 경우 값 이름이 ""
 
 	if ((hkey = _RegOpenKeyEx(ti.lParam, path)) != NULL)
@@ -605,7 +605,7 @@ int changeValue(int n, THREAD_DATA* tarData)
 			}
 
 			ListView_SetItemText(hresultLV, n, 3, value);
-			if (TreeView_GetSelection(hTV) == item)
+			if (TreeView_GetSelection(hTV) == item) //데이터 다시 로드하기 위함
 			{
 				TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
 				TreeView_SelectItem(hTV, item);

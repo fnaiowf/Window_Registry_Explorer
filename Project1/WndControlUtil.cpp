@@ -659,7 +659,7 @@ void AcceleratorProcess(HWND hWnd, int id)
 	{
 	case ID_ACCELERATOR_F5: //F5
 	{
-		if (funcState == FINDING) //검색 중이면 X
+		if (funcState == ING) //검색 중이면 X
 			break;
 
 		THREAD_DATA* d = (THREAD_DATA*)malloc(sizeof(THREAD_DATA));
@@ -676,13 +676,5 @@ void AcceleratorProcess(HWND hWnd, int id)
 			ShowWindow(hDlgFind, SW_SHOW);
 		}
 		break;
-	case ID_ACCELERATOR_F7:
-	{
-		HKEY hkey;
-		RegOpenKeyEx(HKEY_USERS, L"S-1-5-21-784107973-3724358277-514594677-1001\\새 키 #1", 0, KEY_READ | KEY_WRITE, &hkey);
-
-		RegSetValueEx(hkey, L"TEST", 0, REG_NONE, 0, 0);
-		RegCloseKey(hkey);
-	}
 	}
 }

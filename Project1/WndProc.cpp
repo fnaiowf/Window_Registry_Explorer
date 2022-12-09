@@ -6,7 +6,7 @@ int treeWidth, resultHeight, isDataLoad, funcState; //funcState : enumRegistry�
 
 DWORD WINAPI ThreadFunc(LPVOID temp)
 {
-	funcState = FINDING;
+	funcState = ING;
 
 	if (temp != NULL && ((THREAD_DATA*)temp)->threadType == REFRESH) //F5 눌렀을 때 기존에 추가되어 있던 것들 전부 삭제
 	{
@@ -67,7 +67,6 @@ DWORD WINAPI ThreadFunc(LPVOID temp)
 				ListView_DeSelectAll(hresultLV);
 				ListView_SetSelectionMark(hresultLV, 0);
 				ListView_SetItemState(hresultLV, 0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-				free((THREAD_DATA*)temp);
 				break;
 			}
 		}
