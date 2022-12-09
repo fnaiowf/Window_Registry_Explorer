@@ -83,7 +83,7 @@ void enumRegistry(THREAD_DATA* data)
 	if(dt == NULL)
 		root = addTVitem(TEXT("컴퓨터"), 0, 0);
 
-	for (int k = 3; k < 5; k++) //BASIC KEY
+	for (int k = 0; k < 5; k++) //BASIC KEY
 	{
 		wsprintf(path, L"컴퓨터\\%ws", getBasicKey(k));
 		if(dt == NULL)
