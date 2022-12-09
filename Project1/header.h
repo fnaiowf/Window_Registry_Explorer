@@ -1,8 +1,5 @@
 #pragma once
-#pragma warning(disable : 6387)
-#pragma warning(disable : 4267)
 #pragma warning(disable : 4996)
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include<stdio.h>

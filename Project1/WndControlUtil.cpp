@@ -512,7 +512,10 @@ void processPopup(int id, int index, void* item)
 									TCHAR path[MAX_PATH_LENGTH];
 									ListView_GetItemText(hresultLV, i, 0, path, sizeof(path));
 									if (wcscmp(temp, path) == 0)
+									{
 										ListView_DeleteItem(hresultLV, i);
+										break;
+									}
 								}
 							}
 						}
@@ -536,12 +539,15 @@ void processPopup(int id, int index, void* item)
 								{
 									ListView_GetItemText(hresultLV, i, 0, tp, sizeof(tp)); //path
 									if (wcscmp(temp, tp) == 0)
+									{
 										ListView_DeleteItem(hresultLV, i);
+										break;
+									}
 								}
 							}
 						}
 						ListView_GetItemText(hLV, litem, 2, tstr, sizeof(tstr)); //type
-						if (getType(tstr) >= 4)
+						if (getType(tstr) >= 4) //데이터만 다시 로드
 						{
 							isDataLoad = 1;
 							HTREEITEM it = TreeView_GetSelection(hTV);
@@ -615,7 +621,20 @@ void processPopup(int id, int index, void* item)
 							{
 								ListView_GetItemText(hLV, i, 0, tp[0], sizeof(tp[0]));
 								if (wcscmp(tp[0], temp) == 0)
+								{
 									ListView_DeleteItem(hLV, i);
+									break;
+								}
+							}
+
+							ListView_GetItemText(hresultLV, litem, 2, tstr, sizeof(tstr)); //type
+							if (getType(tstr) >= 4) //데이터만 다시 로드
+							{
+								isDataLoad = 1;
+								HTREEITEM it = TreeView_GetSelection(hTV);
+								TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
+								TreeView_SelectItem(hTV, it);
+								isDataLoad = 0;
 							}
 						}
 					}

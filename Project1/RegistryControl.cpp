@@ -517,10 +517,10 @@ void loadValue(TCHAR* mpath, HKEY bkeyH, int isDataLoad)
 
 int changeValue(HKEY hkey, TCHAR* name, TCHAR* value, THREAD_DATA* data, DWORD pos)
 {
-	TCHAR temp[MAX_VALUE_LENGTH]={}, strTime[50], multiSzConcat[MAX_VALUE_LENGTH];
+	TCHAR temp[MAX_VALUE_LENGTH]={}, strTime[50];
 	DWORD len = 0, tlen = wcslen(data->targetValue), nlen = wcslen(data->newValue);
 
-	if (fp = fopen("Log.txt", "w"))
+	if (fp = fopen("Log.txt", "a"))
 	{
 		getTime(strTime);
 		if (data->type == REG_DWORD || data->type == REG_QWORD)

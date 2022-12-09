@@ -6,17 +6,19 @@ C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(83,2): warning C4091: 
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(422,28): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(427,18): warning C4244: '초기화 중': '__int64'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(502,43): warning C4244: '=': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(520,48): warning C4101: 'multiSzConcat' :참조되지 않은 지역 변수입니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(594,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(596,56): warning C4244: '인수': 'LPARAM'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(633,30): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(647,31): warning C4244: '인수': 'LPARAM'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(685,9): warning C4101: 'li' :참조되지 않은 지역 변수입니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\RegistryControl.cpp(681,7): warning C4101: 'hkey' :참조되지 않은 지역 변수입니다.
-  Util.cpp
+  WndControlUtil.cpp
 C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(61,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'THREAD_DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(68,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'BYTE_DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(76,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'MULSZ_DATA' 왼쪽은 무시됩니다.
 C:\Users\jinwoo\Desktop\registryControl\Project1\header.h(83,2): warning C4091: 'typedef ': 변수를 선언하지 않으면 'LV_DATA_MANAGE' 왼쪽은 무시됩니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\WndControlUtil.cpp(147,13): warning C4101: 'it' :참조되지 않은 지역 변수입니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\WndControlUtil.cpp(268,27): warning C4244: '=': 'LONG_PTR'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\jinwoo\Desktop\registryControl\Project1\WndControlUtil.cpp(275,27): warning C4244: '=': 'LONG_PTR'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   코드를 생성하고 있습니다...
   Project1.vcxproj -> C:\Users\jinwoo\Desktop\registryControl\x64\Debug\Project1.exe
