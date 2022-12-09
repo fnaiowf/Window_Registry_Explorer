@@ -5,10 +5,6 @@
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-/*
-	삭제할 때 MULTI_SZ, BINARY 데이터 삭제
-*/
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<windows.h>

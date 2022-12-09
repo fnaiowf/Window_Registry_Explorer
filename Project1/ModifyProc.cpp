@@ -7,7 +7,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 	static TCHAR text[MAX_VALUE_LENGTH], path[2][MAX_PATH_LENGTH], name[2][MAX_KEY_LENGTH], type[20];
 	TCHAR* pos, tempvalue[MAX_VALUE_LENGTH];
 	int t = 0, itype;
-	static HWND nh = 0;
+	static HWND nhWnd = 0;
 	static int tindex = -1, isdefault, prevBase;
 
 	switch (iMessage)
@@ -17,18 +17,18 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 		isdefault = 0;
 		if (GetFocus() == hresultLV)
 		{
-			nh = hresultLV;
+			nhWnd = hresultLV;
 			tindex = 1;
 		}
 		else
 		{
-			nh = hLV;
+			nhWnd = hLV;
 			tindex = 0;
 		}
 		//검색 결과 탭이면 1을 더 더해서 인덱스 맞춤
-		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, text, sizeof(text));
-		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 1, type, sizeof(type));
-		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 0, name[0], sizeof(name[0]));
+		ListView_GetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 2, text, sizeof(text));
+		ListView_GetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 1, type, sizeof(type));
+		ListView_GetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 0, name[0], sizeof(name[0]));
 		itype = getType(type);
 
 		if (itype < 2) //정수
@@ -83,7 +83,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 		switch (LOWORD(wParam))
 		{
 		case IDC_D2_MODIFY_OK:
-			ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 1, type, sizeof(type));
+			ListView_GetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 1, type, sizeof(type));
 			GetDlgItemText(hDlg, IDC_D2_VDATA, text, sizeof(text));
 			GetDlgItemText(hDlg, IDC_D2_VNAME, name[0], sizeof(name[0]));
 
@@ -117,7 +117,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 					else
 						wsprintf(tempvalue, text);
 
-					ListView_SetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, tempvalue);
+					ListView_SetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 2, tempvalue);
 
 					if (tindex) //검색 결과 탭인 경우 데이터 리스트뷰에 수정하는 값이 있다면 같이 바꿔줌
 					{
@@ -182,7 +182,7 @@ BOOL CALLBACK ModifySzNumDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM
 
 BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
-	static HWND nh;
+	static HWND nhWnd;
 	static int tindex, tarindex;
 	static HTREEITEM oldItem;
 	static TCHAR name[2][MAX_KEY_LENGTH], path[2][MAX_PATH_LENGTH];
@@ -198,16 +198,17 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 
 		if (GetFocus() == hresultLV)
 		{
-			nh = hresultLV;
+			nhWnd = hresultLV;
 			tindex = 1;
 		}
 		else
 		{
-			nh = hLV;
+			nhWnd = hLV;
 			tindex = 0;
 		}
 
-		ListView_GetItemText(nh, ListView_GetSelectionMark(nh), tindex + 0, name[0], sizeof(name[0]));
+		ListView_GetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 0, name[0], sizeof(name[0]));
+		SetWindowText(GetDlgItem(hDlg, IDC_D4_VNAME), name[0]);
 
 		oldItem = TreeView_GetSelection(hTV); //MULTI_SZ는 데이터를 따로 불러오는데 이를 위해 검색 결과 탭에서는 이전 선택을 저장한 뒤 데이터만 불러오기 위해 그 키를 선택해서 처리하고 저장한 선택으로 돌아옴
 
@@ -215,22 +216,11 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 		{
 			ListView_GetItemText(hresultLV, ListView_GetSelectionMark(hresultLV), 0, path[0], sizeof(path[0]));
 
-			isDataLoad = 1; //TVN_SELCHANGED에서 리스트뷰 초기화 하지 않고 데이터만 불러옴
-
-			NMTREEVIEW t;
-			TVITEM b;
-			b.mask = TVIF_PARAM;
-			b.hItem = getItemfromPath(path[0]);
-			TreeView_GetItem(hTV, &b);
-
-			t.itemNew = b;
-			t.hdr.code = TVN_SELCHANGED;
-			SendMessage(hWndMain, WM_NOTIFY, ID_TV, (LPARAM)&t);
+			isDataLoad = 1; //resultLV인 경우 TVN_SELCHANGED에서 리스트뷰 초기화 하지 않고 데이터만 불러옴
+			TreeView_SelectItem(hTV, getItemfromPath(path[0]));
 		}
 		else
 			GetWindowText(hEdit, path[0], sizeof(path[0]));
-
-		SetWindowText(GetDlgItem(hDlg, IDC_D4_VNAME), name[0]);
 
 		if (tindex)
 		{
@@ -258,7 +248,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 		{
 			for (int i = 0; i < lvData.nMul; i++)
 			{
-				if (lvData.mulstrData[i].index == ListView_GetSelectionMark(nh)) //hLV에서는 인덱스만 비교하는 것이 연산이 더 적음
+				if (lvData.mulstrData[i].index == ListView_GetSelectionMark(nhWnd)) //hLV에서는 인덱스만 비교하는 것이 연산이 더 적음
 				{
 					tarindex = i;
 					memset(text, 0, sizeof(text));
@@ -379,7 +369,7 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 				{
 					concatMulSz(temp, idx - 2, text); //맨 뒤에 널 2개 있어서 idx-2
 
-					ListView_SetItemText(nh, ListView_GetSelectionMark(nh), tindex + 2, text);
+					ListView_SetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 2, text);
 
 					if (tindex)
 					{
@@ -434,8 +424,10 @@ BOOL CALLBACK ModifyMultiSzDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPAR
 BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	static HFONT hf;
-	static TCHAR name[MAX_KEY_LENGTH], path[MAX_PATH_LENGTH];
-	static int i;
+	static HWND nhWnd;
+	static TCHAR name[2][MAX_KEY_LENGTH], path[2][MAX_PATH_LENGTH];
+	static HTREEITEM oldItem;
+	static int i, tindex, tarindex;
 
 	TCHAR byte1[10], byte2[10];
 	HKEY hkey;
@@ -454,17 +446,47 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 	 	SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA), WM_SETFONT, (WPARAM)hf, TRUE);
 		SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), WM_SETFONT, (WPARAM)hf, TRUE);
 	 	SendMessage(GetDlgItem(hDlg, IDC_D3_VDATA_ASCII), WM_SETFONT, (WPARAM)hf, TRUE);
-		 
-		ListView_GetItemText(hLV, ListView_GetSelectionMark(hLV), 0, name, sizeof(name));
-		SetWindowText(GetDlgItem(hDlg, IDC_D3_VNAME), name);
 
-		GetWindowText(hEdit, path, sizeof(path));
+		if (GetFocus() == hresultLV)
+		{
+			nhWnd = hresultLV;
+			tindex = 1;
+		}
+		else
+		{
+			nhWnd = hLV;
+			tindex = 0;
+		}
+
+		ListView_GetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 0, name[0], sizeof(name[0]));
+		SetWindowText(GetDlgItem(hDlg, IDC_D3_VNAME), name[0]);
+
+		oldItem = TreeView_GetSelection(hTV);
+
+		if (tindex)
+		{
+			ListView_GetItemText(hresultLV, ListView_GetSelectionMark(hresultLV), 0, path[0], sizeof(path[0]));
+
+			isDataLoad = 1; //resultLV인 경우 TVN_SELCHANGED에서 리스트뷰 초기화 하지 않고 데이터만 불러옴
+			TreeView_SelectItem(hTV, getItemfromPath(path[0]));
+		}
+		else
+			GetWindowText(hEdit, path[0], sizeof(path[0]));
+
+		if (tindex)
+		{
+			for (i = 0; i < lvData.nByte; i++) //선택한 항목에 해당하는 데이터 배열 인덱스 찾기
+				if (wcscmp(lvData.byteData[i].name, name[0]) == 0)
+					break;
+		}
+		else
+		{
+			for (i = 0; i < lvData.nByte; i++)
+				if (lvData.byteData[i].index == ListView_GetSelectionMark(hLV))
+					break;
+		}
 
 		SetWindowText(GetDlgItem(hDlg, IDC_D3_VDATA_NUMBERING), L"00000000");
-		
-		for (i = 0; i < lvData.nByte; i++)
-			if (lvData.byteData[i].index == ListView_GetSelectionMark(hLV))
-				break;
 
 		SetFocus(GetDlgItem(hDlg, IDC_D3_VDATA));
 
@@ -509,31 +531,52 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 		switch (LOWORD(wParam))
 		{
 		case IDC_D3_MODIFY_OK:
-			if ((hkey = _RegOpenKeyEx(getBasicKey(path), path)) != NULL)
+			if ((hkey = _RegOpenKeyEx(getBasicKey(path[0]), path[0])) != NULL)
 			{
-				if (_RegSetValueEx(hkey, name, REG_BINARY, bytes, nbyte, -1, 1))
+				if (_RegSetValueEx(hkey, name[0], REG_BINARY, bytes, nbyte, -1, 1))
 				{
 					if (nbyte == 0)
 					{
 						wsprintf(temp, L"(길이가 0인 이진값)");
-						ListView_SetItemText(hLV, ListView_GetSelectionMark(hLV), 2, temp);
 
 						memset(lvData.byteData[i].bytes, 0, sizeof(BYTE) * lvData.byteData[i].size);
 						lvData.byteData[i].bytes = (BYTE*)realloc(lvData.byteData[i].bytes, sizeof(BYTE));
 					}
 					else
 					{
-						TCHAR* b = (TCHAR*)calloc(nbyte * 3, sizeof(TCHAR));
-						byteToString(bytes, nbyte, b);
-
-						ListView_SetItemText(hLV, ListView_GetSelectionMark(hLV), 2, b);
+						byteToString(bytes, nbyte, temp);
 
 						memset(lvData.byteData[i].bytes, 0, sizeof(BYTE) * lvData.byteData[i].size);
 						lvData.byteData[i].bytes = (BYTE*)realloc(lvData.byteData[i].bytes, sizeof(BYTE) * nbyte);
 						memcpy(lvData.byteData[i].bytes, bytes, sizeof(BYTE) * nbyte);
 					}
-
 					lvData.byteData[i].size = nbyte;
+
+					ListView_SetItemText(nhWnd, ListView_GetSelectionMark(nhWnd), tindex + 2, temp);
+					if (tindex)
+					{
+						GetWindowText(hEdit, path[1], sizeof(path[0]));
+
+						if (wcscmp(path[0], path[1]) == 0)
+							ListView_SetItemText(hLV, lvData.byteData[i].index, 2, temp);
+					}
+					else
+					{
+						int t = 0;
+						while (t != ListView_GetItemCount(hresultLV))
+						{
+							ListView_GetItemText(hresultLV, t, 0, path[1], sizeof(path[0]));
+							ListView_GetItemText(hresultLV, t, 1, name[1], sizeof(name[0]));
+
+							if (wcscmp(name[0], name[1]) == 0 && wcscmp(path[0], path[1]) == 0)
+							{
+								ListView_SetItemText(hresultLV, t, 3, temp);
+								break;
+							}
+
+							t++;
+						}
+					}
 				}
 
 				RegCloseKey(hkey);
@@ -555,8 +598,10 @@ BOOL CALLBACK ModifyBinaryDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARA
 		ScrollProcess(lParam, wParam);
 		return 1;
 	case WM_CLOSE:
-		DeleteObject(hf);
+		TreeView_SelectItem(hTV, oldItem);
+		isDataLoad = 0;
 
+		DeleteObject(hf);
 		hDlgModify = NULL;
 		EndDialog(hDlg, 0);
 		return 1;

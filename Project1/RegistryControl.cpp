@@ -317,10 +317,10 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 
 						lvData.mulstrData[lvData.nMul].strings = (TCHAR**)calloc(sizeof(TCHAR*), 1);
 
+						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
 						int c = splitMulSz(value, len2, &(lvData.mulstrData[lvData.nMul].strings), 1);
 						lvData.mulstrData[lvData.nMul].size = len2;
 						lvData.mulstrData[lvData.nMul].nString = c;
-						wsprintf(lvData.mulstrData[lvData.nMul].name, name);
 						lvData.mulstrData[lvData.nMul].index = i + defValueOpt;
 						
 						lvData.mulstrData = (MULSZ_DATA*)realloc(lvData.mulstrData, sizeof(MULSZ_DATA) * (++lvData.nMul + 1));
@@ -332,11 +332,12 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 			case REG_BINARY:
 				if (len2 == 0)
 				{
-					value = (TCHAR*)malloc(13 * sizeof(TCHAR));
+					value = (TCHAR*)calloc(13, sizeof(TCHAR));
 					wsprintf(value, L"(길이가 0인 이진값)");
 					if (data == NULL || data->threadType == DATA_LOAD)
 					{
-						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(sizeof(BYTE));
+						wsprintf(lvData.byteData[lvData.nByte].name, name);
+						lvData.byteData[lvData.nByte].bytes = (BYTE*)calloc(1, sizeof(BYTE));
 						lvData.byteData[lvData.nByte].size = len2;
 						lvData.byteData[lvData.nByte].index = i + defValueOpt;
 
@@ -346,7 +347,7 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 				}
 				else
 				{
-					bytes = (BYTE*)malloc(len2);
+					bytes = (BYTE*)calloc(len2, 1);
 					value = (TCHAR*)calloc(len2 * 3, sizeof(TCHAR));
 					RegQueryValueEx(hkey, name, NULL, NULL, bytes, &len2);
 
@@ -354,6 +355,7 @@ void enumValue(HKEY hkey, THREAD_DATA* data)
 					{
 						byteToString(bytes, len2, value);
 
+						wsprintf(lvData.byteData[lvData.nByte].name, name);
 						lvData.byteData[lvData.nByte].bytes = (BYTE*)malloc(len2);
 						lvData.byteData[lvData.nByte].size = len2;
 						memcpy(lvData.byteData[lvData.nByte].bytes, bytes, len2);

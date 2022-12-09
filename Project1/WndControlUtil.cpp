@@ -540,11 +540,20 @@ void processPopup(int id, int index, void* item)
 								}
 							}
 						}
+						ListView_GetItemText(hLV, litem, 2, tstr, sizeof(tstr)); //type
+						if (getType(tstr) >= 4)
+						{
+							isDataLoad = 1;
+							HTREEITEM it = TreeView_GetSelection(hTV);
+							TreeView_SelectItem(hTV, TreeView_GetRoot(hTV));
+							TreeView_SelectItem(hTV, it);
+							isDataLoad = 0;
+						}
 
 						ListView_DeleteItem(hLV, litem);
 					}
 				}
-
+				
 				RegCloseKey(hkey);
 			}
 			break;

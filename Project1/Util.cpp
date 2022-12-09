@@ -111,6 +111,9 @@ const TCHAR* getTypeName(int type)
 
 void byteToString(BYTE* bytes, int size, TCHAR* dest)
 {
+	if (size == 0)
+		return;
+
 	wsprintf(dest, L"%02X", bytes[0]);
 	for (int i = 1; i < size; ++i)
 	{
